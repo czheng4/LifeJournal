@@ -1,13 +1,12 @@
 <!-- 
 	registration.html
 	ChaoHuiZheng
-	10/04/2019
+	11/06/2019
 	
 	It show the registration form.
 	It also does the error check for bad inputs from user.
 -->
 
-<!-- close: #2 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -73,6 +72,24 @@
 		
 		$(document).ready(function(){
 
+			/* clear out error state */
+			$("#user").click(function(){
+			
+				$("#user").css(box_border_style);
+				document.getElementById("error1").innerHTML = "";
+			})	
+			$("#password").click(function(){
+			
+				$("#password").css(box_border_style);
+				document.getElementById("error2").innerHTML = "";
+			})	
+			$("#confirm_password").click(function(){
+			
+				$("#confirm_password").css(box_border_style);
+				document.getElementById("error3").innerHTML = "";
+			})		
+
+
 			/* click on "show" button and swith the input type of password */
 			$("#show").click(function(){
 				var confirm_password = document.getElementById("confirm_password");
@@ -100,24 +117,6 @@
 				confirm_password = $("#confirm_password").val();
 				
 				let error = false;
-
-				/* clear out error state */
-				$("#user").click(function(){
-				
-					$("#user").css(box_border_style);
-					document.getElementById("error1").innerHTML = "";
-				})	
-				$("#password").click(function(){
-				
-					$("#password").css(box_border_style);
-					document.getElementById("error2").innerHTML = "";
-				})	
-				$("#confirm_password").click(function(){
-				
-					$("#confirm_password").css(box_border_style);
-					document.getElementById("error3").innerHTML = "";
-				})		
-
 
 				/* error check on user name */
 				if (user == "") // empty name
@@ -177,7 +176,6 @@
 					
 					var setting  = new File("./data/" + user + "/setting.txt");
                 	setting.writeDict(dict);
-					//fs.mkdir(path + "/photo/")
 					window.location.href = "return_to_login.html";
 				}
 			})
