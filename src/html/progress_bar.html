@@ -29,7 +29,7 @@
 	<div class="container" style="position:fixed; top:40%">
 	 	<h2></h2>
   		<div class="progress" style="background-color:silver">
-    		<div id = "progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
+    		<div id = "progress" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
     		</div>
  		 </div>
 	</div>
@@ -66,20 +66,14 @@
 		var finish = 0; // keep track the number of dir we finish decodeing or encoding.
 		var i = 0;	// iterate through the directory
 		
-
-		
 		if(status === "loading") $("h2").text("Loading your info.......");
 		if(status === "saving") $("h2").text("Saving your info.......");
-		
-		if(files.length == 0)
-		{
-			$("#progress").text("100.0%");
-			$("#progress").css("width", "100%");
-		}
 
 		$(document).ready(function()
 		{	
-			var myVar = setInterval(function(){
+
+			var progress = setInterval(function(){
+				if(i >= files.length) return;
         		if(files.length > 1 && files[i].indexOf("ENCODE") != 0 && files[i] != "album_background.txt")
         		{
         			
@@ -89,23 +83,23 @@
         			finish++;
 
         			/* update the progress */
-        			$("#progress").text((finish / num_dir * 100).toFixed(1) + "%");
         			$("#progress").css("width", (finish / num_dir * 100).toFixed(1) + "%");	
 				}
 
 				i++;
-				if(i == files.length || files.length == 0) 
-				{
-					sleep(100);
-					clearInterval(myVar);
-					/* open the diary */
+    		},1)
+
+    		var loadDiary = setInterval(function(){
+    			if(i >= files.length)
+    			{
+    				clearInterval(progress);
+    				clearInterval(loadDiary);
     				if(status === "loading")window.location.href = "diary.html";
 
     				/* close the diary and open the sign in page */
     				if(status === "saving") progressThread.send("closeDiary");
     			}
-			
-    		},1)
+    		},1000)
 		})
     
 	</script>
