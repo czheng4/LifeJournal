@@ -1,0 +1,245 @@
+<!-- 
+	transfer_photo.html
+	ChaoHuiZheng
+	10/05/2019
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Transfer</title>
+
+	<script>
+		/* ignore this as i choose not to use. Just for reference */
+		/* Fix issue: Bootstrap: Uncaught TypeError: Cannot read property 'fn' of undefined
+*/
+  		//window.$ = window.jQuery = require('jquery');
+ 		//window.Bootstrap = require('bootstrap');
+	</script>
+
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<style type="text/css">
+		body
+		{
+    		background-color: var(--background-color);
+    		color: var(--text-color);
+		}
+		.dropdown
+		{
+  			font-size: 20px;  
+			border: none;
+  			outline: none;
+  			padding: 14px 16px;
+  			background-color: var(--panel-color);
+  			color: var(--text-color);
+  			position: relative;
+			text-align: left;
+			margin-left: 5%;
+			margin-right: 5%;
+			margin-top: 5%;
+			width: 90%;
+			border-radius: 13px;
+		}
+		.dropdown:focus
+		{
+			outline:none;
+		}
+		.content
+		{	
+			transition: 0.5s;
+			position: absolute;
+			margin-left: 5%;
+			width: 90%;
+  			background-color: var(--text-color);
+  			box-shadow: 0px 4px 8px 0px;
+
+  			z-index: 1;
+  			max-height: 0%;
+  			overflow: scroll;
+  			border-radius: 10px;
+  			
+		}
+		.content a 
+		{
+
+ 			color: var(--background-color);
+ 			padding: 12px 16px;
+  			text-decoration: none;
+  			display: block;
+  			text-align: left;
+		}
+		.content a:hover
+		{
+			background-color: pink;
+		}
+
+	</style>
+</head>
+<body>
+	<div style="position: fixed;top:80%;left:62%">
+			<button id = "cancel" type="button" class="btn btn-primary">Cancel</button>
+			&emsp;
+			<button id = "transfer"type="button" class="btn btn-danger">Transfer</button>
+	</div>
+	
+    <button class = "dropdown" type="button" id = "albums"><span>Album Name</span><i class="fa fa-caret-down" style="position:absolute; left:90%; font-size: 30px"></i></button>
+   	
+   	
+    <div class = "content" id = "albumOptions"> </div>
+
+	<script type="text/javascript">
+		'use strict'
+
+		const $ = require("jQuery");
+
+		const fs = require("fs");
+		const transferPhotoThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote;  
+		const {Confirmation} = require("../js/confirmation.js");
+		const {mvFileKeepTimeStamp} = require("../js/time.js");
+		const {diaryEntry,storeDiaryEntryTofFile} = require("../js/diaryEntry.js");
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+
+		/*
+			usr is user nmae
+			albumOptions is dropdown list selections
+			isSelect is true when selecting the album we transfer to
+			album is the name of album we are in when we open the trasfer
+		*/
+		const album = remote.getGlobal('share').albumFrom; 
+		const user = remote.getGlobal('share').user; 
+		var albumOptions;
+		var isSelect = false;
+
+
+
+
+		function updateDirayEntryPhoto(dirFrom, from, to)
+		{	
+			/* grab the diary filename 
+			   the photos stores in the format of NUM-DIARY_FILENAME.........
+			*/
+			var filename = from.split('-')[1];
+			var entryData = new diaryEntry("./data/" + user + "/entry/" + filename);
+			var index = entryData.photo.indexOf(dirFrom + from);
+
+			entryData.photo[index] = to;
+			storeDiaryEntryTofFile("./data/" + user + "/entry/" + filename, entryData);
+		}
+		$(document).ready(function(){
+			transferPhotoThread.send("PHOTO_TRANSFER_REGISTER")
+			/* dropdown list callback */
+			$("#albums").click(function(){
+				
+				/* show dropdown list */
+				if($(".content").css("max-height") === "0%") 
+				{
+					/* traverse the directory to get what albums we can transfer to */
+					fs.readdir("./data/" + user + "/photo",{withFileTypes: true},(err,dirent) =>{
+						if(err) throw err;
+						var dirs = []
+						var path = "./data/" + user + "/photo/"
+						
+						albumOptions = "";
+						$("#albumOptions").text("");
+						console.log("Album: "  + album);
+						/* get all dirs except itself */
+						for(var i = 0; i < dirent.length; i++)
+						{
+
+							if(dirent[i].isDirectory() && dirent[i].name !== album)
+							{ 	
+								if(dirent[i].name.indexOf("ENCODE") != 0) dirs.push(dirent[i].name);
+							}
+
+						}
+						/* sort the dirs by the birthtime */
+						dirs = dirs.sort(function(t1, t2) { return fs.statSync(path + t1).birthtime - fs.statSync(path + t2).birthtime; })
+						for(var i = 0; i < dirs.length; i++)
+						{
+							/* <a href = "#"> ALBUM_NAME </a> */	
+							albumOptions += "<a href = \"#\">" + dirs[i] + "</a>\n"
+						}
+						$("#albumOptions").append(albumOptions);
+						
+						/* show what album we choose */
+						$("a").click(function(){
+							isSelect = true;
+							$(".content").css("max-height","0%")
+							$("#albums span").text($(this).text());
+						})
+					})
+					$(".content").css("max-height","50%");
+				}
+				/* hide dropdown list */
+				else $(".content").css("max-height","0%");
+			})
+
+			/* transfer button callback */
+			$("#transfer").click(function(){
+
+				/* error message on unselecting album */
+				if(isSelect == false)
+				{
+					transferPhotoThread.send("errorMessage","Error","select the album!!!");
+					return;
+				}
+				
+				/* send the message to main.js to open cofimation page */
+				var confirmation = new Confirmation(
+					"PHOTO_TRANSFER",     		//type
+					"Transfer",			  		//title
+					"Are you sure you want to transfer the photos you selected?", // text
+					["Cancel","Confirm"],   	//buttonlabels 
+					false,						//isConfirm
+					$("#albums span").text() 	//data
+				)
+				transferPhotoThread.send("openConfirmation",confirmation);
+			})
+			
+			transferPhotoThread.on("PHOTO_TRANSFER",(event)=>{
+				
+				var moveFrom = remote.getGlobal('share').moveFrom;
+				console.log(moveFrom);
+				var name;
+				var toName;	
+				var from = "./data/" + user + "/photo/" + album + "/"; 
+				var to = "./data/" + user + "/photo/" + $("#albums span").text() + "/"
+				var files = fs.readdirSync(to).sort(function(t1,t2){return parseInt(t1) - parseInt(t2);});
+        		var num;
+       			
+       			/* name our files with number. Therefore, we can have multiple same files */
+        		if(files.length == 0) num = 1;
+       			/* grab the biggest number */
+       			else num =  1 + parseInt(files[files.length - 1]);
+       			console.log(num);
+			
+				for(var i = 0; i < moveFrom.length; i++) 
+				{
+					name = moveFrom[i].split('-');
+					toName = to + num;
+					for(var j = 1; j < name.length; j++) toName += "-" + name[j];
+					if(moveFrom[i].indexOf("DIARY_ENTRY") != -1) updateDirayEntryPhoto(from,moveFrom[i],toName);
+					mvFileKeepTimeStamp(from + moveFrom[i], toName);
+					num++;
+				}
+				transferPhotoThread.send("PHOTO_TRANSFER_DONE");
+				transferPhotoThread.send("closeTransferPhoto");
+			
+			})
+
+
+			/* cancel button callback */
+			$("#cancel").click(function(){
+				transferPhotoThread.send("closeTransferPhoto");
+			})
+			transferPhotoThread.on("changeThemeMode",changeThemeMode);
+			
+		})
+	</script>
+</body>
+</html>

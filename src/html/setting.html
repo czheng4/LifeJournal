@@ -1,0 +1,144 @@
+<!-- 
+    setting.html
+    ChaoHuiZheng
+    11/04/2019
+    
+    set mode.
+    change passwork
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dark.css">
+</head>
+	<style type="text/css">
+
+/* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  left: 65%;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+/* end here */
+
+body
+{
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+</style>
+
+
+<body>
+	<div class = "container" style="margin-top:30px">
+       <div style="color: red; font-size: 20px;"> Theme </div>
+       <br>
+       Night mode
+	   <label class="switch"><input id = "theme" type="checkbox"><span class="slider round"></span></label>
+</div>
+	
+	<script type="text/javascript">
+		const $ = require("jQuery");
+		const fs = require("fs");
+		var settingThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote;
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
+		var {Confirmation} = require("../js/confirmation.js");
+		var {File} = require("../js/file.js");
+		var {getDiaryEntry} = require("../js/diaryEntry.js");
+
+		var user = remote.getGlobal('share').user;  
+        var path = "./data/" + user + "/entry"; 
+        var diaryEntry;
+       
+
+        var mode = loadThemeMode();
+        
+        if(mode == "dark") $("#theme").prop("checked", true);
+
+		$(document).ready(function(){
+
+			settingThread.send("MAIN_SETTING_REGISTER");
+			$("#theme").click(function(){
+                dict = {"mode":null};
+				if($("#theme").is(':checked') == true) 
+                {
+                    dict["mode"] = "dark";
+                    settingThread.send("changeThemeMode","dark");
+
+                    $('link[rel=stylesheet][href~="light.css"]').remove();
+                    $("head").append('<link rel="stylesheet" type="text/css" href="../css/dark.css">');
+                }
+				else 
+                {
+                    settingThread.send("changeThemeMode","light");
+                    dict["mode"] = "light";
+
+                    $('link[rel=stylesheet][href~="dark.css"]').remove();
+                    $("head").append('<link rel="stylesheet" type="text/css" href="../css/light.css">');
+                }
+                let f  = new File("./data/" + user + "/setting.txt");
+                f.writeDict(dict)
+			})
+		})
+</script>
+</body>
+</html>
+

@@ -1,0 +1,190 @@
+<!-- 
+	registration.html
+	ChaoHuiZheng
+	10/04/2019
+	
+	It show the registration form.
+	It also does the error check for bad inputs from user.
+-->
+
+<!-- close: #2 -->
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="../js/file.js"></script>
+	<title>
+		Registration
+	</title>
+</head>
+<body>
+	
+	<div class = container>
+		<a href = "login.html" style="color :black;font-size:23px;text-decoration:none"><i class="fas fa-arrow-circle-left"></i></a>
+		<img src = "../../image/registration.png" alt = "log in image" height="100" width="510">
+  		<div class = "form-group">
+  			<input type = "text" id = "user" class = "form-control" placeholder="user name">
+  			<div id = "error1" style="text-align:right;color:red">  </div>
+  			<br>
+
+  			<input type = "password" id = "password" class = "form-control" placeholder="use 8 or more characters">
+  			<div id = "error2" style="text-align:right;color:red">  </div>
+  		</div>
+
+  		<div class = "input-group">
+  			<input type = "password" id = "confirm_password" class = "form-control" placeholder="confirm password">
+  			<div class="input-group-btn">
+				<button type="button" class="btn btn-success" id = "show">Show</button>
+			</div>
+  		</div>
+  		<div id = "error3" style="text-align:right;color:red">  </div>
+  		
+  		<button type="button" id = "join" class="btn btn-info" style="transform: translate(-50%, -50%);position: absolute;left: 80%;top: 85%;">Join</button>
+	</div>
+
+
+
+
+	<script type="text/javascript">
+		'use strict'
+		const $ = require("jQuery");
+		const fs = require("fs");
+
+		/* users is a dictionary with key on user and val on password. */
+		const f = new File("./data/users.txt");
+		const users = f.readDict();
+		
+		/* user and password input */
+		var user;
+		var confirm_password;
+		var password
+		
+		/* err function */
+		var err = (err) =>{
+			if(err) throw err;
+		}
+
+		/* css style */
+		const error_sign = "<i class=\"fas fa-exclamation-circle\"></i>";
+		const box_border_style = {"border-color": "rgb(206,212,218)","border-width":"1px"};
+		const error_border_style = {"border-color": "red","border-width":"2px"};
+		
+		$(document).ready(function(){
+
+			/* click on "show" button and swith the input type of password */
+			$("#show").click(function(){
+				var confirm_password = document.getElementById("confirm_password");
+				var password = document.getElementById("password");
+				if(password.type === "text") 
+				{
+					password.type = "password";
+					confirm_password.type = "password";
+				}
+				else
+				{
+					password.type = "text";
+					confirm_password.type = "text";
+				}
+			})
+           
+           	/* click on "join" button */
+			$("#join").click(function(){
+				
+				user = $("#user").val();
+
+				/* get rid of trailing space */
+				user = user.replace(/\s+$/,"");
+				password = $("#password").val();
+				confirm_password = $("#confirm_password").val();
+				
+				let error = false;
+
+				/* clear out error state */
+				$("#user").click(function(){
+				
+					$("#user").css(box_border_style);
+					document.getElementById("error1").innerHTML = "";
+				})	
+				$("#password").click(function(){
+				
+					$("#password").css(box_border_style);
+					document.getElementById("error2").innerHTML = "";
+				})	
+				$("#confirm_password").click(function(){
+				
+					$("#confirm_password").css(box_border_style);
+					document.getElementById("error3").innerHTML = "";
+				})		
+
+
+				/* error check on user name */
+				if (user == "") // empty name
+				{
+					document.getElementById("error1").innerHTML = error_sign + "This field is required";
+					$("#user").css(error_border_style);
+					error = true;
+				}
+				else if(users[user] != undefined) // name is taken
+				{
+					document.getElementById("error1").innerHTML = error_sign + "The user name is taken";
+					$("#user").css(error_border_style);
+					error = true;
+				}
+				else if(user.indexOf(" ") != -1) // name contains space
+				{
+					document.getElementById("error1").innerHTML = error_sign + "Name contains space";
+					$("#user").css(error_border_style);
+					error = true;
+				}
+				
+
+				/* error check on password */
+				if(password.length < 8) // password has less than 8 chars
+				{
+					$("#password").css(error_border_style);
+					document.getElementById("error2").innerHTML = error_sign + "use 8 or more characters";
+					error = true;
+				}
+				
+				if(password !== confirm_password) // password and confirm_password are not equal
+				{
+					$("#confirm_password").css(error_border_style);
+					document.getElementById("error3").innerHTML = error_sign + "Those passwords didn't match";
+					error = true;
+				}
+				
+ 				
+ 				/* write to files */
+				if(error == false)
+				{
+					
+					/* wirte username and password to users.txt */
+					let content = user + ":" + password + "\n";
+					let dict = {"mode":"dark"};
+					f.append(content);
+
+					/* set up the user database */
+					let path = "./data/" + user;
+					fs.mkdirSync(path, err);
+					fs.mkdir(path + "/photo", err);
+					fs.mkdir(path + "/video", err);
+					fs.mkdir(path + "/music", err);
+					fs.mkdir(path + "/entry", err);
+					fs.mkdir(path + "/photo/Diary Entry", err);
+					fs.mkdir(path + "/photo/ENCODEDiary Entry",err);
+					
+					var setting  = new File("./data/" + user + "/setting.txt");
+                	setting.writeDict(dict);
+					//fs.mkdir(path + "/photo/")
+					window.location.href = "return_to_login.html";
+				}
+			})
+		})
+
+		
+
+	</script>
+</body>
+</html>

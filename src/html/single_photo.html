@@ -1,0 +1,436 @@
+<!-- 
+	photo.html
+	ChaoHuiZheng
+	10/21/2019
+	
+	Double click the photo in the album to view individual photo in an appropriate image size.
+	We can zoom in, zoom out the image.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="../js/time.js"></script>
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<style type="text/css">
+		body
+		{
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+		img
+		{
+			max-height: 80%;
+			transform: translate(-50%, -50%);
+			position: absolute;
+			left: 50%;
+			top: 45%
+		}
+		.navbar1
+		{
+  			overflow: hidden;
+  			background-color: var(--nav-color);
+  			position: fixed;
+  			bottom: 25px;
+  			height: 42px;
+  			width: 100%;
+
+		}
+		.navbar2
+		{
+  			overflow: hidden;
+  			background-color: var(--nav-color);
+  			position: fixed;
+  			bottom: 0;
+  			height: 25px;
+  			width: 100%;
+		}
+		button
+		{
+			
+			border: none;
+			color:var(--text-color);
+			background-color: var(--nav-color);
+			margin-top: 6px;
+			font-size: 20px;
+			outline: none;
+		}
+		
+		button .shortcut
+		{
+			font-size:17px;
+			visibility: hidden;
+ 			width: 90px;
+ 			background-color: var(--page-background);
+ 			color:var(--text-color);
+  			text-align: center;
+  			border-radius: 6px;
+  			position: absolute;
+  			bottom: 20%;
+  			left: -95%;
+  			z-index: 1;
+		}
+
+		button:hover .shortcut
+		{
+			visibility: visible
+		}
+
+		button:focus
+		{
+			outline:none;
+		}
+	</style>
+</head>
+<body>
+	<div id = "showImg">
+	<img src = "bridege.jpg">
+	</div>
+	<div class = "navbar1">
+		
+		<button id = "previous" style = "position:absolute; left: 4%"><i class="fas fa-arrow-circle-left"></i><span class = "shortcut"> left arrow </span></button>
+		
+		<button id = "next"style = "position:absolute; left: 10%"><i class="fas fa-arrow-circle-right"></i><span class = "shortcut"> right arrow </span></button>
+		
+
+		<button id = "zoomOut" style = "position:absolute; left: 60%"><i class="fas fa-minus-circle"></i><span class = "shortcut"> ctr--/alt--</span></button>
+		
+		<button id = "zoomIn"style = "position:absolute; left: 68%"><i class="fas fa-plus-circle"></i><span class = "shortcut"> ctr-+/alt-+ </span></button>
+		
+		<button id = "download"style = "position:absolute; left: 76%"><i class="fas fa-download"></i><span class = "shortcut"> ctr-s/alt-s</span></button>
+		
+		<button id = "transfer"style = "position:absolute; left: 84%"><i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-t/alt-t </span></button>
+		
+		<button id = "delete"style = "display:none; position:absolute; left: 92%"><i class="far fa-trash-alt"></i><span class = "shortcut"> ctr-d/alt-d </span></button>
+
+		<button id = "diary1" style = "display:none; position:absolute; left: 92%"><i class="fas fa-pen"></i><span class = "shortcut"> ctr-w/alt-w</span></button>
+	</div>
+	<div class = "navbar2" >
+		<span style="position:absolute; left: 4%">back</span>
+		<span style="position:absolute; left: 9.2%">forward</span>
+		
+		<span style="position:absolute; left: 58.8%">zoom out</span>
+		<span style="position:absolute; left: 67.1%">zoom in</span>
+		<span style="position:absolute; left: 75.4%">export</span>
+		<span style="position:absolute; left: 83.3%">transfer</span>
+		<span id = "delete1" style="display:none; position:absolute; left: 91.4%">delete</span>
+		<span id = "diary2" style="display: none; position:absolute; left: 92%">diary</span>
+	</div>
+
+	<script type="text/javascript">
+		const $ = require("jQuery");
+
+		/* images hold all the names of images in the current album 
+		   indexOfImage hold the index where we are in in images array.
+		*/
+		const singlePhotoThread = require('electron').ipcRenderer;
+		const {Confirmation} = require("../js/confirmation.js");
+		const remote = require('electron').remote;  
+		const user = remote.getGlobal('share').user; 
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+
+		var album = remote.getGlobal('share').album;
+		var image = remote.getGlobal('share').image;
+		var path = "../../data/" + user + "/photo/" + album + "/";
+		var images = [];
+		var indexOfImage;
+		var width;
+		var height;
+		const {getDiaryEntry} = require("../js/diaryEntry.js");
+		var diaryEntries;
+		var diaryNames; 		// filename
+
+		/* zoom out function 
+		   width *= 0.9
+		   height *= 0.9
+		*/
+		function zoomOut()
+		{
+			width = $("img").css("width");
+			height = $("img").css("height");
+			width = parseInt(width);
+			height = parseInt(height);
+			$("img").css({"width":width * 0.9,"height":height * 0.9});
+			
+		}
+
+
+		/* zoom out function 
+		   width *= 1.1
+		   height *= 1.1
+		   max_height *= 1.1
+		*/
+		function zoomIn()
+		{
+			let max_height = $('img').css("max-height").split('%')[0];
+			width = $("img").css("width");
+			height = $("img").css("height");
+			
+			max_height = parseInt(max_height);
+			width = parseInt(width);
+			height = parseInt(height);
+			$("img").css({"width":width * 1.1,"height":height * 1.1,"max-height":max_height * 1.1 + "%"});
+		}
+
+		/* initialize the images chronologically */
+		function getImgs()
+		{
+			images = fs.readdirSync("./data/" + user + "/photo/" + album);
+			images = getSortedFiles("./data/" + user + "/photo/" + album + "/",images);
+			let img;
+			img = image.split("/");
+			img = img[img.length - 1];
+			indexOfImage = images.indexOf(img);
+			
+		}
+
+		/* show the image */
+		function showImg()
+		{
+			$("#showImg").text("");
+			if(images.length == 0) return;
+			
+			console.log(image);
+			$("#showImg").append("<img src = \"" + image + "\">");
+
+			/* hide diary button and text if it is not a photo attached to a diary */
+			if(images[indexOfImage].indexOf("DIARY_ENTRY") == -1)
+			{	
+				$("#diary1").css("display","none");
+				$("#diary2").css("display","none");
+
+				$("#delete").css("display","block");
+				$("#delete1").css("display","block");
+				
+			}
+			else
+			{
+				
+				$("#diary1").css("display","block");
+				$("#diary2").css("display","block");
+				
+				$("#delete").css("display","none");
+				$("#delete1").css("display","none");
+			}
+		}
+
+		/* next image */
+		function next()
+		{
+			indexOfImage = (indexOfImage + 1) % images.length;
+			image = path + images[indexOfImage];
+			showImg();
+		}
+
+		/* previous image */
+		function previous()
+		{
+			indexOfImage -= 1;
+			if(indexOfImage < 0) indexOfImage = images.length - 1;
+			image = path + images[indexOfImage];
+			showImg();
+		}
+
+		/* send the deletion confirmation */
+		function deletion()
+		{
+			/* send the message to main.js to open cofimation page */
+			var confirmation = new Confirmation(
+				"SINGLE_PHOTO_DELETION",     //type
+				"Delete",			  //title
+				"Are you sure you want to delete this photos?", // text
+				["Cancel","Delete"]   //buttonlabels 
+			);
+			singlePhotoThread.send("openConfirmation",confirmation);
+		}
+
+		/* transfer image */
+		function transfer()
+		{
+			singlePhotoThread.send("openTransferPhoto",album,[images[indexOfImage % images.length]]);
+		}
+
+		/* whenever we delete or transfer the photo, we update the album */
+		function refreshPhotos()
+		{
+			singlePhotoThread.send("refreshPhotos");
+		}
+
+		/* export(download) button callback */
+		function download()
+		{
+			singlePhotoThread.send("download","photo/" + album + "/",[images[indexOfImage % images.length]]);
+		}
+
+		/* get diaryEntries */
+		function getdiaryEntries()
+		{
+			diaryEntries = getDiaryEntry("./data/" + user + "/entry");
+			console.log(diaryEntries);
+			diaryNames = diaryEntries.map((x)=>{
+				let s = x.filePath.split('/');
+				return s[s.length - 1];
+			});
+		}
+
+		function openDiary()
+		{
+			console.log(images[indexOfImage].split('-')[1]);
+			let index = diaryNames.indexOf(images[indexOfImage].split('-')[1]);
+			diaryEntries[index].index = index;
+			singlePhotoThread.send("openEntry",index,diaryEntries[index]);
+		}
+
+		$(document).ready(function(){
+
+
+			singlePhotoThread.send("SINGLE_PHOTO_REGISTER");
+			
+			getImgs();
+			showImg();
+			getdiaryEntries();
+
+			/* click feature buttons */
+			$("#diary1").click(openDiary);
+			$("#zoomOut").click(zoomOut);
+			$("#zoomIn").click(zoomIn);
+			$("#next").click(next);
+			$("#previous").click(previous);
+			$("#delete").click(deletion);
+			$("#transfer").click(transfer);
+			$("#download").click(download);
+
+
+			/* shortcuts 
+			   ctr-w alt-w diary
+			   ctr-d alt-d delete
+			   ctr-s alt-s export
+               ctr-t alt-t transfer
+          	   ctr+'-' alt+'-' zoom out
+          	   ctr+'+' alt+'+' zoom in
+
+               left arrow key previous image
+               right arrow key next image
+			*/
+			$("body").keydown(function(event){
+
+
+				if(event.ctrlKey || event.altKey)
+				{
+					switch(event.keyCode)
+					{
+							
+						case 87:
+							if($("#diary1").css("display") != "none") openDiary();
+							break;
+
+						case 68: 			// 'd' key
+							if($("#delete").css("display") != "none") deletion();	
+							break;
+						
+						case 83:            // 's' key
+							download(); break;
+
+						case 84:  			// 't' key
+							transfer(); break;
+						
+						case 189:  			// '-' key
+							zoomOut(); break;
+
+						case 187:  			// '+' key
+							zoomIn(); break;
+
+					}
+				}
+				else
+				{
+					switch(event.keyCode)
+					{
+						case 37: 		   // left arrow key
+							previous(); break;
+						case 39: 		   // right arrow key 
+							next(); break;
+					}
+				}
+			})
+
+			/* delete current photo */
+			singlePhotoThread.on("SINGLE_PHOTO_DELETION",(event)=>{
+
+				fs.unlinkSync("./data/" + user + "/photo/" + album + "/" + images[indexOfImage]);
+				
+				images.splice(indexOfImage,1);
+
+				image = path + images[indexOfImage % images.length];
+				showImg();
+				refreshPhotos();
+
+			})
+
+			/* transfer the current photo */
+			singlePhotoThread.on("PHOTO_TRANSFER_DONE",(event)=>{
+				//let from = "./data/" + user + "/photo/" + album + "/" + images[indexOfImage];
+				//let to = "./data/" + user + "/photo/" + toAlbum + "/" + images[indexOfImage];
+				//mvFileKeepTimeStamp(from, to);
+				images.splice(indexOfImage,1);
+				image = path + images[indexOfImage % images.length];
+				showImg();
+				refreshPhotos();
+			})
+
+			/* chnage the current photo to whatever the user clicks on */
+			singlePhotoThread.on("changePhoto",(event)=>{
+				let newAlbum = remote.getGlobal('share').album;
+				let img;
+				image = remote.getGlobal('share').image;
+				console.log(newAlbum);
+				if(newAlbum != album) 
+				{
+					album = newAlbum;
+					path = "../../data/" + user + "/photo/" + album + "/";
+					getImgs();
+				}
+				else
+				{
+				
+					img = image.split("/");
+					img = img[img.length - 1];
+					indexOfImage = images.indexOf(img);
+				}
+				showImg();
+				
+			})
+
+			/* refresh the page whenever the photo get deleted, transfered, imported in photo.html */
+			singlePhotoThread.on("refreshSinglePhoto",(event)=>{
+				let numDel = 0;
+				let p = "./data/" + user + "/photo/" + album + "/";
+				/* calculate the number of photos deleted before the current image */
+				for(var i = 0; i < indexOfImage; i++)
+				{
+					if(fs.existsSync(p + images[i]) == false) numDel++;
+				}
+				/* shift the index */
+				indexOfImage -= numDel;
+				
+				/* update the images and image */
+				if(numDel != 0)
+				{
+					images = fs.readdirSync("./data/" + user + "/photo/" + album);
+					images = getSortedFiles("./data/" + user + "/photo/" + album + "/",images);
+					image = path + images[indexOfImage % images.length];
+					showImg();
+				}
+			})
+			singlePhotoThread.on("changeThemeMode",changeThemeMode);
+
+		})
+
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!-- 
+	confirmation.html
+	ChaoHuiZheng
+	10/04/2019
+	
+	pop out a confirmation window when deleting the photos
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<style type="text/css">
+		body
+		{
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+	</style>
+</head>
+
+<body>
+	<div class = "container">
+		<h2></h2>
+		<div style="position: fixed;top:80%;left:60%">
+			<button id = "cancel" type="button" class="btn btn-primary"></button>
+			&nbsp;&nbsp;
+			<button id = "delete"type="button" class="btn btn-danger"></button>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+		
+		var confirmationThread = require('electron').ipcRenderer;
+		var confirmation;
+		
+		$(document).ready(function(){
+
+			/* get confiramation page info */
+			confirmationThread.send("askConfirmationData");
+			confirmationThread.on(("getConfirmationData"),(event,data)=>{
+				confirmation = data;
+				console.log(confirmation.type);
+				$("title").text(data.title); 
+				$("h2").text(data.text);
+				$("#cancel").text(data.buttonlabels[0]);
+				$("#delete").text(data.buttonlabels[1]);
+			})
+
+			/* close the window by press 'esc' or click "cancel" button. */
+			$("#cancel").click(function(){
+				confirmationThread.send("closeConfirmation",confirmation);
+			})
+			$("body").keydown(function(event){
+				if(event.keyCode == 27) confirmationThread.send("closeConfirmation",confirmation); //'esc' key
+			})
+
+
+			/* confirm deletion and close the window */
+			$("#delete").click(function(){
+				confirmation.isConfirm = true;
+				confirmationThread.send("closeConfirmation",confirmation);
+			})
+
+			confirmationThread.on("changeThemeMode",changeThemeMode);
+
+		})
+	</script>
+</body>
+</html>

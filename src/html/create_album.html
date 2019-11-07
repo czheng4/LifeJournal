@@ -1,0 +1,83 @@
+<!-- 
+	create_album.html
+	ChaoHuiZheng
+	10/04/2019
+
+	create Album page
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Create Album</title>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<style type="text/css">
+		body
+		{
+    		background-color: var(--background-color);
+    		color: var(--text-color);
+		}
+	</style>
+</head>
+<body>
+	<div class = "container">
+		<br><br>
+		<input type="text" id = "albumName" class="form-control" placeholder="Enter album name">
+		<div style="position: fixed;top:80%;left:60%">
+			<button id = "cancel" type="button" class="btn btn-primary">Cancel</button>
+			&nbsp;&nbsp;
+			<button id = "create" type="button" class="btn btn-danger">Create</button>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const remote = require('electron').remote; 
+		const createAlbumThread = require('electron').ipcRenderer;
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+
+
+		var user = remote.getGlobal('share').user; 
+		path = "./data/" + user + "/photo/"; // releative to html file
+
+		
+		$(document).ready(function(){
+			createAlbumThread.send("CREATE_ALBUM_REGISTER");
+			$("#cancel").click(function(){
+				createAlbumThread.send("closeCreateAlbum",null);
+			})
+
+			/* create a new album */
+			$("#create").click(function(){
+
+				/* remove the trailing space */
+				var dir = path + $("#albumName").val().replace(/\s+$/,"");
+
+				/* check if the album exists */
+				if(fs.existsSync(dir) === true) 
+				{
+					createAlbumThread.send("errorMessage","ERROR","The album exists");
+				}
+				else 
+				{
+					/* dir stores decoding images 
+					   ENCODEdir stores encoding images
+					*/
+					fs.mkdirSync(dir,(err)=>{ if(err) throw err;});
+					fs.mkdirSync(path + "ENCODE" + $("#albumName").val().replace(/\s+$/,""),(err) =>{if(err) throw err;})
+					createAlbumThread.send("closeCreateAlbum",$("#albumName").val().replace(/\s+$/,""));
+
+				}
+				
+			})
+			createAlbumThread.on("changeThemeMode",changeThemeMode);
+
+		})
+	</script>
+</body>
+</html>

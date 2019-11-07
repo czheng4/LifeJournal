@@ -1,0 +1,135 @@
+<!-- 
+	login.html
+	ChaoHuiZheng
+	10/04/2019
+	
+	login page
+-->
+
+<!-- close: #2 -->
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="../js/file.js"></script>
+	<title>Login</title>
+</head>
+<body>
+	<div class = "container">
+		<img src = "../../image/login.png" alt = "log in image" height="100" width="510">
+
+		<form>
+
+			<label for = "user"><b>User:</b></label><br>
+			<div class = "input-group">
+				<span class="input-group-addon"><button disabled style = "font-size: 22px;width:40px"><i class="fas fa-sign-in-alt"></i></button></span>
+				<input type="text" id = "user" class="form-control" placeholder="Enter user name">
+			</div>
+			<br>
+			<label for ="password"><b>Password:</b></label><br>
+			<div class = "input-group"> 
+				<span class="input-group-addon"><button disabled style = "font-size: 22px;width:40px"><i class="fas fa-lock"></i></button></span>
+				<input type="password" id = "password" class = "form-control" placeholder="Enter password">
+				<div class="input-group-btn">
+					<button type="button" class="btn btn-success" id = "show">Show</button>
+				</div>
+			</div>
+			<div id = "error1" style="text-align:right;color:red">  </div>
+			<br>
+		</form>
+		<a href="registration.html">register</a>
+		<div style="text-align:right">Remember me <input type="checkbox" id = "remember"></div>
+	</div>
+
+	
+	<button type="button" id = "login" class="btn btn-info" style="transform: translate(-50%, -50%);position: absolute;left: 50%;top: 70%;">Login</button>
+
+	<script type="text/javascript">
+		'use strict'
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const loginThread = require('electron').ipcRenderer;
+
+		/* read the users info and return a dict whose key is username and val is password */
+		const f = new File("./data/users.txt");
+		const users = f.readDict();
+		
+		/* error icon */
+		const error_sign = "<i class=\"fas fa-exclamation-circle\"></i>";
+		
+		$(document).ready(function(){
+
+			/* remember.txt stores remembered username
+			   load it if it exists.
+			*/	
+			if(fs.existsSync("./data/remember.txt"))
+			{
+				let user = fs.readFileSync("./data/remember.txt","utf-8");
+				document.getElementById("user").value = user;
+				document.getElementById("remember").checked = true;
+			}
+
+			/* clean out error state when inputing */
+			$("#password").click(function(){
+				
+				$("#password").css({"border-color": "rgb(206,212,218)","border-width":"1px"});
+				document.getElementById("error1").innerHTML = "";
+			})	
+
+			/* click "Login" button */
+			$("#login").click(function(){
+				
+				/* get val from input box */
+				let user = $("#user").val();
+				let password = $("#password").val();
+				
+				/* get rid of trailing space */
+				user = user.replace(/\s+$/,"");
+				
+				/* the username and password matche, and then login */
+				if(users[user] == password) 
+				{
+					
+				    /* if "remember" is checked, write to remember.txt file */
+				    if($("#remember").is(':checked')) 
+				    {	
+				    	fs.writeFileSync("./data/remember.txt",user,function(err){
+				    		if(err) throw err;
+				    	});
+				    }
+				    /* if "remembre" is unchecked, delete it if it exists */
+				    else if(fs.existsSync("./data/remember.txt")) 
+				    {   
+				    	fs.unlinkSync("./data/remember.txt");
+				    }
+				    
+				    /* load diary.html and close login.html */
+				    loginThread.send("openDiary",user); 
+				    loginThread.send("closeLogin");
+				    
+				}
+				/* the username and password don't matche, and then print error */
+				else
+				{
+					document.getElementById("error1").innerHTML = error_sign + "Wrong password or username. Try again!";
+					$("#password").css({"border-color": "red","border-width":"2px"});
+				}
+			})
+
+			/* click "Show" button to swith the type of input */
+			$("#show").click(function(){
+				let password = document.getElementById("password");
+				if(password.type === "text") password.type = "password";
+				else password.type = "text";
+			})
+
+
+		})
+
+		
+	</script>
+
+</body>
+</html>

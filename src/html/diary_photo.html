@@ -1,0 +1,350 @@
+<!-- 
+	diary_photo.html
+	ChaoHuiZheng
+	10/26/2019
+	
+	/* 
+		view the photo attached the diary 
+		Even though, these photos will appear in the "Diary Entry" album.
+		The only place you can delete these photos is directly throght the diary.
+	*/
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="../js/time.js"></script>
+
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<style type="text/css">
+		body
+		{
+			background-color: var(--background-color);
+			color: var(--text-color);
+
+		}
+		img
+		{
+			max-height: 80%;
+			transform: translate(-50%, -50%);
+			position: absolute;
+			left: 50%;
+			top: 45%
+		}
+		.navbar1
+		{
+  			overflow: hidden;
+  			background-color: var(--nav-color);
+  			position: fixed;
+  			bottom: 25px;
+  			height: 42px;
+  			width: 100%;
+
+		}
+		.navbar2
+		{
+  			overflow: hidden;
+  			background-color: var(--nav-color);
+  			position: fixed;
+  			bottom: 0;
+  			height: 25px;
+  			width: 100%;
+		}
+		button
+		{
+			
+			border: none;
+			color:var(--text-color);
+			background-color: var(--nav-color);
+			margin-top: 6px;
+			font-size: 20px;
+			outline: none;
+		}
+		
+		button .shortcut, a .shortcut
+		{
+			font-size:17px;
+			visibility: hidden;
+ 			width: 90px;
+ 			background-color: var(--page-background);
+ 			color:var(--text-color);
+  			text-align: center;
+  			border-radius: 6px;
+  			position: absolute;
+  			bottom: 20%;
+  			left: -95%;
+  			z-index: 1;
+		}
+
+		button:hover .shortcut, a:hover .shortcut
+		{
+			visibility: visible
+		}
+
+		button:focus
+		{
+			outline:none;
+		}
+	</style>
+</head>
+<body>
+	<div id = "showImg">
+	<img src = "bridege.jpg">
+	</div>
+
+	<a id = "goBack" href="#" style="position:fixed; font-size: 23px; left: 50px; top:25px"><i class="fas fa-undo"></i><span class = "shortcut"> ctr-b/alt-b </span></a>
+
+	<div class = "navbar1">
+		
+		<button id = "previous" style = "position:absolute; left: 4%"><i class="fas fa-arrow-circle-left"></i><span class = "shortcut"> left arrow </span></button>
+		
+		<button id = "next"style = "position:absolute; left: 15%"><i class="fas fa-arrow-circle-right"></i><span class = "shortcut"> right arrow </span></button>
+		
+		<button id = "zoomOut" style = "position:absolute; left: 52%"><i class="fas fa-minus-circle"></i><span class = "shortcut"> ctr--/alt--</span></button>
+		
+		<button id = "zoomIn"style = "position:absolute; left: 64%"><i class="fas fa-plus-circle"></i><span class = "shortcut"> ctr-+/alt-+ </span></button>
+		
+		<button id = "download"style = "position:absolute; left: 76%"><i class="fas fa-download"></i><span class = "shortcut"> ctr-s/alt-s</span></button>
+		
+		<button id = "delete"style = "position:absolute; left: 88%"><i class="far fa-trash-alt"></i><span class = "shortcut"> ctr-d/alt-d </span></button>
+	</div>
+	<div class = "navbar2" >
+
+		<span style="position:absolute; left: 4%">back</span>
+		<span style="position:absolute; left: 14%">forward</span>
+		<span style="position:absolute; left: 50.5%">zoom out</span>
+		<span style="position:absolute; left: 63%">zoom in</span>
+		<span style="position:absolute; left: 75.5%">export</span>
+		<span style="position:absolute; left: 87.5%">delete</span>
+	
+	</div>
+
+	<script type="text/javascript">
+		const $ = require("jQuery");
+
+		/* images hold all the names of images in the current album 
+		   indexOfImage hold the index where we are in in images array.
+		   oldDiaryEntry hold the unchanged diray data.
+		   newDiaryEntry hold the changed diary data.
+		   We deliver theses info(oldDiaryEntry, newDiaryEntry) back to text_box.html when we click "go back" button.
+		*/
+		const diaryPhotoThread = require('electron').ipcRenderer;
+		const {Confirmation} = require("../js/confirmation.js");
+		const remote = require('electron').remote;  
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+		
+		var images = [];
+		var indexOfImage;
+		var width;
+		var height;
+		var {getDiaryEntry} = require("../js/diaryEntry.js");
+		
+		var oldDiaryEntry;
+		var newDiaryEntry;
+
+		/* zoom out function 
+		   width *= 0.9
+		   height *= 0.9
+		*/
+		function zoomOut()
+		{
+			width = $("img").css("width");
+			height = $("img").css("height");
+			width = parseInt(width);
+			height = parseInt(height);
+			$("img").css({"width":width * 0.9,"height":height * 0.9});
+			
+		}
+
+
+		/* zoom out function 
+		   width *= 1.1
+		   height *= 1.1
+		   max_height *= 1.1
+		*/
+		function zoomIn()
+		{
+			let max_height = $('img').css("max-height").split('%')[0];
+			width = $("img").css("width");
+			height = $("img").css("height");
+			
+			max_height = parseInt(max_height);
+			width = parseInt(width);
+			height = parseInt(height);
+			$("img").css({"width":width * 1.1,"height":height * 1.1,"max-height":max_height * 1.1 + "%"});
+		}
+
+		/* initialize the images chronologically */
+		function getImgs()
+		{
+			images = newDiaryEntry.photo;
+			images = images.map((img)=>{return "../." + img;});
+
+			image = images[indexOfImage];
+		}
+
+		/* show the image */
+		function showImg()
+		{
+			$("#showImg").text("");
+			if(images.length == 0) return;
+			
+			console.log(image);
+			$("#showImg").append("<img src = \"" + image + "\">");
+		}
+
+		/* next image */
+		function next()
+		{
+			indexOfImage = (indexOfImage + 1) % images.length;
+			image = images[indexOfImage];
+			showImg();
+		}
+
+		/* previous image */
+		function previous()
+		{
+			indexOfImage -= 1;
+			if(indexOfImage < 0) indexOfImage = images.length - 1;
+			image = images[indexOfImage];
+			showImg();
+		}
+
+		/* send the deletion confirmation */
+		function deletion()
+		{
+			/* send the message to main.js to open cofimation page */
+			var confirmation = new Confirmation(
+				"DIARY_PHOTO_DELETION",     //type
+				"Delete",			  //title
+				"Are you sure you want to delete this photo?", // text
+				["Cancel","Delete"]   //buttonlabels 
+			);
+			diaryPhotoThread.send("openConfirmation",confirmation);
+		}
+
+		
+		
+
+		/* export(download) button callback */
+		function download()
+		{
+			let s = images[indexOfImage];
+			let type = "";
+			s = s.split('/');
+
+			/* grab where we store these images in format of "DATA_TYPE/ALBUM_NAME/" 
+			   DATA_TYPE can be "photo", "video", "music" and "entry".
+			*/
+
+			for(var i = s.length - 3; i < s.length - 1; i++) type += s[i] + "/";
+			
+			diaryPhotoThread.send("download",type,[s[s.length - 1]]);
+		}
+
+	
+
+		$(document).ready(function(){
+
+
+
+			$("#zoomOut").click(zoomOut);
+			$("#zoomIn").click(zoomIn);
+			$("#next").click(next);
+			$("#previous").click(previous);
+			$("#delete").click(deletion);
+			$("#download").click(download);
+
+
+			/* store the diary info from text_box.html */
+			diaryPhotoThread.send("getDiaryInfo");
+			diaryPhotoThread.once("getDiaryInfo",(event,index,oldDiaryEntry1,newDiaryEntry1)=>{
+				indexOfImage = index;
+				oldDiaryEntry = oldDiaryEntry1;
+				newDiaryEntry = newDiaryEntry1;
+				getImgs();
+				showImg();
+			})
+
+
+			/* send the diary info back to text_box.html */
+			$("#goBack").click(function(){
+				
+				diaryPhotoThread.send("sendDiaryEntry",oldDiaryEntry,newDiaryEntry);
+				console.log("back");
+				window.location.href = "text_box.html";
+			})
+
+			/* delet the photo */
+			diaryPhotoThread.on("DIARY_PHOTO_DELETION",(event)=>{
+
+				/* remove the current photo from photo images and newDiaryEntry.photo array
+				   and show the next image.
+				*/
+				images.splice(indexOfImage,1);
+				image = images[indexOfImage % images.length];
+				showImg();
+				newDiaryEntry.photo.splice(indexOfImage,1);
+	
+			})
+
+			/* shortcuts 
+			   ctr-d alt-d delete
+			   ctr-s alt-s export
+          	   ctr+'-' alt+'-' zoom out
+          	   ctr+'+' alt+'+' zoom in
+
+               left arrow key previous image
+               right arrow key next image
+			*/
+			$("body").keydown(function(event){
+
+
+				if(event.ctrlKey || event.altKey)
+				{
+					switch(event.keyCode)
+					{
+							
+						case 68: 			// 'd' key
+							deletion();	break;
+						
+						case 83:            // 's' key
+							download(); break;
+
+						
+						case 189:  			// '-' key
+							zoomOut(); break;
+
+						case 187:  			// '+' key
+							zoomIn(); break;
+
+						case 66:  			// 'b' key
+							diaryPhotoThread.send("sendDiaryEntry",oldDiaryEntry,newDiaryEntry);
+							window.location.href = "text_box.html";
+ 							break;
+
+					}
+				}
+				else
+				{
+					switch(event.keyCode)
+					{
+						case 37: 		   // left arrow key
+							previous(); break;
+						case 39: 		   // right arrow key 
+							next(); break;
+					}
+				}
+			})
+			diaryPhotoThread.on("changeThemeMode",changeThemeMode);
+
+		})
+
+
+	</script>
+</body>
+</html>

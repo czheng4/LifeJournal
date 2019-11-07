@@ -1,0 +1,15 @@
+/*
+	dark theme
+	ChaoHui Zheng
+	10/03/2019 
+*/
+:root 
+{
+	--background-color: rgb(10,10,10,0.8);
+	--page-background: #212121;
+	--text-color: #ededed;
+	--panel-color: #212121;
+	--color-alpha: #50a8d8;
+	--hr-line:rgb(250,250,250,0.5);
+	--nav-color:#212121;
+}

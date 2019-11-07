@@ -1,0 +1,643 @@
+<!-- 
+    text_box.html
+    ChaoHui Zheng
+    10/22/2019
+
+    textbox entry
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Textbox</title>
+    <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link href="../../fontawesome/css/all.css" rel="stylesheet">
+    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+
+    <style type="text/css">
+* {box-sizing: border-box}
+body
+{
+    padding-bottom: 100px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+
+}
+
+/* css style of image slide show comes from: https://www.w3schools.com/howto/howto_js_slideshow.asp */
+.mySlides {display: none}
+img 
+{
+    vertical-align: middle;
+    height: 200px;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Slideshow container */
+.slideshow-container 
+{
+    background-color: var(--background-color);
+    max-width: 100%;
+    position: relative;
+    margin: auto;
+}
+
+/* Next & previous buttons */
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next 
+{
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover 
+{
+    background-color: rgba(0,0,0,0.8);
+}
+
+
+
+/* The dots/bullets/indicators */
+.dot 
+{
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: var(--panel-color); 
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover 
+{
+     background-color: var(--text-color);
+}
+/* css style for image ends here */
+
+    	::placeholder
+    	{
+    		color:var(--text-color);
+    	}
+    	.textboxTitle
+    	{
+            position: relative;
+    		border:none;
+    		text-align: left;
+    		width:100%;
+    		height:35px;
+    		font-size:25px;
+    		background-color: var(--panel-color);
+            color: var(--text-color);
+    		resize:none;
+    		outline: none;
+    		margin-top: 2.5px;
+    		overflow-y: hidden;
+    	}
+    	.textboxEntry
+    	{
+            position: relative;
+    		border:none;
+    		text-align: left;
+    		width:100%;
+    		height: 50vh;
+    		font-size:20px;
+    		background-color: var(--panel-color);
+            color: var(--text-color);
+    		resize:none;
+    		outline: none;
+    		overflow: scroll;
+    		text-indent: 4px;
+    	}
+  
+    	.container-box
+    	{
+    		position: relative;
+    		width: 97%;
+    		left:1.5%;
+    		right:1.5%;
+    		top:12px;
+    		background-color: var(--panel-color); 
+    		border: 1px solid rgba(0, 0, 0,0.3);
+    	}
+        hr
+        {
+            background-color: rgba(0,0,0,0.4);
+        }
+        .feature_button
+        {
+            position: absolute;
+            border: none;
+            background-color: var(--panel-color); 
+            font-size: 20px;
+            top: -33px;
+        }
+        button
+        {
+            color: var(--text-color);
+        }
+        button:focus
+        {
+
+            outline:none;
+        }
+    </style>
+</head>
+<body>
+
+<div id = "photos" class="slideshow-container">
+</div>
+<br>
+
+<div id = "dots" style="text-align:center">
+</div>
+
+    <div class="container-box">
+        <textarea class = "textboxTitle" placeholder="Title" id = "title"></textarea>
+        
+        <hr style="position:relative;top:-10px">
+        <textarea  id = "entry" class="textboxEntry" style="top:-15px;" placeholder="     Dear Diary"></textarea>
+        <hr style="position:relative;top:-25px">
+       	
+       	
+        <div style="position: relative; height: 5px;">
+            <input id = "date" type = "date" style="position: relative; top:-33px;font-size: 100%; left: 10px; width: 170px;background: silver">
+
+            <button id = "hideDisplay" class = "feature_button" style = "left:70%"><i class="fas fa-eye-slash"></i></button>
+
+            <button id = "upload" class = "feature_button" style = "left:80%"><i class="fas fa-images"></i></button>
+            
+            <button id = "delete" class = "feature_button" style = "left:90%"> <i class="fas fa-trash"></i></button>
+
+        </div>
+    </div>
+        
+        <div style="position: fixed;top:90%;right:30px">
+            <button id = "cancel" type="button" class="btn btn-primary">Cancel</button>
+            &nbsp;&nbsp;
+            <button id = "save" type="button" class="btn btn-danger">Save</button>
+     </div>
+   
+
+   	<script type="text/javascript">
+   		'use strict'
+   		const $ = require("jQuery");
+        const fs = require("fs");
+        const entryThread = require('electron').ipcRenderer;
+        const remote = require('electron').remote;  
+        const Path = require('path');
+
+    
+        const user = remote.getGlobal('share').user; 
+        var entryData = remote.getGlobal('share').entryData; 
+        const {Confirmation} = require("../js/confirmation.js");
+        const {diaryEntry} = require("../js/diaryEntry.js");
+        const {File} = require("../js/file.js");
+        const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
+        let mode = loadThemeMode();
+        console.log(mode)
+
+        var path = "./data/" + user + "/entry/"; 
+        var filePath = null;
+        var photo = [];
+        var slides;
+        var dots;
+        var slideIndex = -1;
+
+
+        /* hide or display the images */
+        function hideOrDisplay()
+        {
+            if($("#photos").css("display") == "none")
+            {
+                $("#photos").css("display","block");
+                $("#dots").css("display","block");
+            }
+            else
+            {
+                $("#photos").css("display","none");
+                $("#dots").css("display","none");
+            }
+        }
+
+
+        /* load info if we open the written diary */
+        function load()
+        {
+            if(entryData != null)
+            {
+                filePath = entryData.filePath;
+                $("#title").text(entryData.title.replace("\n",""));
+                $("#entry").text(entryData.entry);
+                $("#date").val(entryData.date);
+                photo = entryData.photo;
+            }
+            entryThread.send("setGlobalVal","entryData",null);
+
+        }
+
+        /* upload photos attached the current diary */
+        function upload()
+        {
+            /* name is the where this entry gonna store 
+               So, we can open the attached text box by grabing the "name".
+            */
+            let name = filePath.split('/');
+            name = filePath[filePath.length - 1];
+            entryThread.send("upload","photo/Diary Entry/",name + "-DIARY_ENTRY");
+        }
+
+        /* delete the diary */
+        function deletion()
+        {
+            /* send the message to main.js to open cofimation page */
+            var confirmation = new Confirmation(
+                "ENTRY_DELETION",     //type
+                "Delete",             //title
+                "Are you sure you want to delete this diary", // text
+                ["Cancel","Delete"]   //buttonlabels 
+            );
+            entryThread.send("openConfirmation",confirmation);  
+        }
+
+        /* cancel without saving */
+        function cancel()
+        {
+             /* send the message to main.js to open cofimation page */
+            var confirmation = new Confirmation(
+                "ENTRY_CANCELLATION",     //type
+                "Cancel",             //title
+                "Are you sure you don't want to save this diary?", // text
+                ["Cancel","Yes"]   //buttonlabels 
+            );
+            entryThread.send("openConfirmation",confirmation);  
+        }
+
+
+        /* the functions below are image manipulation */
+
+        /* go to the next slide */
+        function nextSlide() 
+        {
+            slides[slideIndex].style.display = "none";
+            dots[slideIndex].className = dots[slideIndex].className.replace(" active", "");
+            slideIndex = (slideIndex + 1) % slides.length;
+            showSlides(slideIndex);
+        }
+        /* go to the previous slide */
+        function prevSlide()
+        {
+            slides[slideIndex].style.display = "none";
+            dots[slideIndex].className = dots[slideIndex].className.replace(" active", "");
+            slideIndex = (slideIndex - 1);
+            if(slideIndex == -1) slideIndex = slides.length - 1;
+            showSlides(slideIndex);
+        }
+    
+        /* show a specific slide */
+        function showSlides() 
+        {
+            if(slideIndex < 0) return;
+            slides[slideIndex].style.display = "block";
+            dots[slideIndex].className += " active";
+        }
+
+        /* get all slides ready */
+        function getSlides()
+        {
+
+            console.log(photo);
+            let imgs = "";
+            let myDots = "";
+            $("#photos").text("");
+            $("#dots").text("");
+            for(var i = 0; i < photo.length; i++)
+            {
+                imgs += '<div class="mySlides">\
+                             <img src="../.' + photo[i] + '">\
+                        </div>';
+                myDots += '<span class="dot" name ="' + i + '"></span>';
+            }
+            if(photo.length != 0) 
+            {
+                imgs += '<a class="prev" id = "prev">&#10094;</a>\
+                         <a class="next" id = "next">&#10095;</a>'
+                slideIndex = 0;
+            }
+            $("#photos").append(imgs);
+            $("#dots").append(myDots);
+
+            slides = document.getElementsByClassName("mySlides");
+            dots = document.getElementsByClassName("dot");
+            showSlides();
+
+            /* register the event */
+            $("#next").click(nextSlide);
+            $("#prev").click(prevSlide);
+            $(".dot").click(function(){
+                slides[slideIndex].style.display = "none";
+                dots[slideIndex].className = dots[slideIndex].className.replace(" active", "");
+                slideIndex = parseInt($(this).attr("name")); 
+                showSlides();
+            })
+        }
+
+        /* get the file path */
+        function getFilePath()
+        {
+
+            if(entryData != null) return entryData.filePath;
+            
+            var files = fs.readdirSync(path).sort(function(t1,t2){return parseInt(t1) - parseInt(t2);});
+            var newfilePath;
+
+               
+            if(files.length == 0) newfilePath = 1;
+            else newfilePath =  1 + parseInt(files[files.length - 1]);
+            return path + newfilePath;
+
+        }
+
+        /* create a DiaryEntry stores the current info */
+        function newEntryData()
+        {
+            var newEntryData = new diaryEntry(null);
+            newEntryData.title = $("#title").val();
+            newEntryData.entry = $("#entry").val();;
+            newEntryData.date = $("#date").val();
+            newEntryData.photo = photo;
+            return newEntryData;
+        }
+
+   		$(document).ready(function(){
+
+            let entryEventKey;
+            
+            if(entryData == null) entryEventKey = 0xffffff;
+            else entryEventKey = entryData.index;
+            entryThread.send("TEXTBOX_REGISTER",entryEventKey);
+           
+            load();
+            filePath = getFilePath();
+            getSlides();
+            
+
+            
+            $("#delete").click(deletion);
+            $("#upload").click(upload);
+            $("#hideDisplay").click(hideOrDisplay);
+            $("#cancel").click(cancel);
+
+            $("body").on('click','img',function(){
+                /* send the info to diary_photo.html */
+                entryThread.send("sendInfoToDiaryPhoto",slideIndex,entryData,newEntryData());
+                window.location.href = "diary_photo.html";
+            })
+
+
+            /* get the diary info when we return to this page for diary_photo.html */
+            entryThread.send("getDiaryInfo");
+            entryThread.once("getDiaryInfo",(event,oldDiaryEntry,newDiaryEntry)=>{
+                console.log("get info");
+                entryData = oldDiaryEntry;
+                photo = newDiaryEntry.photo;
+                console.log(newDiaryEntry);
+                $("#title").text(newDiaryEntry.title.replace("\n",""));
+                $("#entry").text(newDiaryEntry.entry);
+                $("#date").val(newDiaryEntry.date);
+                
+                filePath = getFilePath();
+                getSlides();
+            })
+
+
+            /* delet the entry including photos */
+            entryThread.on("ENTRY_DELETION",function(){
+                var album = remote.getGlobal('share').album; 
+                var isFresh = false;
+                var temp;
+                if(entryData == null) entryThread.send("closeEntry");
+                else 
+                {
+
+                    /* delete entry */
+                    fs.unlinkSync(filePath);
+
+                    /* delete attached photos */
+                    for(var i = 0; i < entryData.photo.length; i++)
+                    {
+                        fs.unlinkSync(entryData.photo[i]);
+                        temp = entryData.photo[i];
+                        temp = temp.split('/');
+                        temp = temp[temp.length - 2];
+                        if(temp == album) isFresh = true;
+                    }
+
+                    entryThread.send("refreshPhotos");
+                    entryThread.send("refreshSinglePhoto");
+                    entryThread.send("closeEntry",entryData.index);
+
+                }
+            })
+
+            /* refresh the diary photos as we have new photos */
+            entryThread.on("doneUpload",function(event,files){
+                for(var i = 0; i < files.length; i++)
+                {
+                    photo.push("./data/" + user + "/photo/Diary Entry/" + files[i]);
+                }
+                /* refresh the photos */
+                getSlides();
+            })
+
+            /* disable 'enter' ket when typing title */
+            $("#title").keydown(function(event){
+                if (event.which == '13') event.preventDefault();
+            })
+
+            /* making tab key as adding space */
+            $("#entry").keydown(function(event){
+                if (event.which == '9')    // "tab key"
+                {
+                    /* add four spaces when typing the 'tab' key */
+                    let newString = "";
+                    let oldString = $(this).val();
+                    /* 
+                        this.slectionStart gets where the cursor is.
+                        this.selectionEnd gets where the selection ends.
+                    */
+                    let start = this.selectionStart;
+                    let end = this.selectionEnd;
+                    newString = oldString.substring(0,start) + "\t" + oldString.substring(start);
+                    $("#entry").val(newString);
+
+                    /* move the cursor to right by 4 spaces */
+                    this.selectionEnd = start + 1;
+                    this.selectionStart = start + 1;
+                   
+                    event.preventDefault();
+                }
+            })
+
+            
+            /* do not save the change */
+            entryThread.on("ENTRY_CANCELLATION",function(){
+            
+
+                /* delete added photos */
+                for(var i = 0; i < photo.length; i++)
+                {   
+                    if(entryData != null)
+                    {
+                        if(entryData.photo.indexOf(photo[i]) == -1) fs.unlinkSync(photo[i]);
+                    }
+                    else fs.unlinkSync(photo[i]);
+
+                }
+
+                if(entryData == null) entryThread.send("closeEntry");
+                else entryThread.send("closeEntry",entryData.index);
+            })
+
+            /* 
+                save entry:
+                title
+                entry
+                date
+                photo
+            */
+   			$("#save").click(()=>{
+                var title = $("#title").val();
+                var entry = $("#entry").val();;
+                var date = $("#date").val();
+                var content = "";
+
+                
+                content += title;
+
+                content += "TITLE_ENTRY_DATE_PHOTO:"
+                content += entry;
+
+                content += "TITLE_ENTRY_DATE_PHOTO:"
+                content += date;
+
+                content += "TITLE_ENTRY_DATE_PHOTO:"
+            
+                for(var i = 0; i < photo.length - 1; i++)
+                {
+                    content += photo[i] + "|,|";    // "|,|" is a seperator i choose as i think it won't be part of file name.
+                }
+                if(photo.length != 0) content += photo[photo.length - 1];
+                else content += "|,|";
+                
+                if(date === "")
+                {
+                    entryThread.send("errorMessage","DATE","Please input the date");
+                    return;
+                }
+
+                /* store data */
+                let f = new File(filePath);
+                f.write(content);
+
+                /* look up what photos we delete.
+                   compare the entryData,photo and photo.
+                   photo store the recentest status of what photo we have.
+                */
+                if(entryData != null)
+                {
+                    for(var i = 0; i < entryData.photo.length; i++)
+                    {
+                        if(photo.indexOf(entryData.photo[i]) == -1) 
+                        {
+                            console.log("delete");
+                            fs.unlinkSync(entryData.photo[i]);
+                        }
+                    }
+                }
+                if(entryData == null) entryThread.send("closeEntry");
+                else entryThread.send("closeEntry",entryData.index);
+   			})
+            entryThread.on("changeThemeMode",changeThemeMode);
+   		})
+       </script>
+        <!--
+            The following code is for the emoji buttons and the mood picker
+        -->
+       
+        <html>
+            <head>
+        
+                
+                <style>
+                    body {
+                        margin:30px;
+                    }
+                    h1, h4, p {
+                        font-family: Arial;
+                    }
+                 </style>
+            </head>
+            <body>
+                <h1 style= "color:black">How're you feeling today?</h1>
+        
+                <div class="content">
+                    <button type="button" onclick="alert('Feeling great!')">&#x1F600</button>
+                    <button type="button" onclick="alert('Feeling good!')">&#x1F642</button> 
+                    <button type="button" onclick="alert('Feeling oof!')">&#x1F643</button>
+                    <button type="button" onclick="alert('Feeling loving!')">&#x1F60D</button>
+                    <button type="button" onclick="alert('Feeling okay!')">&#x1F60F</button>
+                    <button type="button" onclick="alert('Feeling down.')">&#x1F622</button>
+                    <button type="button" onclick="alert('Feeling mad.')">&#x1F621</button>
+                    <button type="button" onclick="alert('YEE HAAW!')">&#x1F920</button>
+                    <button type="button" onclick="alert('Feeling sick.')">&#x1F922</button>
+                    <button type="button" onclick="alert('Feeling stressed.')">&#x1F62C</button>
+                </div>
+            </body>
+        </html>    
+
+        <!-- Weather Picker Buttons -->
+        <html>
+            <head>
+        
+                
+                <style>
+                    body {
+                        margin:30px;
+                    }
+                    h1, h4, p {
+                        font-family: Arial;
+                    }
+                 </style>
+            </head>
+            <body>
+                <h1 style= "color:black">How's the weather today?</h1>
+        
+                <div class="content">
+                    <button type="button" onclick="alert('Cloudy today')">&#x26C5</button>
+                    <button type="button" onclick="alert('Stormy today')">⛈️</button> 
+                    <button type="button" onclick="alert('Rainy today')">🌧️</button>
+                    <button type="button" onclick="alert('Snowy today')">🌨️</button>
+                    <button type="button" onclick="alert('Sunny today')">☀️</button>
+                </div>
+            </body>
+        </html>
+</body>
+</html>

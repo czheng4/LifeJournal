@@ -1,0 +1,36 @@
+<!-- 
+	return_to_login.html
+	ChaoHuiZheng
+	09/10/2019
+	
+	return to login page in three seconds.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<title></title>
+</head>
+<body>
+	<h1 style="position: absolute; transform: translate(-50%, -50%); top:50%; left: 50%">
+		SUCCESS <i class="fas fa-check-circle" style="font-size: 50px"></i>
+	</h1>
+
+	<h2 id = "count" style="text-align: center">return to login page in 3 seconds</h2>
+
+	<script type="text/javascript">
+		
+		let count = document.getElementById("count");
+		var i = 2;
+		setInterval(function(){
+			count.innerHTML = "return to login page in " + i + " seconds";
+			i--;
+			if(i == 0) window.location.href = "login.html";
+		},1000);
+ 			
+	</script>
+</body>
+</html>

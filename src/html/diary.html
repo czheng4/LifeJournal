@@ -1,0 +1,302 @@
+<!-- 
+	diary.html
+	ChaoHuiZheng
+	09/12/2019
+	
+	diary page. Modify it as you see fit.
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<style type="text/css">
+
+		body
+		{
+			overflow: scroll;
+			padding-bottom: 100px;
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+		/* panel style */
+		.topnav 
+		{
+			margin-top:7.5px;
+  			background-color: var(--page-background);
+  			padding: 5px;
+  			box-shadow: 0 0 12px 6px rgba(0,0,0,0.05);
+			border-radius: .60rem;
+		}
+		.panelbn
+		{	
+			background-color: var(--page-background);
+			margin-left: 15px;
+			padding: 10px 15px;
+			border-radius: .25rem;
+			border: none;
+			width: 50px;
+			font-size: 9px;
+		}
+		.panelbn i
+		{
+			color: var(--text-color);
+		}
+
+		.panelbn:hover
+		{
+			outline: 0;
+			background-color:#444;
+		}
+		.panel
+		{
+			width: 30%;
+  			position: fixed;
+  			z-index: 1;
+  			height: 100%;
+  			top: 0;
+  			left: 0;
+  			background-color: var(--page-background);
+  			overflow-x: hidden;
+  			transition: 0.2s;
+  			padding-top: 60px;
+  			
+		}
+		.panel a
+		{
+			padding: 8px 8px 8px 10px;
+ 			text-decoration: none;
+  			font-size: 20px;
+  			color: var(--text-color);
+  			display: block;
+  			cursor: pointer;	
+		}
+		
+		.panel a:hover
+		{
+			color: red;
+		}
+		.closePanel
+		{
+			right: 10px;
+			top:10px;
+			position: absolute;
+			top: 0;
+			
+		}
+		/* text box style */
+		
+		.date
+		{
+			position: absolute;
+			top: 5%;
+			font-size: 20px;
+			text-align: left;
+			margin-left: 1.5%;
+			color: var(--text-color);
+		}
+		
+		.boxed
+		{
+			position: relative;
+			left: 8%;
+			margin-right: 10%;
+			border-width: 100%;
+			height: 125px;
+			padding: 5px 5px 5px 5px;
+		  	border: 1px solid rgba(0, 0, 0,0.2);
+		  	overflow: scroll;
+		  	cursor: pointer;
+		  	
+
+		  	background-color: var(--page-background);
+  			box-shadow: 0 0 12px 6px rgba(0,0,0,0.05);
+			border-radius: .269666667rem;
+		}
+		.boxed .title
+		{	
+			color: var(--text-color);
+			font-size: 22px;
+
+		}
+		.boxed span
+		{	
+			color: var(--text-color);
+			font-size: 17px;
+			white-space: pre-wrap;
+		}
+    	
+        hr
+        {
+            border-color: var(--hr-line);
+        }
+        
+        input
+        {
+			border-radius: .25rem;
+        }
+	</style>
+	<title>DocYOUment</title>
+</head>
+<body>
+
+	<div class = "container">
+		<div class = "topnav">
+			<button id = "openPanel" class = "panelbn"><i class="fas fa-bars" style="font-size: 17px"></i></button>
+			<input type="text" id = "search" style = "font-size: 18px;width: 80%;position: relative;left: 27px;top:2px"placeholder="Search ...">
+			
+		</div>
+
+		<!-- close: #16 -->
+		<div id = "myPanel" class = "panel">
+			<span style="transform: translate(-50%, -50%);position: absolute;left: 50%;top: 5%; font-size: 45px;"><i class	="fas fa-book"></i></span>
+			<p style = "color:#E80D38; text-align: center; font-size:30px">DocYOUment</p>
+			<hr>
+			<a href = "#" id ="closePanel" class = "closePanel" ><i class="fas fa-times-circle"></i></a>
+			<a href = "#" id = "setting"><i class="fas fa-cog"></i>&nbsp;&nbsp;Setting</a>
+			<a href = "#" id = "openMusic"><i class="fas fa-music"></i>&nbsp;&nbsp;Music</a>
+			<a href = "#" id = "photoUpload"><i class="far fa-image"></i>&nbsp;&nbsp;Photo</a>
+			<a href = "#" id = "openCalendar"><i class="fas fa-calendar"></i>&nbsp;&nbsp;Calendar</a>
+			<a href = "#" id = "signOut"><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;Sign Out</a>
+			<!-- 
+				add features here. If the feature you are implementing is gonna open a window,use button(<button> tag). If the feature you are implementing is gonan overwrite html file, use link(<a> tag).
+
+				I implement "sign out" feature as one of the examples.
+			-->
+
+		</div>
+		<button id = "entry" style = "z-index:1;border-radius:50%; background-color:red; color:white; border:none; position:fixed; top:85%; right:70px; font-size:45px;outline: none"><i class="fas fa-marker"></i></button>
+
+	</div>
+	<br>
+	<br>
+	<div id = "diaryEntries">
+	</div>
+	
+	<script type="text/javascript">
+		
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const diaryThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote;
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
+		const {Confirmation} = require("../js/confirmation.js");
+		const {File} = require("../js/file.js");
+		const {getDiaryEntry} = require("../js/diaryEntry.js");
+
+		const user = remote.getGlobal('share').user;  
+       	const path = "./data/" + user + "/entry"; 
+        var diaryEntry;
+        loadThemeMode();
+
+
+        
+       
+
+        /* show the diary entry */
+        function showDiaryEntry()
+        {
+        	$("#diaryEntries").text("");
+        	diaryEntries = getDiaryEntry(path);
+        	var s = "";
+			for(var i = 0; i < diaryEntries.length; i++)
+			{
+
+				let diaryEntry = diaryEntries[i];
+				s += '\
+					<div style="position: relative">\
+						<div class = "date">'
+							+ diaryEntry.year +'<br>'
+							+ diaryEntry.month + '<br>'
+							+ diaryEntry.day + '\
+						</div>\
+					<div class="boxed" name = "' + i + '">\
+						<span class = "title">' + diaryEntry.title + '</span>\
+						<br>\
+  						<span>' + diaryEntry.entry.replace(/  +/g," ") + '</span>\
+  						</div>\
+					</div>\
+					<hr>\
+					'
+			}
+			$("#diaryEntries").append(s);
+        }
+		$(document).ready(function(){
+
+			diaryThread.send("MAIN_DIARY_REGISTER");
+			showDiaryEntry();
+
+			
+			diaryThread.on("reload",function(){
+				showDiaryEntry();
+			})
+			
+			diaryThread.on("updateDiaryEntries",(event)=>{
+				diaryEntries = getDiaryEntry(path);
+			})
+
+			$('body').on('click','.boxed',function(){
+				let index = parseInt($(this).attr("name"));
+				diaryEntries[index].index = index;
+				diaryThread.send("openEntry",index,diaryEntries[index]);
+			})
+
+			$("#openPanel").click(function(){
+				$("#myPanel").css("width","35%");
+				//$("body").css("background-color","#ECEAE4");
+			})
+
+			$("#closePanel").click(function(){
+				$("#myPanel").css("width","0px");
+				//$("body").css("background-color","#eeeeee");
+			})
+
+
+			$("#signOut").click(function(){
+				var confirmation = new Confirmation(
+					"SIGN_OUT",     //type
+					"Sign Out",			  //title
+					"Are you sure you want to sign out?", // text
+					["Cancel","Sign Out"]   //buttonlabels 
+				);
+				diaryThread.send("openConfirmation",confirmation);
+				
+			})
+
+
+
+			/* open window for music, photo, calendar and diaryEntry */
+			$("#openMusic").click(function(){
+				diaryThread.send("openMusic"); 
+			})
+
+			$("#photoUpload").click(function(){
+				diaryThread.send("openPhoto");
+			})
+			
+			$("#openCalendar").click(function(){
+				diaryThread.send("openCalendar"); 
+			})
+			//Textbox//
+            $("#entry").click(function(){
+            	
+                diaryThread.send("openEntry");
+            })
+
+            $("#setting").click(function(){
+            	diaryThread.send("openSetting");
+            })
+
+
+            /* mode swapping */
+            
+            diaryThread.on("changeThemeMode",changeThemeMode);
+
+		})
+	</script>
+
+</body>
+</html>

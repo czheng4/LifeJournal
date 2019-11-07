@@ -1,0 +1,28 @@
+{
+  "name": "2019fall_iron-man",
+  "version": "1.0.0",
+  "description": "cs340 project",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utk-cs/2019fall_iron-man.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/utk-cs/2019fall_iron-man/issues"
+  },
+  "homepage": "https://github.com/utk-cs/2019fall_iron-man#readme",
+  "devDependencies": {
+    "electron": "^6.0.5"
+  },
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "glyphicons": "^0.2.0",
+    "jquery": "^3.4.1",
+    "nodemailer": "^6.3.0"
+  }
+}

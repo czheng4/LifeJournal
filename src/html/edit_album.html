@@ -1,0 +1,194 @@
+<!-- 
+	album.html
+	ChaoHuiZheng
+	10/24/2019
+
+	album page
+
+	We have a default album called "Diary Entry". The use couldn't change the name of it and delete it.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Edit</title>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="../js/file.js"></script>
+	<style type="text/css">
+		body
+		{
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+		hr
+		{
+			background-color:var(--hr-line)
+		}
+		img
+		{
+			position: absolute;
+			right: 10%;
+			width: 50px;
+			height: 50px;
+		}
+	</style>
+</head>
+<body>
+	<div class = "container">
+		<form>
+			<br>
+			<div class = "input-group">
+				<span class="input-group-addon"><button disabled style = "color:black; font-size: 22px;width:70px">name</button></span>
+				<input type="text" id = "name" class="form-control" placeholder="Enter user name">
+			</div>
+		</form>
+
+		<hr>
+		<div style="font-size: 30px">Album Background<a href="choose_album_background.html"><img id = "background" src = "../../image/photo.png"></a></div>
+		<hr>
+	</div>
+	<div id = "buttonList" style="position: fixed;top:80%;left:40%">
+			<button id = "cancel" type="button" class="btn btn-primary">Cancel</button>
+			&nbsp;&nbsp;
+			<button id = "delete" type="button" class="btn btn-danger">Delete Album</button>
+			&nbsp;&nbsp;
+			<button id = "modify" type="button" class="btn btn-success">Modify</button>
+	</div>
+
+
+	<script type="text/javascript">
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const editThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote; 
+		const {Confirmation} = require("../js/confirmation.js");
+		const dirPath = require("path")
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+
+		var user = remote.getGlobal('share').user; 
+		var album = remote.getGlobal('share').album; 
+		var path = "./data/" + user + "/photo/";
+		var oldName,name,dir,files;
+		
+		
+		const f = new File("./data/" + user + "/photo/album_background.txt");
+		const album_background = f.readDict();
+		
+
+		$(document).ready(function(){
+
+			editThread.send("EDIT_ALBUM_REGISTER");
+			/* show the album name and store it(oldName) */
+			document.getElementById("name").value = album;
+			oldName = album;
+
+			/* disable the ability of changing album name and deleting it if it is default album */
+			if(oldName == "Diary Entry") 
+			{
+				$("#name").attr("disabled", true);
+				$("#delete").css("display","none");
+				$("#buttonList").css("left","65%");
+			}
+			
+
+
+			/* set album backgrond if it exists*/
+			if(fs.existsSync(path + album_background[album]) === true)
+			{
+				$("#background").attr("src","../." + path + album_background[album]);
+			}
+
+			/* modify button */
+			$("#modify").click(function(){
+
+				/* grab the changed name */
+				name = document.getElementById("name").value;
+				dir = path + $("#name").val().replace(/\s+$/,"");
+
+				/* compare the newest name with oldName */
+				if(oldName == name)		
+				{
+					editThread.send("closeEditAlbum",name);
+					return;
+				}
+				else if(fs.existsSync(dir) === true) // have the same name of album existing
+				{
+					editThread.send("errorMessage","ERROR","The album exists")
+				}
+				else 
+				{	
+					/* update the album_background.txt file. */
+					if(fs.existsSync(path + album_background[album]) === true)
+					{
+						album_background[name] = name + "/" + album_background[album].split("/")[1]
+						delete album_background[album];
+						f.writeDict(album_background);
+
+					}
+					/* rename it */
+					fs.rename(path + album, path + name, (err)=>{if(err) throw err;});
+					fs.rename(path + "ENCODE" + album, path + "ENCODE" + name, (err)=>{if(err) throw err;});
+					
+					editThread.send("setGlobalVal","album",name);
+					editThread.send("closeEditAlbum",name);
+				}
+
+			})
+
+			/* delete button */
+			$("#delete").click(function(){
+
+				var confirmation = new Confirmation(
+					"ALBUM_DELETION",     //type
+					"Delete",			  //title
+					"Are you sure you want to delete the album? It will delete all photos on the album.", // text
+					["Cancel","Delete"]   //buttonlabels 
+				);
+				editThread.send("openConfirmation",confirmation);
+				
+			})
+
+			/* confirm to delete the entire album */
+			editThread.on(("ALBUM_DELETION"),()=>{
+
+				dir = path + $("#name").val().replace(/\s+$/,"");
+				
+				var basename = dirPath.parse(dir).base;
+				var encodeDir = dirPath.join(dirPath.parse(dir).dir, "ENCODE" + dirPath.parse(dir).base);
+				var isDiaryEntry = false;
+				/* delete the files inside of directory and then, delete directory */
+				files = fs.readdirSync(dir);
+				for(var i = 0; i < files.length; i++) 
+				{
+					if(files[i].indexOf("DIARY_ENTRY") == -1) fs.unlinkSync(dir + "/" + files[i]);	
+					else isDiaryEntry = true;
+					
+				}
+				files = fs.readdirSync(encodeDir);
+				for(var i = 0; i < files.length; i++)
+				{
+					if(files[i].indexOf("DIARY_ENTRY") == -1) fs.unlinkSync(encodeDir + "/" + files[i]);
+				}
+
+				/* delete the directory */
+				if(isDiaryEntry == true) editThread.send("errorMessage","Error","Can't delete the photos attached to diary");
+				else
+				{
+					fs.rmdirSync(dir); 
+					fs.rmdirSync(encodeDir); 
+				}
+				editThread.send("closeEditAlbum","loadAlbumPage",!isDiaryEntry);
+			})
+
+			/* cancel button */
+			$("#cancel").click(function(){
+				editThread.send("closeEditAlbum",null);
+			})
+
+			editThread.on("changeThemeMode",changeThemeMode);
+		})
+	</script>
+</body>
+</html>

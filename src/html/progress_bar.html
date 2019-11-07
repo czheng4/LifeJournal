@@ -1,0 +1,113 @@
+<!-- 
+	progress_bar.html
+	ChaoHuiZheng
+	10/15/2019
+
+	encode the info and delete decoded info when saving 
+	decode the info when loading
+	This html can be divided into two to handle the loading and saving respectively
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<style type="text/css">
+		body
+		{
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+	</style>
+
+	
+</head>
+<body>
+	<div class="container" style="position:fixed; top:40%">
+	 	<h2></h2>
+  		<div class="progress" style="background-color:silver">
+    		<div id = "progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
+    		</div>
+ 		 </div>
+	</div>
+
+
+	<script type="text/javascript">
+	    'use strict'
+
+	    /* sleep the program */
+	    function sleep(milliseconds) 
+	    {
+ 			var start = new Date().getTime();
+  			for (var i = 0; i < 1e7; i++) 
+  			{
+    			if ((new Date().getTime() - start) > milliseconds) break;	
+  			}
+		}
+
+
+		const $ = require("jQuery");
+		const fs = require("fs")
+		const progressThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote;  
+		const {decodeAll,encodeAll} = require("../js/cryptography.js")
+		const {loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+		
+
+		var user = remote.getGlobal('share').user;
+		var status = remote.getGlobal('share').status; 
+		var path = "./data/" + user + "/photo/"; 
+		var files = fs.readdirSync(path);
+		var num_dir = Math.floor(files.length / 2);
+		var finish = 0; // keep track the number of dir we finish decodeing or encoding.
+		var i = 0;	// iterate through the directory
+		
+
+		
+		if(status === "loading") $("h2").text("Loading your info.......");
+		if(status === "saving") $("h2").text("Saving your info.......");
+		
+		if(files.length == 0)
+		{
+			$("#progress").text("100.0%");
+			$("#progress").css("width", "100%");
+		}
+
+		$(document).ready(function()
+		{	
+			var myVar = setInterval(function(){
+        		if(files.length > 1 && files[i].indexOf("ENCODE") != 0 && files[i] != "album_background.txt")
+        		{
+        			
+        			/* load and save */
+        	 		if(status === "loading")decodeAll(path + files[i]);
+        	 		if(status === "saving") encodeAll(path + files[i]);
+        			finish++;
+
+        			/* update the progress */
+        			$("#progress").text((finish / num_dir * 100).toFixed(1) + "%");
+        			$("#progress").css("width", (finish / num_dir * 100).toFixed(1) + "%");	
+				}
+
+				i++;
+				if(i == files.length || files.length == 0) 
+				{
+					sleep(100);
+					clearInterval(myVar);
+					/* open the diary */
+    				if(status === "loading")window.location.href = "diary.html";
+
+    				/* close the diary and open the sign in page */
+    				if(status === "saving") progressThread.send("closeDiary");
+    			}
+			
+    		},1)
+		})
+    
+	</script>
+</body>
+</html>

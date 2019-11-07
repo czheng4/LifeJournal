@@ -1,0 +1,127 @@
+<!-- 
+	choose_album_background.html
+	ChaoHuiZheng
+	10/2/2019
+	
+	choose the background
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Photo</title>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../js/file.js"></script>
+	<style type="text/css">
+		body
+		{
+			background-color: var(--background-color);
+    		color: var(--text-color);
+			padding-bottom: 100px;
+		}
+		.photo
+		{
+  	  		display: grid;
+  			grid-template-columns: auto auto auto;
+  			grid-gap: 14px;
+  			margin-left: 14px;
+  			margin-right: 14px;
+  			align-items: stretch;
+  			overflow: hidden;
+
+
+		}
+		.photo img
+		{
+
+			border: 1px solid var(--text-color);
+	
+  			width: 180px;
+  			height: 160px;
+		}
+		
+
+	</style>
+</head>
+<body>
+	<a name = "goBack" href="edit_album.html" style="position:fixed; font-size: 23px; left: 50px; top:25px"><i class="fas fa-undo"></i></a>
+	<h2 style = "text-align: center; margin-top: 5px"></h2>
+	<p id = "quantity" style="text-align: center"></p>
+	
+	<section id = "photos" class = "photo">
+	</section>
+
+
+	<script type="text/javascript">
+
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const albumBackgroundThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote; 
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+
+		var user = remote.getGlobal('share').user; 
+		var album = remote.getGlobal('share').album; 
+		var images = "";
+		var path = "../../data/" + user + "/photo/" + album + "/";
+
+		/* 
+		   album_background.txt is what we store album background info.
+		   the format of it is "album_name:chosen_file\n" each line
+		*/
+		const f = new File("./data/" + user + "/photo/album_background.txt"); 
+		const album_background = f.readDict();
+
+
+
+		/* show images. */
+		function showImage()
+		{
+
+			/* show album name */
+			$("h2").text(album);
+			images = "";
+			
+			/* traverse the directory */
+			fs.readdir("./data/" + user + "/photo/" + album + "/",(err,files) =>{
+				if(err) throw err;
+
+
+				/* show the numner of images at the album */
+				$("#quantity").text(files.length + " photos");
+				
+				
+				for(var i = 0; i < files.length; i++) 
+				{
+					/* <a href = "edit_album.html" id = "NUMBER" name="IMAGE_NAME"> <img src = "IMGAE_PATH" ></a> */
+					images += "<a href = \"edit_album.html\" id = \"" + i + "\" name=\"" + files[i] + "\"> <img src = \"" + path + files[i] + "\" ></a>\n";
+				}
+				$("#photos").append(images);
+			
+			/* register the click event to get the background image name */
+			$("a").click(function(){
+					let name = $(this).attr("name");
+					if(name !== "goBack")
+					{
+						/* update background.txt according to the name attribute of tag 'a' */ 
+						let text = album + ":" + album + "/" + $(this).attr("name") + "\n";
+						f.append(text);
+					}
+				})
+			})
+
+		}	
+		$(document).ready(function(){
+			albumBackgroundThread.send("ALBUM_BACKGROUND_REGISTER");
+			showImage();
+			albumBackgroundThread.on("changeThemeMode",changeThemeMode);
+
+		})
+
+
+	</script>
+</body>
+</html>

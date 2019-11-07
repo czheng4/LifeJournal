@@ -1,0 +1,200 @@
+<!-- 
+	album.html
+	ChaoHuiZheng
+	10/04/2019
+
+	album page
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Album</title>
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	
+	<link href="../../fontawesome/css/all.css" rel="stylesheet">
+	<script src="../js/file.js"></script>
+	<style type="text/css">
+		body
+		{
+			padding-bottom: 100px;
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+		.relative
+		{
+			position: relative;
+		}
+		.album
+		{
+  	  		display: grid;
+  			grid-template-columns: auto auto;
+  			grid-row-gap: 30px;
+  			margin-left: 30px;
+  			align-items: stretch;
+  			overflow: auto;
+		}
+		img
+		{
+  			width: 342px;
+  			height: 342px;
+		}
+		.text
+		{
+			font-size: 25px;
+		}
+
+		button
+		{
+			position: absolute;
+			border: none;	
+		}
+	</style>
+
+</head>
+<body>
+	<h2 style="text-align: center"></h2>
+	<div id = "albums" class = "album">
+
+		<div class = "relative">
+			<a href = "#" id = "create"><img src ="../../image/createAlbum.png"></a>	
+		</div>
+	</div>
+<script type="text/javascript">
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const albumThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote;  
+		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		loadThemeMode();
+		
+		/*
+			usr is user nmae
+			album is album name
+			numAlbums is the number of albums
+			width is the width of album
+		*/
+		var user = remote.getGlobal('share').user; 
+		var album = "";
+		var numAlbums = 0;
+		var path = "./data/" + user + "/photo/"; // relative to main.js
+		var width;
+		/* File class to encrypt the album_background.txt 
+		   album_background.txt stores at user's photo directory
+		*/
+		const f = new File("./data/" + user + "/photo/album_background.txt");
+		const album_background = f.readDict();
+		
+
+		var id;
+		var img;
+
+		/* show the albums */
+		function showAlbum()
+		{
+			
+			var dirent = fs.readdirSync("./data/" + user + "/photo",{withFileTypes: true});
+				
+				numAlbums = 0;
+				var dirs = []
+				/* get directories */
+				for(var i = 0; i < dirent.length; i++)
+				{
+					if(dirent[i].isDirectory())
+					{ 
+						if(dirent[i].name.indexOf("ENCODE") != 0)dirs.push(dirent[i].name);
+					}
+				}
+				/* sort the directories by the birthtime*/
+				dirs = dirs.sort(function(t1, t2) { return fs.statSync(path + t1).birthtime - fs.statSync(path + t2).birthtime; })
+				for(var i = 0; i < dirs.length; i++)
+				{
+					/* check if we have chosen album background */
+					if(fs.existsSync(path + album_background[dirs[i]])) 
+						img = "../." + path + album_background[dirs[i]];
+						
+					else img = "../../image/photo.png"; // default background
+						
+					/* 
+						<div class = "relative" id = NUMBER> <a href = "photo.html" name = "ALBUM_NAME"> <img src = "PATH"></a> <div class = "text">ALBUM_NAME</div> </div>
+					*/
+					album += "<div class = \"relative\" id = \"" + numAlbums + "\"> <a href = \"photo.html\" name = \"" + dirs[i] + "\"> <img src = \"" + img + "\"></a> <div class = \"text\">"+ dirs[i] + "</div> </div>";
+					numAlbums++;	
+				}
+           		
+				/* show the number of albums */
+				$("h2").text(numAlbums + " Albums");
+		
+				$("#albums").append(album);
+				resizeImg();
+
+				/* register the event for albums */
+				$("[href='photo.html']").click(getAlbumName);
+		
+			
+		}
+
+		/* get AlbumName by ID */
+		function getAlbumName()
+		{
+			let albumName = $(this).attr("name");
+			albumThread.send("setGlobalVal","album",albumName);
+		}
+
+		/* resize the image */
+		function resizeImg()
+		{
+			// 90px is the sum of left and right margin and the gap between images
+			let size = (width - 90) / 2;
+			if(size > 0	)
+		 	{
+		 		$("img").css("width",size);
+		 		$("img").css("height",size);
+		 	}
+		}
+
+		$(document).ready(function(){
+
+			/* make a connection to main.js */
+			albumThread.send("MAIN_ALBUM_REGISTER");
+
+
+			showAlbum();
+
+			/* resize it when loading the page */
+			albumThread.send("requireResizeImg");
+			resizeImg();
+			/* resize the image when the size of window change  */
+			albumThread.on("resizeImg",function(event,data){
+				width = data;
+				resizeImg();
+			});
+
+
+			
+			/* is about to create a new album */
+			$("#create").click(function(){
+				albumThread.send("openCreateAlbum");	
+			})
+
+			/* add a new album */
+			albumThread.on("addAlbum",function(event,dirname){
+				
+				numAlbums++;
+				album = "<div class = \"relative\" id = \"" + numAlbums + "\"> <a href = \"photo.html\" name = \"" + dirname + "\"> <img src = \"../../image/photo.png\"></a> <div class = \"text\">"+ dirname + "</div> </div>";
+				$("h2").text(numAlbums + " Albums");
+				$("#albums").append(album);
+
+				/* register the event for the added album */
+				$("[href='photo.html']").click(getAlbumName);
+				resizeImg();
+			})
+
+			albumThread.on("changeThemeMode",changeThemeMode);
+
+		})
+		</script>
+</body>
+</html>
