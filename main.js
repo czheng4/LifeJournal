@@ -49,6 +49,11 @@ var confirmation;
     So we can communicate between two children windows.
 */
 
+/*
+    photo.html and album.html shares same window.(MAIN_PHOTO <=> MAIN_ALBUM)
+    DIARY_PHOTO <=> TEXTBOX
+
+*/
 const eventList = {
     "TASK_CONFIRM":null,        // whatever processes open the confirmation page
     "MAIN_ALBUM":null,          // album.html
@@ -63,14 +68,14 @@ const eventList = {
     "PHOTO_TRANSFER":null,      // photo_transfer.html
     "CREATE_ALBUM":null,        // create_album.html
     "ALBUM_BACKGROUND":null,    // choose_album_background.html
-    "TEXTBOX":{}                // text_box.html
+    "TEXTBOX":{},               // text_box.html
 };
 
-mainThread.on("MAIN_ALBUM_REGISTER",function(event){
+mainThread.on("MAIN_ALBUM_REGISTER",(event)=>{
     eventList["MAIN_ALBUM"] = event;
 })
 
-mainThread.on("SINGLE_PHOTO_REGISTER",function(event){
+mainThread.on("SINGLE_PHOTO_REGISTER",(event)=>{
     eventList["SINGLE_PHOTO"] = event;
 })
 
@@ -140,18 +145,17 @@ mainThread.on("closeSetting", function(event){
     settingWindow = null;
 })
 
-mainThread.on("changeThemeMode",function(event,mode){
-    eventList["MAIN_DIARY"].sender.send("changeThemeMode",mode);
-    if(eventList["MAIN_ALBUM"] != null)         eventList["MAIN_ALBUM"].sender.send("changeThemeMode",mode);
-    if(eventList["MAIN_PHOTO"] != null)         eventList["MAIN_PHOTO"].sender.send("changeThemeMode",mode);
-    if(eventList["CONFIRMATION_PAGE"] != null)  eventList["CONFIRMATION_PAGE"].sender.send("changeThemeMode",mode);
-    if(eventList["SINGLE_PHOTO"] != null)       eventList["SINGLE_PHOTO"].sender.send("changeThemeMode",mode);
-    if(eventList["EDIT_ALBUM"] != null)         eventList["EDIT_ALBUM"].sender.send("changeThemeMode",mode);
-    if(eventList["PHOTO_TRANSFER"] != null)     eventList["PHOTO_TRANSFER"].sender.send("changeThemeMode",mode);
-    if(eventList["CREATE_ALBUM"] != null)       eventList["CREATE_ALBUM"].sender.send("changeThemeMode",mode);
-    if(eventList["ALBUM_BACKGROUND"] != null)   eventList["ALBUM_BACKGROUND"].sender.send("changeThemeMode",mode);
-    
-    for(var key in eventList["TEXTBOX"]) eventList["TEXTBOX"][key].sender.send("changeThemeMode",mode);
+mainThread.on("changeThemeMode",function(event,oldMode,newMode){
+    eventList["MAIN_DIARY"].sender.send("changeThemeMode",oldMode,newMode);
+    if(eventList["MAIN_ALBUM"] != null)         eventList["MAIN_ALBUM"].sender.send("changeThemeMode",oldMode, newMode);
+    //if(eventList["MAIN_PHOTO"] != null)       eventList["MAIN_PHOTO"].sender.send("changeThemeMode",mode);
+    if(eventList["CONFIRMATION_PAGE"] != null)  eventList["CONFIRMATION_PAGE"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["SINGLE_PHOTO"] != null)       eventList["SINGLE_PHOTO"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["EDIT_ALBUM"] != null)         eventList["EDIT_ALBUM"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["PHOTO_TRANSFER"] != null)     eventList["PHOTO_TRANSFER"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["CREATE_ALBUM"] != null)       eventList["CREATE_ALBUM"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["ALBUM_BACKGROUND"] != null)   eventList["ALBUM_BACKGROUND"].sender.send("changeThemeMode",oldMode, newMode);
+    for(var key in eventList["TEXTBOX"]) eventList["TEXTBOX"][key].sender.send("changeThemeMode",oldMode, newMode);
     
 })
 
@@ -541,7 +545,7 @@ mainThread.on("openEntry", function(event,index = null, data = null){
 
     global.share.entryData = data;
     if(index == null) index = 0xffffff; // reserved for wirting a new diary 
-    if(entryWindows[index] != null && entryWindows[index] != undefined)
+    if(index in entryWindows)
     {
         entryWindows[index].focus();
         return;

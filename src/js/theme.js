@@ -6,19 +6,12 @@
 */
 
 /* when we swap mode in the setting page, we swap mode througout all windows */
-function changeThemeMode(event,mode)
+function changeThemeMode(event,oldMode, newMode)
 {   
     const $ = require("jQuery");
-	if(mode == "dark")
-	{
-		$('link[rel=stylesheet][href~="light.css"]').remove();
-		$("head").append('<link rel="stylesheet" type="text/css" href="../css/dark.css">');
-	}
-	else
-	{
-		$('link[rel=stylesheet][href~="dark.css"]').remove();
-		$("head").append('<link rel="stylesheet" type="text/css" href="../css/light.css">');
-	}
+
+    $('link[rel=stylesheet][href~="' + oldMode + '.css"]').remove();
+    $("head").append('<link rel="stylesheet" type="text/css" href="../css/' + newMode + '.css">');
 }
 
 /* load theme mode when we first load html */
@@ -27,13 +20,12 @@ function loadThemeMode()
     const remote = require('electron').remote;
     const {File} = require("../js/file.js")
     const user = remote.getGlobal('share').user; 
-    let setting = new File("./data/" + user + "/setting.txt");
-    let dict = setting.readDict();
+    const setting = new File("./data/" + user + "/setting.txt");
+    const dict = setting.readDict();
+    const mode = dict["mode"];
+    $("head").append('<link rel="stylesheet" type="text/css" href="../css/' + mode + '.css">');
     
-    if(dict["mode"] == "light") $("head").append('<link rel="stylesheet" type="text/css" href="../css/light.css">');
-    else $("head").append('<link rel="stylesheet" type="text/css" href="../css/dark.css">');
-
-    return dict["mode"];
+    return mode;
 }
 
 
