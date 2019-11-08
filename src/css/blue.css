@@ -1,0 +1,15 @@
+/*
+	blue theme
+	ChaoHui Zheng
+	11/06/2019 
+*/
+:root 
+{
+	--background-color: #a6d4fa;
+	--page-background: #79bff8;
+	--text-color: black;
+	--panel-color: #79bff8;
+	--hr-line:rgb(10,10,10,0.5);
+	--nav-color: #4daaf6;
+	--hover-color:white;
+}
