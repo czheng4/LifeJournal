@@ -1,16 +1,15 @@
 /* 
 	light theme
 	ChaoHui Zheng
-	10/03/2019 
+	11/03/2019 
 */
-
 :root 
 {
 	--background-color: #ededed;
 	--page-background: #fff;
 	--text-color: #212121;
 	--panel-color: silver;
-	--color-alpha: #50a8d8;
 	--hr-line:rgb(10,10,10,0.3);
 	--nav-color:silver;
+	--hover-color:#2196F3;
 }
