@@ -29,9 +29,9 @@ class File
 	/* split the string by the sperator and return an array of substrings */
 	readBySeparator(sperator)
 	{
-		if(fs.existsSync(this.filename)) 
+		if(this.fs.existsSync(this.filename)) 
 		{
-			var content = fs.readFileSync(this.filename,'utf-8');
+			var content = this.fs.readFileSync(this.filename,'utf-8');
 			content = this.cryptography.decodeString(content)
 			content = content.split(sperator);
 			return content;
@@ -45,7 +45,7 @@ class File
 		
 		var dic = {};
 
-		if(fs.existsSync(this.filename)) var content = fs.readFileSync(this.filename,'utf-8');
+		if(this.fs.existsSync(this.filename)) var content = this.fs.readFileSync(this.filename,'utf-8');
 		else return dic;
 
 
@@ -68,16 +68,16 @@ class File
 		let content = "";
 		for(var key in dict) content += key + ":" + dict[key] + "\n";
 		content = this.cryptography.encodeString(content);
-		fs.writeFileSync(this.filename,content,function(err){
+		this.fs.writeFileSync(this.filename,content,function(err){
 			if(err) throw err;
 		});
 	}
 	// read and decode the file 
 	read()
 	{
-		if(fs.existsSync(this.filename)) 
+		if(this.fs.existsSync(this.filename)) 
 		{
-			var content = fs.readFileSync(this.filename,'utf-8');
+			var content = this.fs.readFileSync(this.filename,'utf-8');
 			return this.cryptography.decodeString(content);
 		}
 		else return "";
@@ -87,7 +87,7 @@ class File
 	write(content)
 	{
 		content = this.cryptography.encodeString(content);
-		fs.writeFileSync(this.filename,content,function(err){
+		this.fs.writeFileSync(this.filename,content,function(err){
 			if(err) throw err;
 		});
 	}
@@ -98,7 +98,7 @@ class File
 
 		content = this.read() + content;
 		content = this.cryptography.encodeString(content);
-		fs.writeFileSync(this.filename,content,function(err){
+		this.fs.writeFileSync(this.filename,content,function(err){
 			if(err) throw err;
 		});
 	}

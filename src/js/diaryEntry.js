@@ -65,8 +65,8 @@ class diaryEntry
 /* return sorted array of diaryEntries */
 function getDiaryEntry(dir)
 {
-	files = fs.readdirSync(dir);
 	var diaryEntries = [];
+	files = fs.readdirSync(dir);
 
 	for(var i = 0; i < files.length; i++)
 	{
@@ -75,6 +75,22 @@ function getDiaryEntry(dir)
 	diaryEntries = diaryEntries.sort(function(d1,d2){return (d1.date > d2.date)? 1:-1;});
 
 	return diaryEntries;
+}
+
+/* return a dict where key is date(yyyy-mm-dd) and val is diaryEntry object array */
+function getDiaryEntryDict(dir)
+{
+	var diaryEntries = getDiaryEntry(dir);
+	var dict = {};
+	var entry;
+	for(var i = 0; i < diaryEntries.length; i++)
+	{
+		entry = diaryEntries[i];
+		entry.index = i;
+		if(entry.date in dict) dict[entry.date].push(entry);
+		else dict[entry.date] = [entry];
+	}
+	return dict;
 }
 
 function storeDiaryEntryTofFile(filename,diaryEntry){
@@ -107,7 +123,8 @@ module.exports = {
 	diaryEntry:diaryEntry,
 	getDiaryEntry:getDiaryEntry,
 	months:months,
-	storeDiaryEntryTofFile:storeDiaryEntryTofFile
+	storeDiaryEntryTofFile:storeDiaryEntryTofFile,
+	getDiaryEntryDict:getDiaryEntryDict
 }
 
 

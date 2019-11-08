@@ -37,12 +37,36 @@
         {
             color:blue;
         }
-        .test:hover
+
+        .diaryAndReminder
+        {
+            cursor: pointer; 
+            height: 175px; 
+            overflow: scroll;
+        }
+
+        .diary
+        {
+            position:relative; 
+            left: 10%; 
+            color: red;
+        }
+        .diaryDot
+        {
+            color:red;
+            font-size: 30px;
+            margin-left: 10px;
+        }
+        .diaryTitle
+        {
+            position: relative;
+            left: 10px;
+            bottom: 3.5px;
+        }
+        .diaryAndReminder div:hover
         {
             background-color: silver;
         }
-        
-
     </style>
 </head>
 <body>
@@ -128,11 +152,7 @@
             <tr>
                 <th colspan="7">
                     
-                <div class = "test" style="position: relative; cursor: pointer;">
-                    <span style="font-size:50px;color:blue; margin-left: 10px;">&#8226;</span>
-                    <span style="position:absolute; left:45px;bottom: 40px;">03:40 PM</span>
-                    <span style="position:absolute; left:45px;bottom: 4px;">04:40 PM</span>
-                    <span style="position:absolute; bottom: 22px; left: 160px">time</span>
+                <div id = "diaryAndReminder" class = "diaryAndReminder">
                 </div>                  
                 </th>
             </tr>

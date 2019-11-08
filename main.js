@@ -68,7 +68,8 @@ const eventList = {
     "PHOTO_TRANSFER":null,      // photo_transfer.html
     "CREATE_ALBUM":null,        // create_album.html
     "ALBUM_BACKGROUND":null,    // choose_album_background.html
-    "TEXTBOX":{},               // text_box.html
+    "CALENDAR":null,            // calendar.js
+    "TEXTBOX":{}                // text_box.html
 };
 
 mainThread.on("MAIN_ALBUM_REGISTER",(event)=>{
@@ -105,6 +106,11 @@ mainThread.on("CREATE_ALBUM_REGISTER",(event)=>{
 
 mainThread.on("ALBUM_BACKGROUND_REGISTER",(event)=>{
     eventList["ALBUM_BACKGROUND"] = event;
+})
+
+mainThread.on("CALENDAR_REGISTER",(event)=>{
+    console.log("ccc");
+    eventList["CALENDAR"] = event;
 })
 
 mainThread.on("TEXTBOX_REGISTER",(event,index)=>{
@@ -315,15 +321,19 @@ mainThread.on("openCalendar", function(event){
         webPreferences: { nodeIntegration: true }
     });
     calendarWindow.webContents.openDevTools();
-    calendarWindow.on('closed',() => { calendarWindow = null;});
+    calendarWindow.on('closed',() => { eventList["CALENDAR"] = null;calendarWindow = null;});
     calendarWindow.loadFile("./src/html/calendar.html");
 })
 
 mainThread.on("closeCalendar", function(event){
     calendarWindow.close();
     calendarWindow = null;
+    eventList["CALENDAR"] = null;
 })
 
+mainThread.on("refreshCalendar",function(event){
+    if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("refreshCalendar");
+})
 // deletion confirm window
 mainThread.on("openConfirmation",function(event,data){
     
