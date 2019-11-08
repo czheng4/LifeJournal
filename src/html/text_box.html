@@ -452,6 +452,7 @@ img
 
                     entryThread.send("refreshPhotos");
                     entryThread.send("refreshSinglePhoto");
+                    entryThread.send("refreshCalendar");
                     entryThread.send("closeEntry",entryData.index);
 
                 }
@@ -572,8 +573,12 @@ img
                         }
                     }
                 }
+
+                entryThread.send("refreshCalendar");
                 if(entryData == null) entryThread.send("closeEntry");
                 else entryThread.send("closeEntry",entryData.index);
+
+
    			})
             entryThread.on("changeThemeMode",changeThemeMode);
    		})
