@@ -158,6 +158,11 @@ img
 
             outline:none;
         }
+        textarea::selection
+        {
+            color: var(--selection-color);
+            background-color: var(--selection-background-color);
+        }
     </style>
 </head>
 <body>
@@ -220,7 +225,6 @@ img
         var slides;
         var dots;
         var slideIndex = -1;
-
 
         /* hide or display the images */
         function hideOrDisplay()
