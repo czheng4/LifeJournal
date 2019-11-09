@@ -56,13 +56,14 @@ class diaryEntry
 		this.year = ymd[0];
 		this.month = months[ymd[1]];
 		this.day = ymd[2];
+		this.isdeleted = false;
 	}
 
 }
 
 
 /* add one diary entry to sorted diaryEntries array 
-   return the index of where we add it.
+   return the position of where we add it.
 */
 function addDiaryEntry(diaryEntries, filePath)
 {
@@ -76,9 +77,14 @@ function addDiaryEntry(diaryEntries, filePath)
 	/* binary search */
 	while(start <= end)
 	{
+		console.log(start + " " + end);
 		middle = Math.floor((start + end) / 2);
 		tempDate = diaryEntries[middle].date;
-		if(tempDate == myDate) index = middle;
+		if(tempDate == myDate) 
+		{
+			index = middle;
+			break;
+		}
 		else if(tempDate < myDate) start = middle + 1;
 		else end = middle - 1;
 	}

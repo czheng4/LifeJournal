@@ -114,6 +114,7 @@
 		const user = remote.getGlobal('share').user; 
 		var albumOptions;
 		var isSelect = false;
+		var entryFilePaths = {};
 
 
 
@@ -124,11 +125,21 @@
 			   the photos stores in the format of NUM-DIARY_FILENAME.........
 			*/
 			var filename = from.split('-')[1];
-			var entryData = new diaryEntry("./data/" + user + "/entry/" + filename);
-			var index = entryData.photo.indexOf(dirFrom + from);
+			var filePath = "./data/" + user + "/entry/" + filename;
+			var entryData;
+			var index;
+			if(filePath in entryFilePaths) entryData = entryFilePaths[filePath];
+			else
+			{
+				 entryData = new diaryEntry(filePath);
+				 entryFilePaths[filePath] = entryData;
+			}
+			index = entryData.photo.indexOf(dirFrom + from);
 
+			
 			entryData.photo[index] = to;
-			storeDiaryEntryTofFile("./data/" + user + "/entry/" + filename, entryData);
+			storeDiaryEntryTofFile(filePath, entryData);
+
 		}
 		$(document).ready(function(){
 			transferPhotoThread.send("PHOTO_TRANSFER_REGISTER")
@@ -204,7 +215,6 @@
 			transferPhotoThread.on("PHOTO_TRANSFER",(event)=>{
 				
 				var moveFrom = remote.getGlobal('share').moveFrom;
-				console.log(moveFrom);
 				var name;
 				var toName;	
 				var from = "./data/" + user + "/photo/" + album + "/"; 
@@ -227,7 +237,7 @@
 					mvFileKeepTimeStamp(from + moveFrom[i], toName);
 					num++;
 				}
-				transferPhotoThread.send("PHOTO_TRANSFER_DONE");
+				transferPhotoThread.send("PHOTO_TRANSFER_DONE",entryFilePaths);
 				transferPhotoThread.send("closeTransferPhoto");
 			
 			})

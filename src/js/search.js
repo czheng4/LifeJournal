@@ -50,6 +50,11 @@ class Search
 	{
 		return this.isFind;
 	}
+	color(color)
+	{
+		this.starting_tag = '<span style = "background-color:' + color + '">';
+		this.ending_tag = '</span>';
+	}
 }
 
 module.exports = {

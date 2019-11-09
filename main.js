@@ -504,9 +504,9 @@ mainThread.on("closeTransferPhoto",function(event){
 /* reshow the photos at the single_photo.html or photo.html 
    update the diaryEntries in diary.html
 */
-mainThread.on("PHOTO_TRANSFER_DONE",(event)=>{
-    eventList["MAIN_DIARY"].sender.send("updateDiaryEntries");
-    eventList["PHOTO_TRANSFER_FROM"].sender.send("PHOTO_TRANSFER_DONE",confirmation.data);
+mainThread.on("PHOTO_TRANSFER_DONE",(event,filePaths)=>{
+    eventList["MAIN_DIARY"].sender.send("updateDiaryEntries",filePaths);
+    eventList["PHOTO_TRANSFER_FROM"].sender.send("PHOTO_TRANSFER_DONE");
 })
 
 mainThread.on("openSinglePhoto",function(event,data){
@@ -550,11 +550,13 @@ mainThread.on("refreshPhotos",(event)=>{
 })
 
 // Open Textbox for Entry Input
-mainThread.on("openEntry", function(event,index = null, data = null){
+mainThread.on("openEntry", function(event,index, data = null){
     
+    /* index = 0xffffff is reserved for wirting a new diary */
+
 
     global.share.entryData = data;
-    if(index == null) index = 0xffffff; // reserved for wirting a new diary 
+   
     if(index in entryWindows)
     {
         entryWindows[index].focus();
@@ -582,10 +584,9 @@ mainThread.on("openEntry", function(event,index = null, data = null){
 
 
 
-mainThread.on("closeEntry",function(event,index = null){
-    eventList["MAIN_DIARY"].sender.send("reload");
-    if(index == null) index = 0xffffff;
-
+mainThread.on("closeEntry",function(event, type, index, filePath = null){
+    
+    eventList["MAIN_DIARY"].sender.send("reload",type, index, filePath);
     entryWindows[index].destroy();
     delete entryWindow[index];
     delete eventList["TEXTBOX"][index];

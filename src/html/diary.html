@@ -177,6 +177,7 @@
 	
 	<script type="text/javascript">
 		
+
 		const $ = require("jQuery");
 		const fs = require("fs");
 		const diaryThread = require('electron').ipcRenderer;
@@ -186,10 +187,19 @@
 		const {File} = require("../js/file.js");
 		const {getDiaryEntry,diaryEntry,addDiaryEntry} = require("../js/diaryEntry.js");
 		const {Search} = require("../js/search.js");
-		const search = new Search("#FFFF00");
+		const mode = loadThemeMode();
+		var search = (mode == "dark")? new Search("red") : new Search("#FFFF00");
 		const user = remote.getGlobal('share').user;  
        	const path = "./data/" + user + "/entry"; 
        
+
+       	/*
+			searchValue is the value read from search bar.
+			isOnSearchProcess is true when it's searching searchValue
+			searchInterval is the number of entries contains searchValue we wanna find each time we scroll or load the page.
+			showInterval is the number of entries we wanna show each time we scroll or load the page.
+			numFind is the number of entries contains searchValue we find so far.
+       	*/
         var isOnSearchProcess = false;
         var searchValue = "";
 
@@ -201,13 +211,13 @@
         var endingSearchIndex = searchInterval;
         var endingShowIndex = showInterval;
         var numFind = 0;
-        loadThemeMode();
+        
 
 
         /* search the entry contains searchValue form diaryEntries[start] to diaryEntries[end-1] */
         function searchDiaryEntry(searchValue,start,end)
         {
-
+        	console.log("search");
         	if(start == 0) $("#diaryEntries").text("");
         	var s = "";
         	var title;
@@ -221,6 +231,10 @@
 			for(var i = start; i < end; i++)
 			{
 				myDiaryEntry = diaryEntries[i];
+
+				/* we may have deleted entry */
+				if(myDiaryEntry.isdeleted == true) continue;
+				
 				title = myDiaryEntry.title;
 				entry = myDiaryEntry.entry.replace(/  +/g," ");
 				
@@ -236,19 +250,19 @@
 				
 				numFind++;
 				s += '\
-					<div style="position: relative">\
+					<div id = "'+ i + '" style="position: relative">\
 						<div class = "date">'
 							+ myDiaryEntry.year +'<br>'
 							+ myDiaryEntry.month + '<br>'
 							+ myDiaryEntry.day + '\
 						</div>\
-					<div class="boxed" name = "' + i + '">\
-						<span class = "title">' + title + '</span>\
-						<br>\
-  						<span>' + entry + '</span>\
+						<div class="boxed" name = "' + i + '">\
+							<span class = "title">' + title + '</span>\
+							<br>\
+  							<span>' + entry + '</span>\
   						</div>\
+  						<hr>\
 					</div>\
-					<hr>\
 					'
 			}
 			
@@ -266,7 +280,7 @@
         /* show the diary entry from diaryEntries[start] to diaryEntries[end-1] */
         function showDiaryEntry(start, end)
         {
-
+        	console.log("show");
         	if(start == 0) $("#diaryEntries").text("");
         	var s = "";
         	var title;
@@ -276,7 +290,11 @@
        		if(end > diaryEntries.length) end = diaryEntries.length;
 			for(var i = start; i < end; i++)
 			{
+
 				myDiaryEntry = diaryEntries[i];
+				/* we may have deleted entry */
+				if(myDiaryEntry.isdeleted == true) continue;
+				
 				title = myDiaryEntry.title;
 				entry = myDiaryEntry.entry.replace(/  +/g," ");
 				
@@ -339,21 +357,31 @@
 				if(type == "DELETE")
 				{
 					$("#" + index).css("display","none");
-					diaryEntries[index] = null;
+					diaryEntries[index].isdeleted = true;
 				}
 				if(type == "ADD")
 				{	
 					index = addDiaryEntry(diaryEntries,filePath);
 					startingShowIndex = 0;
+					console.log("index: " + index);
 					endingShowIndex = index + 10;
 					showDiaryEntry(startingShowIndex, endingShowIndex);
 				}
 				
 			})
 			
-			diaryThread.on("updateDiaryEntries",(event)=>{
-				console.log("uodate");
-				diaryEntries = getDiaryEntry(path);
+			diaryThread.on("updateDiaryEntries",(event,entryFilePaths)=>{
+				/* may be faster if I turn diaryPaths into dictionary */
+				let diaryPaths = diaryEntries.map(function(d){ 
+					if(d.isdeleted == false) return d.filePath;
+					else return "NULL";
+				})
+				let index;
+				for(var key in entryFilePaths)
+				{
+					index = diaryPaths.indexOf(key);
+					diaryEntries[index] = entryFilePaths[key];
+				}
 			})
 
 			$('body').on('click','.boxed',function(){
@@ -419,7 +447,7 @@
             	3. Whenever I scroll the the window, I keep finding the entries contains searchValue or showing the entries.
             */
             $("#search").keyup(function(){
-            	
+            
             	startingSearchIndex = 0;
             	endingSearchIndex = searchInterval;
             	searchValue = $(this).val();
@@ -447,7 +475,12 @@
             })
 
             /* mode swapping */
-            diaryThread.on("changeThemeMode",changeThemeMode);
+            diaryThread.on("changeThemeMode",function(event,oldMode, newMode){
+            	if(newMode == "dark") search.color("red");
+            	else search.color("#FFFF00");
+            	$('link[rel=stylesheet][href~="' + oldMode + '.css"]').remove();
+    			$("head").append('<link rel="stylesheet" type="text/css" href="../css/' + newMode + '.css">');
+            });
 
 		})
 	</script>
