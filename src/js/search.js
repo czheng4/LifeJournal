@@ -25,18 +25,31 @@ class Search
 		3. return a string with starting_tag and ending_tag around the searchValue in the string "string", 
 		or -1 if it never find the searchValue
 	*/
-	search(string, searchValue)
+	search(string, searchValue, case_sensitive = true)
 	{
 		var rv = "";
 		var start = 0;
 		var pos;
 		var searchValueSize = searchValue.length;
+		var myString;
+		var mySearchValue;
+		if(case_sensitive == false)
+		{
+			myString = string.toLowerCase();
+			mySearchValue = searchValue.toLowerCase();
+		}
+		else
+		{
+			myString = string;
+			mySearchValue = searchValue;
+		}
+
 		this.isFind = false;
-		while((pos = string.indexOf(searchValue,start)) != -1)
+		while((pos = myString.indexOf(mySearchValue,start)) != -1)
 		{
 			this.isFind = true;
 			rv += string.substr(start, pos - start);
-			rv += this.starting_tag + searchValue + this.ending_tag;
+			rv += this.starting_tag + string.substr(pos,searchValueSize) + this.ending_tag;
 			start = pos + searchValueSize;
 
 		}

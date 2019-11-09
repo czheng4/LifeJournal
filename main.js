@@ -164,6 +164,9 @@ mainThread.on("changeThemeMode",function(event,oldMode,newMode){
     for(var key in eventList["TEXTBOX"]) eventList["TEXTBOX"][key].sender.send("changeThemeMode",oldMode, newMode);
     
 })
+mainThread.on("changeCaseSensitive",function(event,newCaseSensitive){
+    eventList["MAIN_DIARY"].sender.send("changeCaseSensitive",newCaseSensitive);
+})
 
 
 

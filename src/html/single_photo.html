@@ -197,8 +197,9 @@
 			console.log(image);
 			$("#showImg").append("<img src = \"" + image + "\">");
 
+			console.log(images);
 			/* hide diary button and text if it is not a photo attached to a diary */
-			if(images[indexOfImage].indexOf("DIARY_ENTRY") == -1)
+			if(images[indexOfImage % images.length].indexOf("DIARY_ENTRY") == -1)
 			{	
 				$("#diary1").css("display","none");
 				$("#diary2").css("display","none");

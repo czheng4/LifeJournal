@@ -9,7 +9,7 @@
 function changeThemeMode(event,oldMode, newMode)
 {   
     const $ = require("jQuery");
-
+    
     $('link[rel=stylesheet][href~="' + oldMode + '.css"]').remove();
     $("head").append('<link rel="stylesheet" type="text/css" href="../css/' + newMode + '.css">');
 }

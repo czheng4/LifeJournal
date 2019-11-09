@@ -42,6 +42,7 @@ class diaryEntry
 			return;
 		}
 		let f = new File(filePath);
+		console.log(f.read());
 		let arr = f.readBySeparator("TITLE_ENTRY_DATE_PHOTO:");
 		let ymd = arr[2].split("-"); // year month day
 		
