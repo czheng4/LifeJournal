@@ -1,9 +1,8 @@
 <!-- 
 	diary.html
 	ChaoHuiZheng
-	09/12/2019
+	11/07/2019
 	
-	diary page. Modify it as you see fit.
 -->
 
 <!DOCTYPE html>
@@ -128,6 +127,7 @@
 			font-size: 17px;
 			white-space: pre-wrap;
 		}
+		
     	
         hr
         {
@@ -137,6 +137,10 @@
         input
         {
 			border-radius: .25rem;
+        }
+        .highlight
+        {
+        	background-color: #FFFF00;
         }
 	</style>
 	<title>DocYOUment</title>
@@ -161,11 +165,6 @@
 			<a href = "#" id = "photoUpload"><i class="far fa-image"></i>&nbsp;&nbsp;Photo</a>
 			<a href = "#" id = "openCalendar"><i class="fas fa-calendar"></i>&nbsp;&nbsp;Calendar</a>
 			<a href = "#" id = "signOut"><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;Sign Out</a>
-			<!-- 
-				add features here. If the feature you are implementing is gonna open a window,use button(<button> tag). If the feature you are implementing is gonan overwrite html file, use link(<a> tag).
-
-				I implement "sign out" feature as one of the examples.
-			-->
 
 		</div>
 		<button id = "entry" style = "z-index:1;border-radius:50%; background-color:red; color:white; border:none; position:fixed; top:85%; right:70px; font-size:45px;outline: none"><i class="fas fa-marker"></i></button>
@@ -185,56 +184,175 @@
 		const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
 		const {Confirmation} = require("../js/confirmation.js");
 		const {File} = require("../js/file.js");
-		const {getDiaryEntry} = require("../js/diaryEntry.js");
-
+		const {getDiaryEntry,diaryEntry,addDiaryEntry} = require("../js/diaryEntry.js");
+		const {Search} = require("../js/search.js");
+		const search = new Search("#FFFF00");
 		const user = remote.getGlobal('share').user;  
        	const path = "./data/" + user + "/entry"; 
-        var diaryEntry;
+       
+        var isOnSearchProcess = false;
+        var searchValue = "";
+
+    
+        const searchInterval = 4;
+        const showInterval = 10;
+        var startingShowIndex = 0;
+        var startingSearchIndex = 0;
+        var endingSearchIndex = searchInterval;
+        var endingShowIndex = showInterval;
+        var numFind = 0;
         loadThemeMode();
 
 
-        
-       
-
-        /* show the diary entry */
-        function showDiaryEntry()
+        /* search the entry contains searchValue form diaryEntries[start] to diaryEntries[end-1] */
+        function searchDiaryEntry(searchValue,start,end)
         {
-        	$("#diaryEntries").text("");
-        	diaryEntries = getDiaryEntry(path);
-        	var s = "";
-			for(var i = 0; i < diaryEntries.length; i++)
-			{
 
-				let diaryEntry = diaryEntries[i];
+        	if(start == 0) $("#diaryEntries").text("");
+        	var s = "";
+        	var title;
+        	var entry;
+        	var myDiaryEntry;
+       		var isFindInTitle;
+       		var isFindInEntry;
+       		isOnSearchProcess = true;
+
+       		if(end > diaryEntries.length) end = diaryEntries.length;
+			for(var i = start; i < end; i++)
+			{
+				myDiaryEntry = diaryEntries[i];
+				title = myDiaryEntry.title;
+				entry = myDiaryEntry.entry.replace(/  +/g," ");
+				
+				/* highlight the searchValue */ 
+				
+				title = search.search(title,searchValue);
+				isFindInTitle = search.isFindSearchValue();	
+				entry = search.search(entry,searchValue);
+				isFindInEntry = search.isFindSearchValue();
+					
+				if(isFindInTitle === false && isFindInEntry === false) continue;
+
+				
+				numFind++;
 				s += '\
 					<div style="position: relative">\
 						<div class = "date">'
-							+ diaryEntry.year +'<br>'
-							+ diaryEntry.month + '<br>'
-							+ diaryEntry.day + '\
+							+ myDiaryEntry.year +'<br>'
+							+ myDiaryEntry.month + '<br>'
+							+ myDiaryEntry.day + '\
 						</div>\
 					<div class="boxed" name = "' + i + '">\
-						<span class = "title">' + diaryEntry.title + '</span>\
+						<span class = "title">' + title + '</span>\
 						<br>\
-  						<span>' + diaryEntry.entry.replace(/  +/g," ") + '</span>\
+  						<span>' + entry + '</span>\
   						</div>\
 					</div>\
 					<hr>\
 					'
 			}
+			
+			$("#diaryEntries").append(s);
+			startingSearchIndex = endingSearchIndex;
+			endingSearchIndex += searchInterval;
+			isOnSearchProcess = false;
+
+			/* recusively call it until we find at least 5 entries or traverse all the entries */
+			if(numFind <= searchInterval && startingSearchIndex < diaryEntries.length) searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+
+        }
+       
+
+        /* show the diary entry from diaryEntries[start] to diaryEntries[end-1] */
+        function showDiaryEntry(start, end)
+        {
+
+        	if(start == 0) $("#diaryEntries").text("");
+        	var s = "";
+        	var title;
+        	var entry;
+        	var myDiaryEntry;
+       	
+       		if(end > diaryEntries.length) end = diaryEntries.length;
+			for(var i = start; i < end; i++)
+			{
+				myDiaryEntry = diaryEntries[i];
+				title = myDiaryEntry.title;
+				entry = myDiaryEntry.entry.replace(/  +/g," ");
+				
+				s += '\
+					<div id = "'+ i + '" style="position: relative">\
+						<div class = "date">'
+							+ myDiaryEntry.year +'<br>'
+							+ myDiaryEntry.month + '<br>'
+							+ myDiaryEntry.day + '\
+						</div>\
+						<div class="boxed" name = "' + i + '">\
+							<span class = "title">' + title + '</span>\
+							<br>\
+  							<span>' + entry + '</span>\
+  						</div>\
+  					<hr>\
+					</div>\
+					'
+			}
+			startingShowIndex = endingShowIndex;
+			endingShowIndex += showInterval;
 			$("#diaryEntries").append(s);
         }
 		$(document).ready(function(){
 
 			diaryThread.send("MAIN_DIARY_REGISTER");
-			showDiaryEntry();
 
-			
-			diaryThread.on("reload",function(){
-				showDiaryEntry();
+			diaryEntries = getDiaryEntry(path);
+			showDiaryEntry(startingShowIndex,endingShowIndex);
+
+			/*
+				"CANCEL": cancel the enrty
+				"CHANGE": the entry exists and we change it.
+				"ADD":    create a new entry
+				"DELETE": delete the entry
+			*/
+			diaryThread.on("reload",function(event,type, index, filePath){
+
+				if(type == "CANCEL") return;
+				if(type == "CHANGE")
+				{
+					let myDiaryEntry = new diaryEntry(filePath);
+					let title = myDiaryEntry.title;
+					let entry = myDiaryEntry.entry.replace(/  +/g," ");
+					$('#' + index).text("");
+					$("#" + index).append(
+						'<div class = "date">'
+							+ myDiaryEntry.year +'<br>'  
+							+ myDiaryEntry.month + '<br>'
+							+ myDiaryEntry.day + '\
+						</div>\
+						<div class="boxed" name = "' + index + '">\
+							<span class = "title">' + title + '</span>\
+							<br>\
+  							<span>' + entry + '</span>\
+  						</div>\
+						<hr>');
+					diaryEntries[index] = myDiaryEntry;
+				}
+				if(type == "DELETE")
+				{
+					$("#" + index).css("display","none");
+					diaryEntries[index] = null;
+				}
+				if(type == "ADD")
+				{	
+					index = addDiaryEntry(diaryEntries,filePath);
+					startingShowIndex = 0;
+					endingShowIndex = index + 10;
+					showDiaryEntry(startingShowIndex, endingShowIndex);
+				}
+				
 			})
 			
 			diaryThread.on("updateDiaryEntries",(event)=>{
+				console.log("uodate");
 				diaryEntries = getDiaryEntry(path);
 			})
 
@@ -246,12 +364,12 @@
 
 			$("#openPanel").click(function(){
 				$("#myPanel").css("width","35%");
-				//$("body").css("background-color","#ECEAE4");
+				
 			})
 
 			$("#closePanel").click(function(){
 				$("#myPanel").css("width","0px");
-				//$("body").css("background-color","#eeeeee");
+				
 			})
 
 
@@ -280,10 +398,10 @@
 			$("#openCalendar").click(function(){
 				diaryThread.send("openCalendar"); 
 			})
-			//Textbox//
+			
             $("#entry").click(function(){
             	
-                diaryThread.send("openEntry");
+                diaryThread.send("openEntry",0xffffff);
             })
 
             $("#setting").click(function(){
@@ -291,8 +409,44 @@
             })
 
 
+
+            /*
+            	Search for searchValue is a expensive computational.
+            	Show diary entry becomes expensive when we have thousands of entries.
+            	To overcome the delay of searching and showing entries, I break down them into several tasks.
+            	1. I have startingIndex and endingIndex to specify what diray entries we want to search for/show.
+            	2. In the keyup event, I only find the first 5 entries contains searchValue. Because my main page can only hold at most 4 entries at the same time. I show "showInterval" entries a time.
+            	3. Whenever I scroll the the window, I keep finding the entries contains searchValue or showing the entries.
+            */
+            $("#search").keyup(function(){
+            	
+            	startingSearchIndex = 0;
+            	endingSearchIndex = searchInterval;
+            	searchValue = $(this).val();
+            	numFind = 0;
+            	if(searchValue == "") 
+            	{
+            		startingShowIndex = 0
+            		endingShowIndex = showInterval;
+            		showDiaryEntry(startingShowIndex, endingShowIndex);
+            		return;
+            	}
+            	
+            	searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+            })
+
+            $(window).scroll(function(){
+
+           		
+            	if(searchValue != "" && isOnSearchProcess == false)
+            	{
+            		numFind = 0;
+            		if(startingSearchIndex < diaryEntries.length) searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+            	}
+            	if(searchValue == "" && startingShowIndex < diaryEntries.length) showDiaryEntry(startingShowIndex,endingShowIndex);
+            })
+
             /* mode swapping */
-            
             diaryThread.on("changeThemeMode",changeThemeMode);
 
 		})

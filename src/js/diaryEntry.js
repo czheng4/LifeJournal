@@ -43,8 +43,6 @@ class diaryEntry
 		}
 		let f = new File(filePath);
 		let arr = f.readBySeparator("TITLE_ENTRY_DATE_PHOTO:");
-		console.log(f.read());
-		console.log(arr);
 		let ymd = arr[2].split("-"); // year month day
 		
 		this.filePath = filePath;
@@ -60,6 +58,35 @@ class diaryEntry
 		this.day = ymd[2];
 	}
 
+}
+
+
+/* add one diary entry to sorted diaryEntries array 
+   return the index of where we add it.
+*/
+function addDiaryEntry(diaryEntries, filePath)
+{
+	var myDiaryEntry = new diaryEntry(filePath);
+	var myDate = myDiaryEntry.date; 
+	var tempDate;
+	var start = 0;
+	var end = diaryEntries.length - 1;
+	var middle;
+	var index;
+	/* binary search */
+	while(start <= end)
+	{
+		middle = Math.floor((start + end) / 2);
+		tempDate = diaryEntries[middle].date;
+		if(tempDate == myDate) index = middle;
+		else if(tempDate < myDate) start = middle + 1;
+		else end = middle - 1;
+	}
+
+	if(start > end) index = start;
+
+	diaryEntries.splice(index,0,myDiaryEntry);
+	return index;
 }
 
 /* return sorted array of diaryEntries */
@@ -124,7 +151,8 @@ module.exports = {
 	getDiaryEntry:getDiaryEntry,
 	months:months,
 	storeDiaryEntryTofFile:storeDiaryEntryTofFile,
-	getDiaryEntryDict:getDiaryEntryDict
+	getDiaryEntryDict:getDiaryEntryDict,
+	addDiaryEntry
 }
 
 

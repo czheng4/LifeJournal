@@ -453,7 +453,7 @@ img
                     entryThread.send("refreshPhotos");
                     entryThread.send("refreshSinglePhoto");
                     entryThread.send("refreshCalendar");
-                    entryThread.send("closeEntry",entryData.index);
+                    entryThread.send("closeEntry","DELETE", entryData.index);
 
                 }
             })
@@ -513,8 +513,8 @@ img
 
                 }
 
-                if(entryData == null) entryThread.send("closeEntry");
-                else entryThread.send("closeEntry",entryData.index);
+                if(entryData == null) entryThread.send("closeEntry", "CANCEL", 0xffffff);
+                else entryThread.send("closeEntry","CANCEL",entryData.index);
             })
 
             /* 
@@ -568,15 +568,14 @@ img
                     {
                         if(photo.indexOf(entryData.photo[i]) == -1) 
                         {
-                            console.log("delete");
                             fs.unlinkSync(entryData.photo[i]);
                         }
                     }
                 }
 
                 entryThread.send("refreshCalendar");
-                if(entryData == null) entryThread.send("closeEntry");
-                else entryThread.send("closeEntry",entryData.index);
+                if(entryData == null) entryThread.send("closeEntry","ADD",0xffffff,filePath);
+                else entryThread.send("closeEntry","CHANGE",entryData.index,filePath);
 
 
    			})
