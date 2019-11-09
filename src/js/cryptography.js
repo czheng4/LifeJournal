@@ -33,11 +33,11 @@
 
 const fs = require('fs');
 const path = require('path');
-/* generate utf8 table from 0 to 50000 */
+/* generate utf8 table from 0 to 55203 */
 var utf8_table_to_character = {}
 var utf8_table_to_number = {}
 
-for(var i = 0; i <= 50000; i++)
+for(var i = 0; i <= 55203; i++)
 {
 	utf8_table_to_character[i] = String.fromCharCode(i);
 	utf8_table_to_number[String.fromCharCode(i)] = i;
@@ -110,9 +110,10 @@ class Cryptography
 {
 	// seed is for generating random number
 	// size is the size of utf8 table.
+	// you may change the size to supporot multiple languages for this app.
 	constructor(seed,size = 1000)
 	{
-		if(size > 50000) this.size = 50000;
+		if(size > 55203) this.size = 55203;
 		else this.size = size;
 		
 		this.seed = seed;
@@ -198,7 +199,7 @@ class Cryptography
 		{
 			// find the normal value of character in utf8 table,
 			// and then pass it to shffled table to encode.
-			var num = utf8_table_to_number[content[i]]; 
+			var num = utf8_table_to_number[content[i]];
 			num = (num + i) % this.size; // make sure we have different encoding with same character.
 			encode += this.number_to_character[num];
 			

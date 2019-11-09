@@ -68,7 +68,7 @@ class File
 		let content = "";
 		for(var key in dict) content += key + ":" + dict[key] + "\n";
 		content = this.cryptography.encodeString(content);
-		this.fs.writeFileSync(this.filename,content,function(err){
+		this.fs.writeFileSync(this.filename,content,'utf8',function(err){
 			if(err) throw err;
 		});
 	}
@@ -87,7 +87,7 @@ class File
 	write(content)
 	{
 		content = this.cryptography.encodeString(content);
-		this.fs.writeFileSync(this.filename,content,function(err){
+		this.fs.writeFileSync(this.filename,content,'utf8',function(err){
 			if(err) throw err;
 		});
 	}
@@ -98,7 +98,7 @@ class File
 
 		content = this.read() + content;
 		content = this.cryptography.encodeString(content);
-		this.fs.writeFileSync(this.filename,content,function(err){
+		this.fs.writeFileSync(this.filename,content,'utf8',function(err){
 			if(err) throw err;
 		});
 	}
