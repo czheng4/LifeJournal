@@ -339,7 +339,24 @@
 					let myDiaryEntry = new diaryEntry(filePath);
 					let title = myDiaryEntry.title;
 					let entry = myDiaryEntry.entry.replace(/  +/g," ");
+					let isFindSearchValue;
+					let isFindInTitle;
+
+					diaryEntries[index] = myDiaryEntry;
 					$('#' + index).text("");
+					
+					if(searchValue != "")
+					{
+						title = search.search(title,searchValue);
+						isFindInTitle = search.isFindSearchValue();	
+					
+						entry = search.search(entry,searchValue);
+						isFindInEntry = search.isFindSearchValue();
+					
+						
+						if(isFindInTitle === false && isFindInEntry === false) return;
+					}
+
 					$("#" + index).append(
 						'<div class = "date">'
 							+ myDiaryEntry.year +'<br>'  
@@ -352,20 +369,30 @@
   							<span>' + entry + '</span>\
   						</div>\
 						<hr>');
-					diaryEntries[index] = myDiaryEntry;
+					
 				}
 				if(type == "DELETE")
 				{
+
 					$("#" + index).css("display","none");
 					diaryEntries[index].isdeleted = true;
 				}
 				if(type == "ADD")
 				{	
-					index = addDiaryEntry(diaryEntries,filePath);
-					startingShowIndex = 0;
-					console.log("index: " + index);
-					endingShowIndex = index + 10;
-					showDiaryEntry(startingShowIndex, endingShowIndex);
+					let index = addDiaryEntry(diaryEntries,filePath);
+					if(searchValue == "")
+					{
+						startingShowIndex = 0;
+						endingShowIndex = index + 10;
+						showDiaryEntry(startingShowIndex, endingShowIndex);
+					}
+					else
+					{
+						numFind = 0;
+						startingSearchIndex = 0;
+						endingSearchIndex = searchInterval;
+						searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+					}
 				}
 				
 			})
