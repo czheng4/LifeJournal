@@ -138,11 +138,14 @@ mainThread.on("openSetting", function(event){
         height:500,
         width: 500,
         //resizable: false,
+        //frame:false,
         title: "Setting",
+        //alwaysOnTop:true,
         webPreferences: { nodeIntegration: true }
     });
     settingWindow.webContents.openDevTools();
     settingWindow.on('closed',() => {settingWindow = null;});
+    //settingWindow.on('blur',() => {settingWindow.close(); settingWindow = null;});
     settingWindow.loadFile("./src/html/setting.html");
 })
 
@@ -166,6 +169,7 @@ mainThread.on("changeThemeMode",function(event,oldMode,newMode){
 })
 mainThread.on("changeCaseSensitive",function(event,newCaseSensitive){
     eventList["MAIN_DIARY"].sender.send("changeCaseSensitive",newCaseSensitive);
+    for(var key in eventList["TEXTBOX"]) eventList["TEXTBOX"][key].sender.send("changeCaseSensitive",newCaseSensitive);
 })
 
 
@@ -361,11 +365,13 @@ mainThread.on("openConfirmation",function(event,data){
         movable: false,
         minimizable: false,
         maximizable: false,
+        //frame:false,
         webPreferences: { nodeIntegration: true }
     });
    
     taskConfirm.webContents.openDevTools();
     taskConfirm.on('closed',()=>{ eventList["CONFIRMATION_PAGE"] = null; taskConfirm = null; });
+    //taskConfirm.on('blur',() => { taskConfirm.close(); eventList["CONFIRMATION_PAGE"] = null; taskConfirm = null;});
     taskConfirm.loadFile("./src/html/confirmation.html");
   
 })
@@ -723,7 +729,7 @@ function createWindow()
         webPreferences: { nodeIntegration: true },
     })
     //login.loadFile("./src/html/progress_bar.html");
-    //login.loadFile("test1.html");
+    //login.loadFile("1.html");
     login.loadFile("./src/html/login.html");
     login.webContents.openDevTools();
     login.on('closed',()=>{ login = null; })

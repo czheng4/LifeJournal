@@ -131,24 +131,26 @@
 </div>
 	
 	<script type="text/javascript">
+
+        
+       
 		const $ = require("jQuery");
 		const fs = require("fs");
 		const settingThread = require('electron').ipcRenderer;
 		const remote = require('electron').remote;
-		const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
 		const {File} = require("../js/file.js");
 		const user = remote.getGlobal('share').user;  
-        const mode = loadThemeMode();
         const f  = new File("./data/" + user + "/setting.txt");
+        const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+        const mode = loadThemeMode();
         var dict = f.readDict();
-        
+
         $("#" + mode).prop("checked", true);
         $("#caseSensitive").prop("checked",dict["caseSensitive"] == "on");
-       
+        
 
 		$(document).ready(function(){
-
-			settingThread.send("MAIN_SETTING_REGISTER");
+            settingThread.send("MAIN_SETTING_REGISTER");
 			$("[name~=\"theme\"]").click(function(){
                 let newMode = $(this).attr("id");
                 dict["mode"] = newMode;

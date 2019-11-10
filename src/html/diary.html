@@ -214,7 +214,7 @@
         var endingSearchIndex = searchInterval;
         var endingShowIndex = showInterval;
         var numFind = 0;
-        var case_sensitive = (setting.readDict["caseSensitive"] == "on");
+        var case_sensitive = (setting.readDict()["caseSensitive"] == "on");
 
 
         /* search the entry contains searchValue form diaryEntries[start] to diaryEntries[end-1] */
@@ -511,7 +511,7 @@
             	$('link[rel=stylesheet][href~="' + oldMode + '.css"]').remove();
     			$("head").append('<link rel="stylesheet" type="text/css" href="../css/' + newMode + '.css">');
             });
-
+            
             diaryThread.on("changeCaseSensitive",function(event,newCaseSensitive){
             	case_sensitive = (newCaseSensitive == "on");
             });

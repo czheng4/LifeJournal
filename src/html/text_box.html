@@ -1,9 +1,12 @@
 <!-- 
     text_box.html
     ChaoHui Zheng
-    10/22/2019
-
-    textbox entry
+    11/07/2019
+    
+    The idea of highlighting textarea is from https://codersblock.com/blog/highlight-text-inside-a-textarea/.
+    1. We use another div tag to hold the same info as textarea(same layout, same content, some position)
+    2. We make div(step1) have trasparent color of font and make textarea have trasparent background color.
+    3. We when find the searchValue, we highlight the div.
 -->
 <!DOCTYPE html>
 <html>
@@ -14,7 +17,7 @@
     <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
 
     <style type="text/css">
-* {box-sizing: border-box}
+
 body
 {
     padding-bottom: 100px;
@@ -98,18 +101,22 @@ img
     	}
     	.textboxTitle
     	{
+            
             position: relative;
     		border:none;
     		text-align: left;
     		width:100%;
     		height:35px;
-    		font-size:25px;
-    		background-color: var(--panel-color);
             color: var(--text-color);
     		resize:none;
     		outline: none;
-    		margin-top: 2.5px;
-    		overflow-y: hidden;
+            font-size: 25px;
+            padding: 0px 20px 0px 10px;
+            overflow-x: hidden;
+    		overflow-y: scroll;
+            z-index: 2;
+            background-color: transparent;
+
     	}
     	.textboxEntry
     	{
@@ -117,14 +124,18 @@ img
     		border:none;
     		text-align: left;
     		width:100%;
-    		height: 50vh;
+    		height: 60vh;
     		font-size:20px;
-    		background-color: var(--panel-color);
+            top:-10px;
+    		margin-bottom: 10px;
+            padding: 0px 20px 0px 10px;
             color: var(--text-color);
     		resize:none;
     		outline: none;
-    		overflow: scroll;
-    		text-indent: 4px;
+    		overflow-y: scroll;
+            z-index: 2;
+            background-color: transparent;
+           
     	}
   
     	.container-box
@@ -155,13 +166,40 @@ img
         }
         button:focus
         {
-
             outline:none;
         }
-        textarea::selection
+        .textboxTitle::selection, .textboxEntry::selection
         {
             color: var(--selection-color);
             background-color: var(--selection-background-color);
+        }
+    
+        .searchBar
+        {
+            position: fixed; 
+            left: 36%;
+            top : 50%;
+            z-index: 2;
+            visibility: hidden;
+        }
+        .searchBar input
+        {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+        .highlights 
+        {
+
+            overflow: scroll;
+            width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: left;
+            padding: 0px 20px 0px 10px;
+            position: absolute;
+            color: transparent;
+            z-index: 1;
         }
     </style>
 </head>
@@ -173,32 +211,47 @@ img
 
 <div id = "dots" style="text-align:center">
 </div>
-
+    
     <div class="container-box">
+        <div id = "titleHighlight" class = "highlights" style="font-size:25px; height:35px;"></div>
+       
         <textarea class = "textboxTitle" placeholder="Title" id = "title"></textarea>
-        
+       
         <hr style="position:relative;top:-10px">
-        <textarea  id = "entry" class="textboxEntry" style="top:-15px;" placeholder="     Dear Diary"></textarea>
-        <hr style="position:relative;top:-25px">
+       
+        
+        <div id = "entryHighlight" class = "highlights" style="font-size:20px; height: 60vh; margin-top:-10px; margin-bottom: 10px"></div>
+        <textarea id = "entry" class="textboxEntry" placeholder="     Dear Diary"></textarea>
+      
+       
+        
+       
+        <hr style="position:relative;top:-30px">
        	
        	
         <div style="position: relative; height: 5px;">
             <input id = "date" type = "date" style="position: relative; top:-33px;font-size: 100%; left: 10px; width: 170px;background: silver">
 
-            <button id = "hideDisplay" class = "feature_button" style = "left:70%"><i class="fas fa-eye-slash"></i></button>
+            <button id = "displaySearch" class = "feature_button" style = "left:62%"><i class="fas fa-search"></i></button>
 
-            <button id = "upload" class = "feature_button" style = "left:80%"><i class="fas fa-images"></i></button>
+            <button id = "hideDisplay" class = "feature_button" style = "left:72%"><i class="fas fa-eye-slash"></i></button>
+
+            <button id = "upload" class = "feature_button" style = "left:82%"><i class="fas fa-images"></i></button>
             
-            <button id = "delete" class = "feature_button" style = "left:90%"> <i class="fas fa-trash"></i></button>
+            <button id = "delete" class = "feature_button" style = "left:92%"> <i class="fas fa-trash"></i></button>
 
         </div>
     </div>
         
-        <div style="position: fixed;top:90%;right:30px">
-            <button id = "cancel" type="button" class="btn btn-primary">Cancel</button>
-            &nbsp;&nbsp;
-            <button id = "save" type="button" class="btn btn-danger">Save</button>
-     </div>
+    <div style="position: fixed;top:90%;right:30px; z-index: 2">
+        <button id = "cancel" type="button" class="btn btn-primary">Cancel</button>
+        &nbsp;&nbsp;
+        <button id = "save" type="button" class="btn btn-danger">Save</button>
+    </div>
+    <div class = "searchBar">
+        <input type="text" id = "search" placeholder="Search ..." style="border-radius: .3rem">
+        <i class="fas fa-search" style="position:relative;right:30px"></i>
+    </div>
    
 
    	<script type="text/javascript">
@@ -215,31 +268,30 @@ img
         const {Confirmation} = require("../js/confirmation.js");
         const {diaryEntry} = require("../js/diaryEntry.js");
         const {File} = require("../js/file.js");
-        const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
-        let mode = loadThemeMode();
-        console.log(mode)
+        const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+        const {Search} = require("../js/search.js");
+        const setting = new File("./data/" + user + "/setting.txt");
 
+        var case_sensitive = (setting.readDict()["caseSensitive"] == "on");
+        var prevSearchValue = "";
+        var searchIndex = 0;
+        var prevIsFindTitle = true;
+        var prevIsFindEntry = true;
+
+        /* The searchElements is object. It changes as the highlight area changes */
+        var searchElements = document.getElementsByClassName("myHighlight");
+        var prevSearchElement = null;
+        var mode = loadThemeMode();
+        
+        var color = (mode == "dark")? "red" : "#FFFF00";
+        var targetColor = (mode == "dark")? "#107896" : "red";
+        var search = new Search(color);
         var path = "./data/" + user + "/entry/"; 
         var filePath = null;
         var photo = [];
         var slides;
         var dots;
         var slideIndex = -1;
-
-        /* hide or display the images */
-        function hideOrDisplay()
-        {
-            if($("#photos").css("display") == "none")
-            {
-                $("#photos").css("display","block");
-                $("#dots").css("display","block");
-            }
-            else
-            {
-                $("#photos").css("display","none");
-                $("#dots").css("display","none");
-            }
-        }
 
 
         /* load info if we open the written diary */
@@ -249,7 +301,10 @@ img
             {
                 filePath = entryData.filePath;
                 $("#title").text(entryData.title.replace("\n",""));
+                 $("#entryHighlight").text(entryData.entry);
+
                 $("#entry").text(entryData.entry);
+
                 $("#date").val(entryData.date);
                 photo = entryData.photo;
             }
@@ -294,6 +349,23 @@ img
             entryThread.send("openConfirmation",confirmation);  
         }
 
+        /* create a DiaryEntry stores the current info */
+        function newEntryData()
+        {
+            var newEntryData = new diaryEntry(null);
+            newEntryData.title = $("#title").val();
+            newEntryData.entry = $("#entry").val();;
+            newEntryData.date = $("#date").val();
+            newEntryData.photo = photo;
+            return newEntryData;
+        }
+
+        function displaySearch()
+        {
+            let visibility =  $(".searchBar").css("visibility");
+            $(".searchBar").css("visibility",visibility == "hidden"? "visible":"hidden");
+            if(visibility == "hidden") $(".searchBar input").focus();
+        }
 
         /* the functions below are image manipulation */
 
@@ -379,15 +451,19 @@ img
 
         }
 
-        /* create a DiaryEntry stores the current info */
-        function newEntryData()
+        /* hide or display the images */
+        function hideOrDisplay()
         {
-            var newEntryData = new diaryEntry(null);
-            newEntryData.title = $("#title").val();
-            newEntryData.entry = $("#entry").val();;
-            newEntryData.date = $("#date").val();
-            newEntryData.photo = photo;
-            return newEntryData;
+            if($("#photos").css("display") == "none")
+            {
+                $("#photos").css("display","block");
+                $("#dots").css("display","block");
+            }
+            else
+            {
+                $("#photos").css("display","none");
+                $("#dots").css("display","none");
+            }
         }
 
    		$(document).ready(function(){
@@ -403,18 +479,202 @@ img
             getSlides();
             
 
-            
             $("#delete").click(deletion);
             $("#upload").click(upload);
             $("#hideDisplay").click(hideOrDisplay);
             $("#cancel").click(cancel);
-
+            $("#displaySearch").click(displaySearch);
             $("body").on('click','img',function(){
                 /* send the info to diary_photo.html */
                 entryThread.send("sendInfoToDiaryPhoto",slideIndex,entryData,newEntryData());
                 window.location.href = "diary_photo.html";
             })
 
+            /* search bar */
+            $("body").keyup(function(event){
+                if(event.ctrlKey || event.altKey)
+                {
+                    switch(event.keyCode)
+                    {
+                        case 70:   // f
+                            displaySearch();
+                            break;
+                    }
+                }
+            })
+
+            /* scroll the hightlight area as we scroll the textarea */
+            $("#entry").scroll(function(){
+                var scrollTop = $(this).scrollTop();
+                $("#entryHighlight").scrollTop(scrollTop);
+            })
+
+            $("#title").scroll(function(){
+                var scrollTop = $(this).scrollTop();
+                $("#titleHighlight").scrollTop(scrollTop);
+            })
+
+            /* we write something to entry/title
+               1. check to see if searchValue is empty, if it's empty, we don't care about highlighting.Otherwise update the highlight area. 
+               2. check if what we type is part of searchValue(backspace and Enterkey is exceptional)
+            */
+            $("#entry").keyup(function(event){
+
+                var searchValue = $("#search").val();
+                console.log(searchValue);
+                if(searchValue == "") return;
+
+                if(searchValue.indexOf(event.key) == -1)
+                {
+                    if(event.key != "Backspace" && event.key != "Enter") return;
+                }
+                
+                var scrollTop;
+                var isFindEntry = false;
+                /* if we have extra lines(1 or more) at the end. the div highlight is one line below textarea. Therefore, we add a new line.
+                */ 
+                var entry = $("#entry").val().replace(/\n$/g, '\n\n');
+               
+                entry = search.search(entry,searchValue,case_sensitive);
+                isFindEntry = search.isFindSearchValue();
+
+                /* we update the highlight area when we either find the searchValue or we hit backspace key(we may lose the searchValue)
+                */ 
+                if(isFindEntry == true || event.key == "Backspace" || event.key == "Enter")
+                {
+                    console.log(entry);
+                    $("#entryHighlight").text("");
+                    $("#entryHighlight").append(entry);
+                    scrollTop = $(this).scrollTop();
+                    $("#entryHighlight").scrollTop(scrollTop);
+                }
+               
+                prevIsFindEntry = isFindEntry;
+
+            })
+
+            $("#title").keyup(function(){
+                var searchValue = $("#search").val();
+    
+                if(searchValue == "" | (searchValue.indexOf(event.key) == -1) && event.key != "Backspace") return;
+                var isFindTitle = false;
+                var title = $("#title").val().replace(/\n$/g, '\n\n');
+                var scrollTop;
+
+                title = search.search(title,searchValue,case_sensitive);
+                isFindTitle = search.isFindSearchValue();
+                if(isFindTitle == true || event.key == "Backspace")
+                {
+                    $("#titleHighlight").text("");
+                    $("#titleHighlight").append(title);
+                    scrollTop = $(this).scrollTop();
+                    $("#titleHighlight").scrollTop(scrollTop);
+                }
+                prevIsFindTitle = isFindTitle;
+
+            })
+
+            /* type something in the search bar */
+            $(".searchBar input").keyup(function(event){
+
+
+                var title; 
+                var entry;
+                var searchValue = $(this).val();
+                var isFindTitle = false;
+                var isFindEntry = false;
+                var offsetTop;
+
+                /* hit 'enter' key and we jump to the where we find the searchValue in order */
+                if(event.keyCode == 13 && searchValue != "")
+                {
+                    
+                    /* reset the searchIndex when the searchValue changes */
+                    if(prevSearchValue != searchValue) 
+                    {
+                        searchElements[searchIndex % searchElements.length] = null;
+                        searchIndex = 0;
+                    }
+                    if(searchElements.length == 0) return;
+                    
+                    if(prevSearchElement != null) prevSearchElement.style["background-color"] = color;
+                   
+                    prevSearchElement = searchElements[searchIndex % searchElements.length];
+
+                    /* searchElements holds all highlight tags */
+                    offsetTop = searchElements[searchIndex % searchElements.length].offsetTop;
+
+                    searchElements[searchIndex % searchElements.length].style["background-color"] = targetColor;
+                    //searchElements[searchIndex % searchElements.length].style.background = "red";
+                    searchIndex++;
+                   
+                    $("#entryHighlight").scrollTop(offsetTop > 50? offsetTop - 50: 0);
+                    $("#entry").scrollTop(offsetTop > 50? offsetTop - 50: 0);
+                    prevSearchValue = searchValue;
+                    return;
+                    
+                }
+                
+                /* searchValue unchanged, we do nothing */
+                if(searchValue == prevSearchValue) return;
+                
+
+                prevSearchValue = searchValue;
+                title = $("#title").val().replace(/\n$/g, '\n\n');
+                entry = $("#entry").val().replace(/\n$/g, '\n\n');
+
+                /* searchValue is empty. (hit the 'backspace' to delete the last char) 
+                   we update the highlight area when we find the searchValue previously.
+                */
+                if(searchValue == "")
+                {
+                    console.log(searchValue);
+                    if(prevIsFindTitle == true)
+                    {
+                        $("#titleHighlight").text("");
+                        $("#titleHighlight").append(title);
+                    }
+                    if(prevIsFindEntry == true)
+                    {
+                        $("#entryHighlight").text("");
+                        $("#entryHighlight").append(entry);
+                    }
+                    prevIsFindTitle = false;
+                    prevIsFindEntry = false;
+                    return; 
+                }
+                
+                
+                title = search.search(title,searchValue,case_sensitive);
+                isFindTitle = search.isFindSearchValue();
+                entry = search.search(entry,searchValue,case_sensitive);
+                isFindEntry = search.isFindSearchValue();
+                
+                
+                /*
+                    prevIsFind    IsFind
+                    true          true      => need to change
+                    true          false     => need to change
+                    flase         true      => need to change
+                    flase         false     => don't need to change
+                */
+
+                if(!(isFindEntry == false && prevIsFindEntry == false))
+                {
+                    $("#entryHighlight").text("");
+                    $("#entryHighlight").append(entry);
+                }
+                if(!(isFindTitle == false && prevIsFindTitle == false))
+                {
+                    $("#titleHighlight").text("");
+                    $("#titleHighlight").append(title);
+                }
+                
+                prevIsFindEntry = isFindEntry;
+                prevIsFindTitle = isFindTitle;
+                
+                
+            })
 
             /* get the diary info when we return to this page for diary_photo.html */
             entryThread.send("getDiaryInfo");
@@ -479,6 +739,8 @@ img
 
             /* making tab key as adding space */
             $("#entry").keydown(function(event){
+
+            
                 if (event.which == '9')    // "tab key"
                 {
                     /* add four spaces when typing the 'tab' key */
@@ -488,9 +750,12 @@ img
                         this.slectionStart gets where the cursor is.
                         this.selectionEnd gets where the selection ends.
                     */
+                    console.log(oldString);
                     let start = this.selectionStart;
                     let end = this.selectionEnd;
+                    
                     newString = oldString.substring(0,start) + "\t" + oldString.substring(start);
+                   
                     $("#entry").val(newString);
 
                     /* move the cursor to right by 4 spaces */
@@ -534,7 +799,6 @@ img
                 var date = $("#date").val();
                 var content = "";
 
-                
                 content += title;
 
                 content += "TITLE_ENTRY_DATE_PHOTO:"
@@ -584,6 +848,11 @@ img
 
    			})
             entryThread.on("changeThemeMode",changeThemeMode);
+
+            entryThread.on("changeCaseSensitive",function(event,newCaseSensitive){
+                case_sensitive = (newCaseSensitive == "on");
+                targetColor = (mode == "dark")? "#107896" : "red";
+            });
    		})
        </script>
 </body>

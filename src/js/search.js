@@ -15,18 +15,24 @@ class Search
 	*/
 	constructor(color)
 	{
-		this.starting_tag = '<span style = "background-color:' + color + '">';
+		this.starting_tag = '<span class = "myHighlight" style = "background-color:' + color + '">';
 		this.ending_tag = '</span>';
 		this.isFind = false;
 	}
 	/* 
 		1. string is a string we search at.
 		2. searchValue is a string we are looking at string "string".
-		3. return a string with starting_tag and ending_tag around the searchValue in the string "string", 
-		or -1 if it never find the searchValue
+		3. return a string with starting_tag and ending_tag around the searchValue in the string "string".
 	*/
 	search(string, searchValue, case_sensitive = true)
 	{
+		var regex = case_sensitive == true? new RegExp(searchValue, 'g'): new RegExp(searchValue, 'ig');
+		this.isFind = regex.test(string);
+		// '$&' means the whole mathed srting
+		return string.replace(regex,this.starting_tag + '$&' + this.ending_tag);
+		
+		// hard code to find the return string.
+		/*
 		var rv = "";
 		var start = 0;
 		var pos;
@@ -49,12 +55,15 @@ class Search
 		{
 			this.isFind = true;
 			rv += string.substr(start, pos - start);
+			console.log(string + " " + pos + " " + searchValueSize);
 			rv += this.starting_tag + string.substr(pos,searchValueSize) + this.ending_tag;
 			start = pos + searchValueSize;
 
 		}
 		rv += string.substr(start);
+		
 		return rv;
+		*/
 	}
 	/* 
 		we have to call search first to check if we find it or not.
