@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link href="./fontawesome/css/all.css" rel="stylesheet">
+	<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+	<title></title>
+	<style type="text/css">
+
+		.header
+		{
+			position: absolute;
+			width: 90%;
+			top:5%;
+			left: 5%;
+			height: 8%;
+			background-color: grey;
+			overflow: scroll;
+		}
+		.box
+		{
+			position: absolute;
+			width: 90%;
+			top:13%;
+			left: 5%;
+			height: 80%;
+			background-color: silver;
+			overflow: scroll;
+		}
+
+		pre
+		{
+			overflow: scroll;
+			overflow-x: hidden;
+			white-space:pre-wrap;
+			outline: none;;
+			margin-left: 5%;
+			display: inline-grid;
+		}
+		
+		i
+		{
+			margin-left: 5%;
+		}
+		span
+		{
+			margin-left: 5%;
+		}
+
+		#title:empty::before
+		{
+			content: "Title";
+		}
+
+		#description:empty::before
+		{
+			content: "Description";
+			cursor: text;
+		}
+		a
+		{
+			color: black;
+		}
+		a:hover
+		{
+			color:red;
+		}
+		
+	</style>
+</head>
+<body>
+
+	<div class="header">
+		<h4 style="margin-top: 1.5%"> 
+		<a id = "close" href="#"><i class="fas fa-times"></i></a>
+		<span> New Reminder </span>
+		<a href="#" id = "save"><i class="fas fa-check" style="position: absolute; left: 85%;"></i></a>
+	</h4>
+	</div>
+	<div class = "box">
+		<br>
+		<i class="fas fa-heading"></i>
+		<pre contenteditable="true" id = "title"></pre>
+		
+		<hr>
+
+
+		<div id = "startTime" style="cursor: pointer;">
+			<i class="far fa-clock"></i>
+			<span>Start</span>
+		</div>
+		<hr>
+		
+		<div id = "endTime" style="cursor: pointer;">
+			<i class="far fa-clock"></i>
+			<span>End</span>
+		</div>
+		<hr>
+		<i class="far fa-bell"></i>
+		<span> ADD REMINDER </span>
+	
+
+		<hr>
+		<i class="far fa-comments"></i>
+		<pre contenteditable="true" id = "description"></pre>
+		<hr>
+		<i class="fas fa-sync"></i>
+		<span>Repeat</span>
+	
+	</div>
+	<script type="text/javascript">
+		const $ = require("jquery");
+		s = $("pre").text();
+		console.log(s);
+		$("#startTime").click(function(){
+			window.location.href = "1.html"
+		})
+	</script>
+</body>
+</html>
