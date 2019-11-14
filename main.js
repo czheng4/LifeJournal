@@ -729,8 +729,8 @@ function createWindow()
         webPreferences: { nodeIntegration: true },
     })
     //login.loadFile("./src/html/progress_bar.html");
-    //login.loadFile("1.html");
-    login.loadFile("./src/html/login.html");
+    login.loadFile("./src/html/reminder.html");
+    //login.loadFile("./src/html/login.html");
     login.webContents.openDevTools();
     login.on('closed',()=>{ login = null; })
             
