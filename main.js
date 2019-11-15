@@ -13,7 +13,7 @@ const mainThread = require('electron').ipcMain;
 const {Confirmation} = require("./src/js/confirmation.js");
 const {Cryptography,decodeAll,encodeAll} = require("./src/js/cryptography.js");
 const cwd = process.cwd();
-var login, diary, photo, musicWindow, calendarWindow, upload, download, taskConfirm, createAlbum,entryWindow,editAlbum,transferPhoto,singlePhoto,settingWindow;
+var login, diary, photo, musicWindow, calendarWindow, upload, download, taskConfirm, createAlbum,entryWindow,editAlbum,transferPhoto,singlePhoto,settingWindow,datePicker;
 
 var entryWindows = {};
 
@@ -591,6 +591,38 @@ mainThread.on("openEntry", function(event,index, data = null){
     entryWindows[index] = entryWindow;
 })
 
+mainThread.on("openDatePicker", function(event){
+    
+    console.log("open");
+    if(datePicker != null)
+    {
+        datePicker.show();
+        datePicker.focus();
+
+    }
+    datePicker = new BrowserWindow(
+    {
+        height: 600,
+        width: 550,
+        minHeight:450,
+        minWidth:550,
+        //frame:false,
+        focus:true,
+        //closable:false,
+        //title: "",
+        webPreferences: {nodeIntegration: true}
+    });
+    datePicker.webContents.openDevTools();
+    
+    //datePicker.on('blur', ()=> {datePicker.hide();});
+    datePicker.loadFile("./src/html/date_picker.html");
+})
+
+mainThread.on("closeDatePicker",function(event){
+    datePicker.close();
+    datePicker = null;
+
+})
 
 
 mainThread.on("closeEntry",function(event, type, index, filePath = null){

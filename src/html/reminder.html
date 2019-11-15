@@ -109,11 +109,16 @@
 	
 	</div>
 	<script type="text/javascript">
-		const $ = require("jquery");
+		const $ = require("jQuery");
+		const fs = require("fs");
+		const reminderThread = require('electron').ipcRenderer;
+		const remote = require('electron').remote;  
 		s = $("pre").text();
 		console.log(s);
 		$("#startTime").click(function(){
-			window.location.href = "date_picker.html"
+
+			reminderThread.send("openDatePicker");
+			//window.location.href = "date_picker.html"
 		})
 	</script>
 </body>

@@ -23,6 +23,9 @@ const days = {
 	"6" : "Sat, "
 }
 const $ = require("jquery");
+const fs = require("fs");
+const datePickerThread = require('electron').ipcRenderer;
+const remote = require('electron').remote;  
 const time_span = 366;
 const background_color = $(".content").css("background-color");
 const highlight_color = "red";
@@ -111,6 +114,7 @@ $("#minute").scrollTop((prev_minute.offset().top - $("#first").offset().top))
 $("#date").scrollTop((prev_date.offset().top - $("#first").offset().top))
 
 
+$(document).ready(function(){
 /* reset time */
 $('body').on('click','a',function(){
 	var id = $(this).parents().attr("id");
@@ -151,4 +155,14 @@ $('body').on('click','a',function(){
 
 })
 
+$("#ok").click(function(){
+	datePickerThread.send("closeDatePicker");
+})
+
+$("#cancel").click(function(){
+	datePickerThread.send("closeDatePicker");
+})
+
+
+})
 
