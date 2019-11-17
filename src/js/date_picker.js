@@ -22,15 +22,12 @@ const days = {
 	"5" : "Fri, ",
 	"6" : "Sat, "
 }
-const $ = require("jquery");
-const fs = require("fs");
-const datePickerThread = require('electron').ipcRenderer;
-const remote = require('electron').remote;  
 const time_span = 366;
 const background_color = $(".content").css("background-color");
 const highlight_color = "red";
-
+var timeType = ""; 
 /*
+	timeType is either "start" or "end".
 	date is Date object
 	date_picker is a string to hold the date from (date - time_span) to (date + time_span)
 	day is the day of the week(0-6)
@@ -57,10 +54,10 @@ var day_of_month;
 	string_period is a string holds date text (either 'AM' or 'PM')
 */
 
-var prev_hour;
-var prev_date;
-var prev_period;
-var prev_minute;
+var prev_hour = null;
+var prev_date = null;
+var prev_period = null;
+var prev_minute = null;
 var string_hour;
 var string_date;
 var string_period;
@@ -84,34 +81,49 @@ $("#date").append(date_picker);
 
 
 
-/* grab the jqeury selector and highlight the current time */
-date = new Date();
-let hour = date.getHours();
-let minute = date.getMinutes();
-let	 period = hour >= 12? "pm":"am";
-if(hour > 12) hour -= 12;
 
-prev_hour = $("#hour" + hour);
-prev_date = $("#last");
-prev_period = $("#" + period);
-prev_minute = $("#minute" + minute);
-string_hour = prev_hour.text();
-string_date = prev_date.text();
-string_period = prev_period.text();
-string_minute = prev_minute.text();
+function scrollToToday()
+{
+	/* grab the jqeury selector and highlight the current time */
+	date = new Date();
+	let hour = date.getHours();
+	let minute = date.getMinutes();
+	let	period = hour >= 12? "pm":"am";
+	if(hour > 12) hour -= 12;
+	
+
+	if(prev_date != null) prev_date.css("background-color","");
+	if(prev_hour != null) prev_hour.css("background-color","");
+	if(prev_minute != null) prev_minute.css("background-color","");
+	if(prev_period != null) prev_period.css("background-color","");
+	
+	prev_hour = $("#hour" + hour);
+	prev_date = $("#last");
+	prev_period = $("#" + period);
+	prev_minute = $("#minute" + minute);
+	string_hour = prev_hour.text();
+	string_date = prev_date.text();
+	string_period = prev_period.text();
+	string_minute = prev_minute.text();
+	
+	$("#title").text("");
+	$("#title").append(string_date + " &ensp;&ensp;" + string_hour + ":" + string_minute + " " + string_period);
+	prev_hour.css("background-color",highlight_color);
+	prev_minute.css("background-color",highlight_color);
+	prev_period.css("background-color",highlight_color);
+	prev_date.css("background-color",highlight_color);
+	
+	$("#date").scrollTop(0);
+	$("#hour").scrollTop(0);
+	$("#minute").scrollTop(0);
+	console.log(prev_date.offset().top)
+	console.log(prev_minute)
+	$("#hour").scrollTop((prev_hour.offset().top - $("#first").offset().top))
+	$("#minute").scrollTop((prev_minute.offset().top - $("#first").offset().top))
+	$("#date").scrollTop((prev_date.offset().top - $("#first").offset().top))
+}
 
 
-$("#title").text("");
-$("#title").append(string_date + " &ensp;&ensp;" + string_hour + ":" + string_minute + " " + string_period);
-prev_hour.css("background-color",highlight_color);
-prev_minute.css("background-color",highlight_color);
-prev_period.css("background-color",highlight_color);
-prev_date.css("background-color",highlight_color);
-
-/* scoll to the correct position */
-$("#hour").scrollTop((prev_hour.offset().top - $("#first").offset().top))
-$("#minute").scrollTop((prev_minute.offset().top - $("#first").offset().top))
-$("#date").scrollTop((prev_date.offset().top - $("#first").offset().top))
 
 
 $(document).ready(function(){
@@ -156,11 +168,13 @@ $('body').on('click','a',function(){
 })
 
 $("#ok").click(function(){
-	datePickerThread.send("closeDatePicker",$("#title").text());
+	if(timeType == "start") $("#startTimeText").text($("#title").text());
+	else $("#endTimeText").text($("#title").text());
+	$("#datePicker").css("display","none");
 })
 
 $("#cancel").click(function(){
-	datePickerThread.send("closeDatePicker",null);
+	$("#datePicker").css("display","none");
 })
 
 

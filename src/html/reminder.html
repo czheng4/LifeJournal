@@ -4,6 +4,7 @@
 	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
 	<link href="../../fontawesome/css/all.css" rel="stylesheet">
 	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+	<link href="../../src/css/blue.css" rel="stylesheet">
 	<title></title>
 	<style type="text/css">
 
@@ -81,7 +82,6 @@
 			background-color: red;
 			overflow: scroll;
 			border-radius: 5px;
-			z-index: 2;
 			display: none;
     	}
     	input
@@ -93,9 +93,166 @@
     	{
     		background-color: black;
     	}
+
+
+
+
+
+    	  body
+    {
+        background-color: var(--background-color);
+        color: var(--text-color);
+    }
+    
+    ::-webkit-scrollbar 
+    {
+        width: 0px;
+    }
+
+    .title
+    {
+        top:15%;
+        height: 10%;
+        text-align: center;
+        font-size: 30px;
+        position: absolute;
+        margin-left: 7.5%;
+        width: 85%;
+        background-color: var(--panel-color);
+        color: var(--text-color);
+        overflow: scroll;    
+        border:1px solid;
+        z-index: 2;
+    }
+    .content
+    { 
+        top:25%;
+        transition: 0.5s;
+        position: absolute;
+        margin-left: 7.5%;
+        width: 15%;
+        background-color: var(--panel-color);
+        color: var(--text-color);
+        max-height: 60%;
+        overflow: scroll;    
+        border:1px solid;
+        border-top: none;
+        z-index: 2;
+    }
+
+    .content a 
+    {
+        color: var(--text-color);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+    .content a:hover
+    {
+      background-color: pink;
+    }
 	</style>
 </head>
 <body>
+	<div id = "datePicker" style="display: none;">
+	<div id = "title" class="title">Mon, Dec 2, 2019 7:00AM</div>
+    	<div class = "content" id = "date" style="left:0%; border-right: none; width: 40%; font-family: courier"> 
+    </div>
+    
+    <div class = "content" id = "hour" style="left:40%"> 
+        <a id = "hour1" href="#">1</a>
+        <a id = "hour2" href="#">2</a>
+        <a id = "hour3" href="#">3</a>
+        <a id = "hour4" href="#">4</a>
+        <a id = "hour5" href="#">5</a>
+        <a id = "hour6" href="#">6</a>
+        <a id = "hour7" href="#">7</a>
+        <a id = "hour8" href="#">8</a>
+        <a id = "hour9" href="#">9</a>
+        <a id = "hour10" href="#">10</a>
+        <a id = "hour11" href="#">11</a>
+        <a id = "hour12" href="#">12</a>
+    </div>
+
+    <div class = "content" id = "minute" style="left:55%; border-right: none;border-left: none;"> 
+        <a href = "#" id = "minute0">00</a>
+        <a href = "#" id = "minute1">01</a>
+        <a href = "#" id = "minute2">02</a>
+        <a href = "#" id = "minute3">03</a>
+        <a href = "#" id = "minute4">04</a>
+        <a href = "#" id = "minute5">05</a>
+        <a href = "#" id = "minute6">06</a>
+        <a href = "#" id = "minute7">07</a>
+        <a href = "#" id = "minute8">08</a>
+        <a href = "#" id = "minute9">09</a>
+        <a href = "#" id = "minute10">10</a>
+        <a href = "#" id = "minute11">11</a>
+        <a href = "#" id = "minute12">12</a>
+        <a href = "#" id = "minute13">13</a>
+        <a href = "#" id = "minute14">14</a>
+        <a href = "#" id = "minute15">15</a>
+        <a href = "#" id = "minute16">16</a>
+        <a href = "#" id = "minute17">17</a>
+        <a href = "#" id = "minute18">18</a>
+        <a href = "#" id = "minute19">19</a>
+        <a href = "#" id = "minute20">20</a>
+        <a href = "#" id = "minute21">21</a>
+        <a href = "#" id = "minute22">22</a>
+        <a href = "#" id = "minute23">23</a>
+        <a href = "#" id = "minute24">24</a>
+        <a href = "#" id = "minute25">25</a>
+        <a href = "#" id = "minute26">26</a>
+        <a href = "#" id = "minute27">27</a>
+        <a href = "#" id = "minute28">28</a>
+        <a href = "#" id = "minute29">29</a>
+        <a href = "#" id = "minute30">30</a>
+        <a href = "#" id = "minute31">31</a>
+        <a href = "#" id = "minute32">32</a>
+        <a href = "#" id = "minute33">33</a>
+        <a href = "#" id = "minute34">34</a>
+        <a href = "#" id = "minute35">35</a>
+        <a href = "#" id = "minute36">36</a>
+        <a href = "#" id = "minute37">37</a>
+        <a href = "#" id = "minute38">38</a>
+        <a href = "#" id = "minute39">39</a>
+        <a href = "#" id = "minute40">40</a>
+        <a href = "#" id = "minute41">41</a>
+        <a href = "#" id = "minute42">42</a>
+        <a href = "#" id = "minute43">43</a>
+        <a href = "#" id = "minute44">44</a>
+        <a href = "#" id = "minute45">45</a>
+        <a href = "#" id = "minute46">46</a>
+        <a href = "#" id = "minute47">47</a>
+        <a href = "#" id = "minute48">48</a>
+        <a href = "#" id = "minute49">49</a>
+        <a href = "#" id = "minute50">50</a>
+        <a href = "#" id = "minute51">51</a>
+        <a href = "#" id = "minute52">52</a>
+        <a href = "#" id = "minute53">53</a>
+        <a href = "#" id = "minute54">54</a>
+        <a href = "#" id = "minute55">55</a>
+        <a href = "#" id = "minute56">56</a>
+        <a href = "#" id = "minute57">57</a>
+        <a href = "#" id = "minute58">58</a>
+        <a href = "#" id = "minute59">59</a>
+    </div>
+    <div class="content" id = "period" style="left: 70%; height: 60%;">
+        <a href="#" id ="am">AM</a>
+        <a href="#" id ="pm">PM</a>
+    </div>
+    <div style="position: absolute; top:70%; left: 79%; z-index: 2">
+        <button id = "cancel"type="button" class="btn btn-danger" style="width:100px">Cancel</button>
+    </div>
+    <div style="position: absolute; top: 60%; left: 79%;z-index: 2">
+        <button id = "ok" type="button" class="btn btn-primary" style="width:100px;background-color:green">Ok</button>
+    </div>
+	</div>
+
+
+
+
+
+
 	<div class="reminder">
 		<div style="position: relative;top: 15px; cursor: pointer;">
         	<div id = "none"> <span>None</span><input type="radio" name = "alram"></div><hr>
@@ -165,7 +322,7 @@
 		const {Reminder} = require("../js/reminder.js");
 		const reminder = new Reminder();
 		const {Confirmation} = require("../js/confirmation.js");
-
+		
 		const alarmDict = {
 			"At time of event":0,
 			"5 minutes before":0,
@@ -199,32 +356,15 @@
 			reminder.description = $("#description").text();
 		}
 		$("#startTime").click(function(){
-			reminderThread.send("openDatePicker");
-			reminderThread.once("getTime",function(event,startTime){
-				$("#startTimeText").text(startTime);
-				reminder.startTime = startTime;
-				reminder.timeSplit("startTime");
-				if(reminder.endTimeMilliseconds !=0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
-				{
-					reminder.startTime = reminder.endTime;
-					$("#startTimeText").text(reminder.endTime);
-				}
-			})
-			
+			timeType = "start";
+			$("#datePicker").css({"display":"block","z-index":2});
+			scrollToToday();
 		})
 
 		$("#endTime").click(function(){
-			reminderThread.send("openDatePicker");
-			reminderThread.once("getTime",function(event,endTime){
-				$("#endTimeText").text(endTime);
-				reminder.endTime = endTime;
-				reminder.timeSplit("endTime");
-				if(reminder.startTimeMilliseconds != 0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
-				{
-					reminder.endTime = reminder.startTime;
-					$("#endTimeText").text(reminder.startTime);
-				}
-			})
+			timeType = "end";
+			$("#datePicker").css({"display":"block","z-index":2});
+			scrollToToday();
 		})
 
 		$("#close").click(function(){
@@ -266,5 +406,6 @@
 		})
 
 	</script>
+	<script src = "../js/date_picker.js"></script>
 </body>
 </html>
