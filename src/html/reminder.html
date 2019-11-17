@@ -16,6 +16,8 @@
 			height: 8%;
 			background-color: grey;
 			overflow: scroll;
+			border-top-left-radius: 5px;
+			border-top-right-radius: 5px;
 		}
 		.box
 		{
@@ -26,6 +28,8 @@
 			height: 80%;
 			background-color: silver;
 			overflow: scroll;
+			border-bottom-left-radius: 5px;
+			border-bottom-right-radius: 5px;
 		}
 
 		pre
@@ -66,10 +70,49 @@
 			color:red;
 		}
 		
+
+		.reminder
+    	{ 
+    		position: absolute;
+			width: 70%;
+			top:20%;
+			left: 15%;
+			height: 60%;
+			background-color: red;
+			overflow: scroll;
+			border-radius: 5px;
+			z-index: 2;
+			display: none;
+    	}
+    	input
+    	{
+    		position: absolute;
+    		left: 88%;
+    	}
+    	hr
+    	{
+    		background-color: black;
+    	}
 	</style>
 </head>
 <body>
-
+	<div class="reminder">
+		<div style="position: relative;top: 15px; cursor: pointer;">
+        	<div id = "none"> <span>None</span><input type="radio" name = "alram"></div><hr>
+        	<div id = "at"><span>At time of event</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "5min"><span>5 minutes before</span><input type="radio"  name = "alram"> </div><hr>
+        	<div id = "10min"><span>10 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "15min"><span>15 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "20min"><span>20 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "25min"><span>25 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "30min"><span>30 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "1hour"><span>1 hour before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "2hour"><span>2 hours before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "1day"><span>1 day before</span><input type="radio"  name = "alram"></div><hr>
+        	<div id = "2day"><span>2 days before</span><input type="radio"  name = "alram"></div> <hr>
+        	<div id = "1week"><span>1 week before</span><input type="radio"  name = "alram"></div><br>
+       	</div>
+	</div>
 	<div class="header">
 		<h4 style="margin-top: 1.5%"> 
 		<a id = "close" href="#"><i class="fas fa-times"></i></a>
@@ -77,6 +120,7 @@
 		<a href="#" id = "save"><i class="fas fa-check" style="position: absolute; left: 85%;"></i></a>
 	</h4>
 	</div>
+
 	<div class = "box">
 		<br>
 		<i class="fas fa-heading"></i>
@@ -85,19 +129,25 @@
 		<hr>
 
 
-		<div id = "startTime" style="cursor: pointer;">
+		<div id = "startTime" style="cursor: pointer">
 			<i class="far fa-clock"></i>
 			<span>Start</span>
+			<span id = "startTimeText"></span>
 		</div>
 		<hr>
 		
 		<div id = "endTime" style="cursor: pointer;">
 			<i class="far fa-clock"></i>
-			<span>End</span>
+			<span>End</span> &nbsp;
+			<span id = "endTimeText"></span>
 		</div>
 		<hr>
-		<i class="far fa-bell"></i>
-		<span> ADD REMINDER </span>
+		<div id = "alarm" style="cursor: pointer;">
+			<i class="far fa-bell"></i>
+			<span> ADD REMINDER </span>
+		</div>
+		<div id = "alarmText" style="margin-left:12.5%"></div>
+		
 	
 
 		<hr>
@@ -106,20 +156,115 @@
 		<hr>
 		<i class="fas fa-sync"></i>
 		<span>Repeat</span>
-	
 	</div>
 	<script type="text/javascript">
 		const $ = require("jQuery");
 		const fs = require("fs");
 		const reminderThread = require('electron').ipcRenderer;
 		const remote = require('electron').remote;  
-		s = $("pre").text();
-		console.log(s);
-		$("#startTime").click(function(){
+		const {Reminder} = require("../js/reminder.js");
+		const reminder = new Reminder();
+		const {Confirmation} = require("../js/confirmation.js");
 
+		const alarmDict = {
+			"At time of event":0,
+			"5 minutes before":0,
+			"10 minutes before":0,
+			"15 minutes before":0,
+			"20 minutes before":0,
+			"25 minutes before":0,
+			"30 minutes before":0,
+			"1 hour before":0,
+			"2 hours before":0,
+			"1 day":0,
+			"2 days":0,
+			"1 week":0,
+		};
+		function showReminder()
+		{
+			let string = "";
+			$("#alarmText").text("");
+			for(key in alarmDict)
+			{
+				if(alarmDict[key] == 1) string += '<div><hr>' + key + '<a href="#"><i class="fas fa-times"></i></a></div>'
+			}
+			$("#alarmText").append(string);
+		}
+
+		function setReminder(reminder)
+		{
+			reminder.title = $("#title").text();
+			reminder.startTime = $("#startTimeText").text();
+			reminder.endTime = $("#endTimeText").text();
+			reminder.description = $("#description").text();
+		}
+		$("#startTime").click(function(){
 			reminderThread.send("openDatePicker");
-			//window.location.href = "date_picker.html"
+			reminderThread.once("getTime",function(event,startTime){
+				$("#startTimeText").text(startTime);
+				reminder.startTime = startTime;
+				reminder.timeSplit("startTime");
+				if(reminder.endTimeMilliseconds !=0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
+				{
+					reminder.startTime = reminder.endTime;
+					$("#startTimeText").text(reminder.endTime);
+				}
+			})
+			
 		})
+
+		$("#endTime").click(function(){
+			reminderThread.send("openDatePicker");
+			reminderThread.once("getTime",function(event,endTime){
+				$("#endTimeText").text(endTime);
+				reminder.endTime = endTime;
+				reminder.timeSplit("endTime");
+				if(reminder.startTimeMilliseconds != 0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
+				{
+					reminder.endTime = reminder.startTime;
+					$("#endTimeText").text(reminder.startTime);
+				}
+			})
+		})
+
+		$("#close").click(function(){
+			/* send the message to main.js to open cofimation page */
+			var confirmation = new Confirmation(
+				"REMINDER_CANCELLATION",     //type
+				"Discard",			  //title
+				"Are your sure you don't want to save your changes?", // text
+				["Cancel","Yes"]   //buttonlabels 
+			);
+			reminderThread.send("openConfirmation",confirmation);
+		})
+		reminderThread.on("REMINDER_CANCELLATION",function(){
+			console.log("canel");
+		})
+		$("#save").click(function(){
+			window.location.href = "calendar.html";
+		})
+
+		$("#alarm").click(function(){
+			$(".reminder").css({"display":"block","z-index":2});
+		})
+
+		$('body').on('click',".reminder div div",function(){
+			let text = $(this).children("span").text();
+			
+			if(text != "None" && alarmDict[text] == 0)
+			{
+				console.log(text);
+				alarmDict[text] = 1;
+				showReminder();
+			}
+			$(".reminder").css("display","none");
+		})
+
+		$('body').on('click',"#alarmText a",function(){
+			alarmDict[$(this).parent().text()] = 0;
+			$(this).parent().remove();
+		})
+
 	</script>
 </body>
 </html>

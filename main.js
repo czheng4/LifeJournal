@@ -420,6 +420,9 @@ mainThread.on("closeConfirmation",function(event,confirmation){
                 eventList["TASK_CONFIRM"].sender.send("DIARY_PHOTO_DELETION");
                 break;
 
+            case "REMINDER_CANCELLATION":
+                eventList["TASK_CONFIRM"].sender.send("REMINDER_CANCELLATION");
+                break;
             case "SIGN_OUT":
                 global.share.status = "saving";
                 diary.loadFile("./src/html/progress_bar.html");
@@ -618,7 +621,8 @@ mainThread.on("openDatePicker", function(event){
     datePicker.loadFile("./src/html/date_picker.html");
 })
 
-mainThread.on("closeDatePicker",function(event){
+mainThread.on("closeDatePicker",function(event,time){
+    eventList["CALENDAR"].sender.send("getTime",time);
     datePicker.close();
     datePicker = null;
 
@@ -761,8 +765,8 @@ function createWindow()
         webPreferences: { nodeIntegration: true },
     })
     //login.loadFile("./src/html/progress_bar.html");
-    login.loadFile("./src/html/reminder.html");
-    //login.loadFile("./src/html/login.html");
+    //login.loadFile("./src/html/reminder.html");
+    login.loadFile("./src/html/login.html");
     login.webContents.openDevTools();
     login.on('closed',()=>{ login = null; })
             

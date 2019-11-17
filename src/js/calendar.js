@@ -168,6 +168,10 @@ $("#currentTime").click(function(){
     markToday();
 })
 
+
+$("#reminder").click(function(){
+    window.location.href = "reminder.html"
+})
 calendarThread.on("refreshCalendar",function(){
     diaryEntries = getDiaryEntryDict(path);
     showCalendar(currentYear,currentMonth);

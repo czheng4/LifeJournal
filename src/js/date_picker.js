@@ -156,11 +156,11 @@ $('body').on('click','a',function(){
 })
 
 $("#ok").click(function(){
-	datePickerThread.send("closeDatePicker");
+	datePickerThread.send("closeDatePicker",$("#title").text());
 })
 
 $("#cancel").click(function(){
-	datePickerThread.send("closeDatePicker");
+	datePickerThread.send("closeDatePicker",null);
 })
 
 
