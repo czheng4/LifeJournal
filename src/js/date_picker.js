@@ -89,14 +89,13 @@ function scrollToToday()
 	let hour = date.getHours();
 	let minute = date.getMinutes();
 	let	period = hour >= 12? "pm":"am";
-	if(hour > 12) hour -= 12;
-	
+	if(hour > 12 && period == "pm") hour -= 12;
+	if(hour == 0) hour = 12;
 
 	if(prev_date != null) prev_date.css("background-color","");
 	if(prev_hour != null) prev_hour.css("background-color","");
 	if(prev_minute != null) prev_minute.css("background-color","");
 	if(prev_period != null) prev_period.css("background-color","");
-	
 	prev_hour = $("#hour" + hour);
 	prev_date = $("#last");
 	prev_period = $("#" + period);
@@ -112,12 +111,10 @@ function scrollToToday()
 	prev_minute.css("background-color",highlight_color);
 	prev_period.css("background-color",highlight_color);
 	prev_date.css("background-color",highlight_color);
-	
+	console.log(prev_hour.offset().top);
 	$("#date").scrollTop(0);
 	$("#hour").scrollTop(0);
 	$("#minute").scrollTop(0);
-	console.log(prev_date.offset().top)
-	console.log(prev_minute)
 	$("#hour").scrollTop((prev_hour.offset().top - $("#first").offset().top))
 	$("#minute").scrollTop((prev_minute.offset().top - $("#first").offset().top))
 	$("#date").scrollTop((prev_date.offset().top - $("#first").offset().top))
@@ -168,9 +165,30 @@ $('body').on('click','a',function(){
 })
 
 $("#ok").click(function(){
-	if(timeType == "start") $("#startTimeText").text($("#title").text());
-	else $("#endTimeText").text($("#title").text());
+	if(timeType == "start") 
+	{
+		$("#startTimeText").text($("#title").text());
+		reminder.startTime = $("#title").text();
+ 		reminder.timeSplit("startTime");
+ 		if(reminder.endTimeMilliseconds !=0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
+ 		{
+ 			reminder.startTime = reminder.endTime;
+ 			$("#startTimeText").text(reminder.endTime);
+ 		}
+	}
+	else 
+	{
+		$("#endTimeText").text($("#title").text());
+		reminder.endTime = $("#title").text();
+ 		reminder.timeSplit("endTime");
+ 		if(reminder.startTimeMilliseconds != 0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
+ 		{
+ 			reminder.endTime = reminder.startTime;
+ 			$("#endTimeText").text(reminder.startTime);
+ 		}
+	}
 	$("#datePicker").css("display","none");
+
 })
 
 $("#cancel").click(function(){

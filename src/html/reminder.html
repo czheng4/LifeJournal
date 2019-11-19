@@ -35,10 +35,11 @@
 
 		pre
 		{
-			overflow: scroll;
+			overflow-y: scroll;
 			overflow-x: hidden;
-			white-space:pre-wrap;
-			outline: none;;
+			white-space: normal;
+			outline: none;
+			
 			margin-left: 5%;
 			display: inline-grid;
 		}
@@ -70,8 +71,15 @@
 		{
 			color:red;
 		}
-		
 
+		.gap
+		{
+			background-color: white;
+			width: 100%;
+			height: 10px;
+		}
+		
+		/* alarm */
 		.reminder
     	{ 
     		position: absolute;
@@ -83,6 +91,7 @@
 			overflow: scroll;
 			border-radius: 5px;
 			display: none;
+			z-index: 2;
     	}
     	input
     	{
@@ -94,72 +103,156 @@
     		background-color: black;
     	}
 
+    	/* repeat */
+    	.repeat,.custom
+    	{
+    		position: absolute;
+			width: 50%;
+			top:20%;
+			left: 25%;
+			height: 60%;
+			background-color: red;
+			overflow: scroll;
+			border-radius: 5px;
+			z-index: 2;
+			display: none;
+    	}
 
-
-
-
-    	  body
-    {
-        background-color: var(--background-color);
-        color: var(--text-color);
-    }
+    	/* date picker */
+    	body
+    	{
+        	background-color: var(--background-color);
+        	color: var(--text-color);
+    	}
     
-    ::-webkit-scrollbar 
-    {
-        width: 0px;
-    }
+   		::-webkit-scrollbar 
+    	{
+        	width: 0px;
+    	}
 
-    .title
-    {
-        top:15%;
-        height: 10%;
-        text-align: center;
-        font-size: 30px;
-        position: absolute;
-        margin-left: 7.5%;
-        width: 85%;
-        background-color: var(--panel-color);
-        color: var(--text-color);
-        overflow: scroll;    
-        border:1px solid;
-        z-index: 2;
-    }
-    .content
-    { 
-        top:25%;
-        transition: 0.5s;
-        position: absolute;
-        margin-left: 7.5%;
-        width: 15%;
-        background-color: var(--panel-color);
-        color: var(--text-color);
-        max-height: 60%;
-        overflow: scroll;    
-        border:1px solid;
-        border-top: none;
-        z-index: 2;
-    }
+    	.title
+    	{
+    	    top:15%;
+    	    height: 10%;
+    	    text-align: center;
+    	    font-size: 30px;
+    	    position: absolute;
+    	    margin-left: 7.5%;
+    	    width: 85%;
+    	    background-color: var(--panel-color);
+    	    color: var(--text-color);
+    	    overflow: scroll;    
+    	    border:1px solid;
+    	    z-index: 2;
+    	}
+    	.content
+    	{ 
+    	    top:25%;
+    	    position: absolute;
+    	    margin-left: 7.5%;
+    	    width: 15%;
+    	    background-color: var(--panel-color);
+    	    color: var(--text-color);
+    	    max-height: 60%;
+    	    overflow: scroll;    
+    	    border:1px solid;
+    	    border-top: none;
+    	    z-index: 2;
+    	}
+	
+    	.content a 
+    	{
+    	    color: var(--text-color);
+    	    padding: 12px 16px;
+    	    text-decoration: none;
+    	    display: block;
+    	}
+    	.content a:hover
+    	{
+    	  background-color: pink;
+    	}
 
-    .content a 
-    {
-        color: var(--text-color);
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-    }
-    .content a:hover
-    {
-      background-color: pink;
-    }
+
+    	/* customize the repetition */
+    	.dropdown
+		{
+  			font-size: 20px;  
+			border: none;
+  			outline: none;
+  			padding: 1.8%;
+  			background-color: var(--panel-color);
+  			color: var(--text-color);
+  			position: absolute;
+			text-align: left;
+			margin-left: 3%;
+			top:3%;
+			width: 40%;
+			height: 10%;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		.dropDownRepeat
+		{
+			transition: 0.5s;
+			position: absolute;
+			margin-left: 3%;
+			width: 40%;
+			top:13%;
+  			background-color: var(--background-color);
+  			box-shadow: 0px 4px 8px 0px;
+
+  			z-index: 2;
+  			max-height: 50%;
+  			overflow: scroll;
+  			border-bottom-left-radius: 10px;
+  			border-bottom-right-radius: 10px;
+		}
+
+		.dropDownRepeat a
+		{
+			padding: 8px 16px;
+			cursor: pointer;
+			display: block;
+			text-decoration: none;
+		}
+		.dropDownRepeat a:hover
+		{
+			background-color: pink;
+		}
+
+		.week
+		{
+			position: absolute;
+			top:66%;
+			margin-left: 3%;
+			width: 100%;
+			transition: 0.5s;
+		}
+
+		.effective
+		{
+			position: absolute;
+			top:30%;
+			width: 40%;
+			margin-left: 30%;
+			height: 40%;
+			z-index: 2;
+			background-color: red;
+			display: none;
+		}
 	</style>
 </head>
 <body>
+
+	<!-- datePicker html -->
 	<div id = "datePicker" style="display: none;">
-	<div id = "title" class="title">Mon, Dec 2, 2019 7:00AM</div>
-    	<div class = "content" id = "date" style="left:0%; border-right: none; width: 40%; font-family: courier"> 
-    </div>
-    
-    <div class = "content" id = "hour" style="left:40%"> 
+	
+		<div id = "title" class="title">Mon, Dec 2, 2019 7:00AM</div>
+    		<div class = "content" id = "date" style="left:0%; border-right: none; width: 40%; font-family: courier">	 
+    	</div>
+    	
+    	<div class = "content" id = "hour" style="left:40%"> 
         <a id = "hour1" href="#">1</a>
         <a id = "hour2" href="#">2</a>
         <a id = "hour3" href="#">3</a>
@@ -172,9 +265,9 @@
         <a id = "hour10" href="#">10</a>
         <a id = "hour11" href="#">11</a>
         <a id = "hour12" href="#">12</a>
-    </div>
-
-    <div class = "content" id = "minute" style="left:55%; border-right: none;border-left: none;"> 
+    	</div>
+	
+    	<div class = "content" id = "minute" style="left:55%; border-right: none;border-left: none;"> 
         <a href = "#" id = "minute0">00</a>
         <a href = "#" id = "minute1">01</a>
         <a href = "#" id = "minute2">02</a>
@@ -235,41 +328,104 @@
         <a href = "#" id = "minute57">57</a>
         <a href = "#" id = "minute58">58</a>
         <a href = "#" id = "minute59">59</a>
-    </div>
-    <div class="content" id = "period" style="left: 70%; height: 60%;">
-        <a href="#" id ="am">AM</a>
-        <a href="#" id ="pm">PM</a>
-    </div>
-    <div style="position: absolute; top:70%; left: 79%; z-index: 2">
-        <button id = "cancel"type="button" class="btn btn-danger" style="width:100px">Cancel</button>
-    </div>
-    <div style="position: absolute; top: 60%; left: 79%;z-index: 2">
-        <button id = "ok" type="button" class="btn btn-primary" style="width:100px;background-color:green">Ok</button>
-    </div>
+    	</div>
+    	<div class="content" id = "period" style="left: 70%; height: 60%;">
+    	    <a href="#" id ="am">AM</a>
+    	    <a href="#" id ="pm">PM</a>
+    	</div>
+    	<div style="position: absolute; top:70%; left: 79%; z-index: 2">
+    	    <button id = "cancel"type="button" class="btn btn-danger" style="width:100px">Cancel</button>
+    	</div>
+    	<div style="position: absolute; top: 60%; left: 79%;z-index: 2">
+    	    <button id = "ok" type="button" class="btn btn-primary" style="width:100px;background-color:green">Ok</	button>
+    	</div>
 	</div>
 
-
-
-
-
-
+	<!-- alarm html -->
 	<div class="reminder">
 		<div style="position: relative;top: 15px; cursor: pointer;">
-        	<div id = "none"> <span>None</span><input type="radio" name = "alram"></div><hr>
-        	<div id = "at"><span>At time of event</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "5min"><span>5 minutes before</span><input type="radio"  name = "alram"> </div><hr>
-        	<div id = "10min"><span>10 minutes before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "15min"><span>15 minutes before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "20min"><span>20 minutes before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "25min"><span>25 minutes before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "30min"><span>30 minutes before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "1hour"><span>1 hour before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "2hour"><span>2 hours before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "1day"><span>1 day before</span><input type="radio"  name = "alram"></div><hr>
-        	<div id = "2day"><span>2 days before</span><input type="radio"  name = "alram"></div> <hr>
-        	<div id = "1week"><span>1 week before</span><input type="radio"  name = "alram"></div><br>
+        	<div> <span>None</span><input type="radio" name = "alram"></div><hr>
+        	<div><span>At time of event</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>5 minutes before</span><input type="radio"  name = "alram"> </div><hr>
+        	<div><span>10 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>15 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>20 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>25 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>30 minutes before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>1 hour before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>2 hours before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>1 day before</span><input type="radio"  name = "alram"></div><hr>
+        	<div><span>2 days before</span><input type="radio"  name = "alram"></div> <hr>
+        	<div><span>1 week before</span><input type="radio"  name = "alram"></div><br>
        	</div>
 	</div>
+
+	<div class="repeat">
+		<div style="position: relative;top: 15px; cursor: pointer;">
+        	<div><span>Never</span><input type="radio" name = "repeat"></div><hr>
+        	<div><span>Every day</span><input type="radio"  name = "repeat"></div><hr>
+        	<div><span>Every week</span><input type="radio"  name = "repeat"> </div><hr>
+        	<div><span>Every month</span><input type="radio"  name = "repeat"></div><hr>
+        	<div><span>Every year</span><input type="radio"  name = "repeat"></div><hr>
+        	<div><span>Custom</span><input type="radio"  name = "repeat"></div><hr>
+       	</div>
+	</div>
+
+	<div class="custom">
+		<div class = "dropdown" id = "repeatNumberDropDown">
+			<span id = "repeatNumberText">1</span>
+			<i class="fa fa-caret-down" style="position:absolute; right:25px; font-size: 20px"></i>		
+		</div>
+		<div class="dropDownRepeat" id = "repeatNumber">
+				<a href="#">1</a>
+				<a href="#">2</a>
+				<a href="#">3</a>
+				<a href="#">4</a>
+				<a href="#">5</a>
+				<a href="#">6</a>
+		</div>
+
+		<div class="dropdown" id = "repeatTypeDropDown" style="left: 50%">
+			<span id ="repeatTypeText" >week</span>
+			<i class="fa fa-caret-down" style="position:absolute; right:25px; font-size: 20px"></i>		
+		</div>
+		<div class="dropDownRepeat" id = "repeatType" style="left: 50%">
+				<a href="#">day</a>
+				<a href="#">week</a>
+				<a href="#">month</a>
+				<a href="#">year</a>
+		</div>
+		<div class="week">
+			<div id = "days" style="position: relative;top: 15px; cursor: pointer;">
+				<div>Sunday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>
+				<div>Monday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>
+				<div>Tuesday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>	
+				<div>Wednesday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>
+				<div>Thursday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>
+				<div>Friday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>
+				<div>Saturday<input type="checkbox" style="position:absolute; right: 20px"><hr></div>
+			</div>
+			<div id = "effectiveEntry" style="position: relative;top: 15px; cursor: pointer;">
+				<span style="margin-left: 0">Effective</span><span style="position: absolute; right: 35px" id = "effectiveText">Forever</span>
+			</div>
+			<div id = "until_a_date"  style="position: relative;top: 15px; cursor: pointer">
+				 <br>
+				 <div><input id = "date" type = "date" style="position: relative; left: 0;font-size: 100%; width: 170px;background: silver"></div>
+			</div>
+		</div>
+		
+	</div>
+	<div class="effective">
+		<h3 style = "padding: 20px 0 0 5%">Effective</h3>
+		<div id = "effective" style="position: relative;top: 15px; cursor: pointer;">
+			<div><span>Forever</span><input type="radio" name = "effective"></div><hr>
+        	<div><span>Until a date</span><input type="radio"  name = "effective"></div><hr>
+        	<div><span>For a number of events</span><input type="radio"  name = "effective"> </div>
+        </div>
+	</div>
+
+
+	<!-- main page -->
 	<div class="header">
 		<h4 style="margin-top: 1.5%"> 
 		<a id = "close" href="#"><i class="fas fa-times"></i></a>
@@ -281,38 +437,42 @@
 	<div class = "box">
 		<br>
 		<i class="fas fa-heading"></i>
+
 		<pre contenteditable="true" id = "title"></pre>
 		
 		<hr>
 
 
-		<div id = "startTime" style="cursor: pointer">
+		<div id = "startTime" style="cursor: pointer; width: 100%">
 			<i class="far fa-clock"></i>
 			<span>Start</span>
-			<span id = "startTimeText"></span>
+			<span id = "startTimeText" style="position: absolute; right: 35px"></span>
 		</div>
 		<hr>
 		
-		<div id = "endTime" style="cursor: pointer;">
+		<div id = "endTime" style="cursor: pointer; width: 100%">
 			<i class="far fa-clock"></i>
 			<span>End</span> &nbsp;
-			<span id = "endTimeText"></span>
+			<span id = "endTimeText" style="position: absolute; right: 35px"></span>
 		</div>
 		<hr>
 		<div id = "alarm" style="cursor: pointer;">
 			<i class="far fa-bell"></i>
-			<span> ADD REMINDER </span>
+			<span>ADD REMINDER </span>
 		</div>
-		<div id = "alarmText" style="margin-left:12.5%"></div>
+		<div id = "alarmText" style="margin-left:11.3%"></div>
 		
-	
-
 		<hr>
 		<i class="far fa-comments"></i>
 		<pre contenteditable="true" id = "description"></pre>
 		<hr>
-		<i class="fas fa-sync"></i>
-		<span>Repeat</span>
+		
+		<div id ="repeat" style="cursor: pointer; width: 100%">
+			<i class="fas fa-sync"></i>
+			<span>Repeat</span>
+			<span id = "repeatText" style="position: absolute; right: 35px">Never</span>
+		</div>
+		
 	</div>
 	<script type="text/javascript">
 		const $ = require("jQuery");
@@ -333,9 +493,9 @@
 			"30 minutes before":0,
 			"1 hour before":0,
 			"2 hours before":0,
-			"1 day":0,
-			"2 days":0,
-			"1 week":0,
+			"1 day before":0,
+			"2 days before":0,
+			"1 week before":0,
 		};
 		function showReminder()
 		{
@@ -385,12 +545,16 @@
 		})
 
 		$("#alarm").click(function(){
-			$(".reminder").css({"display":"block","z-index":2});
+			$(".reminder").css({"display":"block"});
 		})
 
+		$("#repeat").click(function(){
+			$(".repeat").css({"display":"block"});
+		})
+		
 		$('body').on('click',".reminder div div",function(){
 			let text = $(this).children("span").text();
-			
+			$(this).children("input").prop("checked", true);
 			if(text != "None" && alarmDict[text] == 0)
 			{
 				console.log(text);
@@ -400,6 +564,16 @@
 			$(".reminder").css("display","none");
 		})
 
+		$('body').on('click',".repeat div div",function(){
+			let text = $(this).children("span").text();
+			$(this).children("input").prop("checked", true);
+			$("#repeatText").text(text);
+			$(".repeat").css("display","none");
+			if(text == "Custom") $(".custom").css("display","block");
+
+		})
+
+
 		$('body').on('click',"#alarmText a",function(){
 			alarmDict[$(this).parent().text()] = 0;
 			$(this).parent().remove();
@@ -407,5 +581,7 @@
 
 	</script>
 	<script src = "../js/date_picker.js"></script>
+	<script src = "../js/customize_repeat.js"></script>
+	<script src = "../js/effective.js"></script>
 </body>
 </html>
