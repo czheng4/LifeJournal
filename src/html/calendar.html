@@ -9,7 +9,11 @@
     <link href="../../fontawesome/css/all.css" rel="stylesheet">
     <title>Calendar</title>
     <style type="text/css">
-        
+        body
+        {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
         h3
         {
             text-align: center;
@@ -51,6 +55,18 @@
             left: 10%; 
             color: red;
         }
+        .reminder
+        {
+            position:relative; 
+            left: 10%; 
+            color: blue;
+        }
+        .reminderDot
+        {
+            color:blue;
+            font-size: 30px;
+            margin-left: 10px;
+        }
         .diaryDot
         {
             color:red;
@@ -82,7 +98,7 @@
         <div style="max-height: 750px;overflow:scroll;">
         <table>
             <tr>
-                <th colspan="7" style="background-color: silver;font-size: 25px">
+                <th colspan="7" style="background-color: var(--theme-l1);font-size: 25px">
                 <a href = "#" id = "previous" style="position: relative; left: 2%"><i class="fas fa-arrow-left"></i></a >
                 <a href = "#" id = "next" style="position: relative; left: 4%"><i class="fas fa-arrow-right"></i></a>
     

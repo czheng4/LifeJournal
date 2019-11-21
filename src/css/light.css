@@ -5,13 +5,18 @@
 */
 :root 
 {
-	--background-color: #ededed;
-	--page-background: #fff;
+	--background-color: #f9f9f9;
+	--page-background: #d8d8d8;
 	--text-color: #212121;
-	--panel-color: silver;
+	--panel-color: #d8d8d8;
 	--hr-line:rgb(10,10,10,0.3);
 	--nav-color:silver;
 	--hover-color:#2196F3;
 	--selection-background-color:lightblue;
 	--selection-color:white;
+
+
+	--theme-l1:#c5c5c5;
+	--theme-l2:#b1b1b1;
+	--theme-l3:#8e8e8e;
 }

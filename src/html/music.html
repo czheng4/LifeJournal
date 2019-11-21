@@ -8,18 +8,33 @@
 <!DOCTYPE html>
 <html>
     <head>
-    	<title>Music Player</title>
-    	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <title>Music Player</title>
+        <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
         <link href="../../fontawesome/css/all.css" rel="stylesheet">
         <style type="text/css">
+            body
+            {
+                background-color: var(--background-color);
+                color: var(--text-color);
+            }
             h1, h2, h3{
                 text-align: center;
+                font-size: 22px;
+            }
+            label, p{
+                font-size: 15px;
             }
             div{
                 margin-bottom: 5px;
             }
             div:last-of-type{
                 margin-bottom: 0px;
+            }
+            hr{
+                width: 98%;
+                height: 3px;
+                background-color: rgb(34, 34, 34);
+                clear: both;
             }
             .button_container{
                 text-align: center;
@@ -111,13 +126,18 @@
                 padding: 4px;
                 border-radius: 15%;
             }
+            .side_by_side{
+                width: 100%;
+                margin: auto;
+            }
             .volume_container{
                 width: 50%;
                 text-align: center;
+                float: left;
             }
             .vol_slider{
                 -webkit-appearance: none;
-                width: 50%;
+                width: 70%;
                 height: 5px;
                 background: #d3d3d3;
                 outline: none;
@@ -142,11 +162,30 @@
                 background: rgb(87, 67, 201);
                 cursor: pointer;
             }
+            .second_select{
+                width: 50%;
+                float: left;
+                text-align: center;
+            }
+            .timer_container{
+                text-align: center;
+                width: 100%;
+            }
+            .light_grey{
+                background-color: rgb(189, 189, 189);
+                height: 12px;
+                width: 75%;
+                display: inline-block;
+            }
+            .light_blue{
+                background-color: rgb(64, 151, 206);
+            }
         </style>
     </head>
 
     <body>
         <div class= "container">
+            <hr>
             <h3>Controls</h3>
             <div class="button_container">
                 <button id = "upload" type="button" class="upbutton">Upload Music</button>
@@ -156,7 +195,7 @@
                 <button id = "refresh" type="button" class="upbutton">Refresh Playlist</button>
             </div>
             <div class="button_container">
-                <button id = "prev" type="button" class="tbutton" title="skip to previous"><img src="../../image/prev.png"></button>
+                <button id = "prev" type="button" class="tbutton" title="go to previous song"><img src="../../image/prev.png"></button>
                 &nbsp;
                 <button id = "rewind" type="button" class="tbutton" title="rewind"><img src="../../image/rewind_button.png" alt="rewind"></button>
                 &nbsp;
@@ -166,30 +205,39 @@
                 &nbsp;
                 <button id = "fastForward" type="button" class="tbutton" title="fast forward"><img src="../../image/fast_forward.png" alt="forward"></button>
                 &nbsp;
-                <button id = "next" type="button" class="tbutton" title="skip to next"><img src="../../image/skip.png"></button>
-                <h3>Time skip (in seconds)</h3>
-                <form>
-                    <input type="radio" name="speed" id="speed1" value="5" checked> 5&nbsp;
-                    <input type="radio" name="speed" id="speed2" value="15"> 15&nbsp;
-                    <input type="radio" name="speed" id="speed3" value="30"> 30
-                </form>
+                <button id = "next" type="button" class="tbutton" title="go to next song"><img src="../../image/skip.png"></button>  
             </div>
-            <div class="volume_container">
-                <p>Volume Controller</p>
-                <input type="range" min="0" max="100" value="100" class="vol_slider" id="vol_con">
-                <p><span id="vol_level"></span></p>
+            <div class="side_by_side">
+                <div class="second_select">
+                    <p>FF/Rewind (secs)</p>
+                    <form>
+                        <label>5
+                        <input type="radio" name="speed" id="speed1" value="5" checked></label>
+                        <label>15
+                        <input type="radio" name="speed" id="speed2" value="15"></label>
+                        <label>30
+                        <input type="radio" name="speed" id="speed3" value="30"></label>
+                    </form>
+                </div>
+                <div class="volume_container">
+                    <label>Volume Slide
+                    <input type="range" min="0" max="100" value="100" class="vol_slider" id="vol_con">
+                    </label>
+                    <p><span id="vol_level"></span></p>
+                </div>
             </div>
-            <div class="button_container">
-                <h3>Color Themes</h3>
-                <button id = "light" type="button" class="light_button">Light</button>
-                &nbsp;
-                <button id = "dark" type="button" class="dark_button">Dark</button>
-                &nbsp;
-                <button id = "blue" type="button" class="blue_button">Blue</button>
-            </div>
+            <hr>
             <div>
                 <h1>Currently Playing</h1>
                 <div id="currently_playing"></div>
+                <div class="timer_container">
+                    <div class="light_grey">
+                    <div id="prog_bar" class="light_blue" style="height:12px;width:0;">
+                    </div>
+                    </div>
+                    <p><span id="curr_t_min"></span>:<span id="curr_t_sec"></span>/<span id="s_dur_min"></span>:<span id="s_dur_sec"></span></p>
+                </div>
+                <hr>
                 <h2>Playlist (Check Box for Deletion)</h2>
                 <div id="playlist"></div>
             </div>
@@ -197,6 +245,8 @@
         <script type="text/javascript">
             const $ = require("jQuery");
             const fs = require("fs");
+            const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+            loadThemeMode();
             var musicThread = require('electron').ipcRenderer;
             var remote = require('electron').remote;  
             var user = remote.getGlobal('share').user;
@@ -211,49 +261,103 @@
             var dec = 5;
             var vol_slider = document.getElementById("vol_con");
             var curr_vol = document.getElementById("vol_level");
+            var curr_t_min = document.getElementById("curr_t_min");
+            var curr_t_sec = document.getElementById("curr_t_sec");
+            var sec_chk = 0;
+            var curr_dur_min = document.getElementById("s_dur_min");
+            var curr_dur_sec = document.getElementById("s_dur_sec");
             var change_vol = 0;
+            var p_bar_w = 1;
+            var audio_tmp, tmp_ind;
+            var aud_tmp_pl = false;
+
+            curr_t_min.innerHTML = 0;
+            curr_t_sec.innerHTML = '00';
+            curr_dur_min.innerHTML = 0;
+            curr_dur_sec.innerHTML = '00';
 
             curr_vol.innerHTML = vol_slider.value;
             // A function for displaying the currently uploaded music available for playback
             function showMusic(){
                 music_list = [];
                 music_titles_list = [];
+                let previous_time = -1;
                 $("#playlist").empty();
                 path = "../../data/" + user + "/music/";
-		        fs.readdir("./data/" + user + "/music",(err,files) =>{
+                fs.readdir("./data/" + user + "/music",(err,files) =>{
                     if(err) throw err;
                     var music_list_length = files.length;
-			        for(var i = 0; i < music_list_length; i++) 
-			        {
+                    for(var i = 0; i < music_list_length; i++) 
+                    {
                         audio_path = path + files[i];
                         var slice = files[i].slice(0, files[i].length - 4);
                         audio = new Audio(audio_path);
-                        music_list.push(audio);
-                        /*if(i > 0){
-                            music_list[i-1].addEventListener('ended', (event) => {
-                                music_list[i].play();
-                            });
-                            if(i === music_list_length - 1){
-                                music_list[i].addEventListener('ended', (event) => {
-                                    music_list[0].play();
-                                }); 
+                        // add the on time update event which will display the current time
+                        // and duration of a song
+                        audio.addEventListener('timeupdate', (event) => {
+                            if(p_bar_w >= 100){
+                                p_bar_w = 0;
                             }
-                        } */
+
+                            else{
+                                p_bar_w = parseInt((audio.currentTime / audio.duration)*100);
+                                if(audio.currentTime < 10) {
+                                        //curr_t_sec.innerHTML = "";
+                                        //console.log(curr_t_sec)
+                                        console.log((audio.currentTime).toFixed(0));
+                                        curr_t_min.innerHTML = "0";
+                                        $("#curr_t_sec").text('0' + (audio.currentTime).toFixed(0));  
+                                        //curr_t_sec.innerHTML = '0' + (audio.currentTime).toFixed(0);
+                                }
+                                else if(audio.currentTime < 60) curr_t_sec.innerHTML = (audio.currentTime).toFixed(0);
+                                else{
+                                    curr_t_min.innerHTML = (audio.currentTime/60).toFixed(0);
+                                    sec_chk = audio.currentTime%60;
+                                    if(sec_chk < 10) curr_t_sec.innerHTML = '0' + sec_chk.toFixed(0);
+                                    else curr_t_sec.innerHTML = sec_chk.toFixed(0);
+                                }
+                                document.getElementById("prog_bar").style.width = p_bar_w + '%';
+                            }
+                        });
+                        if(i > 0){
+                            music_list[i-1].onended = (event) => {
+                                tmp_ind = (music_ind + 1)%music_list.length
+                                audio_tmp = music_list[tmp_ind];
+                                $("#currently_playing").empty();
+                                $("#currently_playing").append(music_titles_list[tmp_ind]);
+                                checkVol(audio_tmp);
+                                checkDur(audio_tmp);
+                                if(audio_tmp.currentTime < 60){
+                                    curr_t_sec.innerHTML = (audio_tmp.currentTime).toFixed(0);
+                                }
+                                if(audio_tmp.currentTime < 10) {
+                                    curr_t_min.innerHTML = "0";
+                                    curr_t_sec.innerHTML = '0' + (audio_tmp.currentTime).toFixed(0);
+                                }
+                                else if(audio_tmp.currentTime < 60) curr_t_sec.innerHTML = (audio_tmp.currentTime).toFixed(0);
+                                else{
+                                    curr_t_min.innerHTML = (audio_tmp.currentTime/60).toFixed(0);
+                                    sec_chk = audio_tmp.currentTime%60;
+                                    if(sec_chk < 10) curr_t_sec.innerHTML = '0' + sec_chk.toFixed(0);
+                                    else curr_t_sec.innerHTML = sec_chk.toFixed(0);
+                                }
+                                document.getElementById("prog_bar").style.width = 0 + '%';
+                                aud_tmp_pl = true;
+                                audio_tmp.play();
+                            };
+                        }
+                        music_list.push(audio);
                         attach = "<body>" + "<b>" + slice + "</b>" + "</body>";
                         music_titles_list.push(attach);
                         // This creates a checkbox element
-                        attach = "<label><input type=\"checkbox\" name=\"checkbox\" id = \"song" + i + "\">" + slice + "</label>";
+                        attach = "<label><input type=\"checkbox\" name=\"checkbox\" id = \"song" + i + "\">" + slice + "</label><br>";
                         $("#playlist").append(attach);
-			        }
+                    }
                     music_list_length = music_list.length;
                     music_ind = 0;
                     audio = music_list[music_ind];
+                    p_bar_w = 1;
                 })
-            }
-            // simple function to change the background color and text color of the music player
-            function changeColor(bg_color, text_color){
-                    document.body.style.backgroundColor = bg_color;
-                    document.body.style.color = text_color;
             }
             // compare current song's volume with the selected slider volume
             // if they are different, change current song's volume to that of the slider's
@@ -268,27 +372,27 @@
                     audio.volume = parseInt(this.value) / 100.0;
                 }
             }
+            function checkDur(audio){
+                if(audio.duration/60 !== curr_dur_min.innerHTML){
+                    curr_dur_min.innerHTML = (audio.duration/60).toFixed(0);
+                    sec_chk = audio.duration%60;
+                    if(sec_chk < 10) curr_dur_sec.innerHTML = '0' + sec_chk.toFixed(0);
+                    else curr_dur_sec.innerHTML = sec_chk.toFixed(0)
+                }
+            }
+            function checkTmp(t_val){
+                if(t_val){
+                    music_ind = tmp_ind;
+                    audio = audio_tmp;
+                    aud_tmp_pl = false;
+                }
+            }
             $(document).ready(function(){
+
+
+                musicThread.send("MUSIC_REGISTER");
                 showMusic();
                 music_list_length = music_list.length;
-                // Try to find if the user has an already selected color theme
-                var bg_path = './data/' + user + "/bg.txt";
-                try{
-                    // if they do, let it happen
-                    if(fs.existsSync(bg_path)){
-                        fs.readFile(bg_path, 'utf-8', (err, data) => {
-                            if(err) throw err;
-
-                            var bg_opts = data.split('\n');
-                            changeColor(bg_opts[0], bg_opts[1]);
-                        })
-                    }
-                    else{ // otherwise use default light theme
-                        changeColor("#EFEFF0", "#1F1F1F");
-                    }
-                }catch(err){
-                    console.error(err);
-                }
                 // this will allow the user to upload music files (only mp3)
                 $("#upload").click(function(){
                     musicThread.send("upload","music/");
@@ -300,12 +404,11 @@
                 // play button will play the first song on the playlist, or if one was already playing
                 // it will pause it and if clicked one additional time, re-play it
                 $("#play").click(function(){
-                    if(music_ind >= music_list.length){
-                        music_ind = 0;
-                    }
+                    checkTmp(aud_tmp_pl);
                     if(audio !== null && audio.currentTime > 0 && !audio.paused){
                         $("#currently_playing").empty();
                         checkVol(audio);
+                        checkDur(audio);
                         audio.pause();
                     }
                     else if(audio !== null && (audio.currentTime === 0 || audio.paused)){
@@ -313,13 +416,7 @@
                         if(audio !== music_list[music_ind]) audio = music_list[music_ind];
                         $("#currently_playing").append(music_titles_list[music_ind]);
                         checkVol(audio);
-                        audio.play();
-                    }
-                    else if(audio === null){
-                        audio = music_list[music_ind];
-                        $("#currently_playing").empty();
-                        $("#currently_playing").append(music_titles_list[music_ind]);
-                        checkVol(audio);
+                        checkDur(audio);
                         audio.play();
                     }
                 })
@@ -327,6 +424,7 @@
                 // is not repeated if there is one
                 $("#playRand").click(function(){
                     var old_ind = music_ind;
+                    checkTmp(aud_tmp_pl);
                     while(old_ind === music_ind){
                         music_ind = parseInt((Math.random() * music_list.length), 10);
                     }
@@ -339,10 +437,14 @@
                     $("#currently_playing").empty();
                     $("#currently_playing").append(music_titles_list[music_ind]);
                     checkVol(audio);
+                    checkDur(audio);
                     audio.play();
                 })
+                // go forward within current song or skip to next song
+                // depending on result from incrementing by time scale
                 $("#fastForward").click(function(){
                     if(audio !== null){
+                        checkTmp(aud_tmp_pl);
                         if(audio !== music_list[music_ind]) audio = music_list[music_ind];
                         if(!audio.paused) audio.pause;
                         if(!document.getElementById("speed1").checked){
@@ -355,15 +457,20 @@
                             audio.currentTime = 0;
                             music_ind = (music_ind + 1) % music_list.length;
                             audio = music_list[music_ind];
+                            p_bar_w = 1;
                             $("#currently_playing").empty();
                             $("#currently_playing").append(music_titles_list[music_ind]);
+                            checkDur(audio);
                         }
                         checkVol(audio);
                         audio.play();
                     }
                 })
+                // Rewind by selected time scale
+                // simply jump the song back by that scale (arithmetic)
                 $("#rewind").click(function(){
                     if(audio !== null){
+                        checkTmp(aud_tmp_pl);
                         if(audio !== music_list[music_ind]) audio = music_list[music_ind];
                         if(!audio.paused) audio.pause;
                         if(!document.getElementById("speed1").checked){
@@ -372,6 +479,7 @@
                         }
                         if((audio.currentTime - dec) >= 0) audio.currentTime -= dec;
                         else{
+                            p_bar_w = 1;
                             audio.pause();
                             audio.currentTime = 0;
                             music_ind -= 1;
@@ -379,6 +487,7 @@
                             audio = music_list[music_ind];
                             $("#currently_playing").empty();
                             $("#currently_playing").append(music_titles_list[music_ind]);
+                            checkDur(audio);
                         }
                         checkVol(audio);
                         audio.play();
@@ -386,34 +495,41 @@
                 })
                 // skip to the song following the current song
                 $("#next").click(function(){
-                    music_ind = (music_ind + 1) % music_list.length;
-                    if(music_ind >= music_list.length){
+                    /*if(music_ind >= music_list.length){
                         music_ind = 0;
-                    }
-                    if(audio !== null){ 
+                    }*/
+                    
+                    if(audio !== null){
+                        checkTmp(aud_tmp_pl); 
                         audio.pause();
                         audio.currentTime = 0; 
                     }
+                    music_ind = (music_ind + 1) % music_list.length;
                     audio = music_list[music_ind];
                     $("#currently_playing").empty();
                     $("#currently_playing").append(music_titles_list[music_ind]);
                     checkVol(audio);
+                    checkDur(audio);
+                    p_bar_w = 1;
                     audio.play();
                 })
                 // skip backward from current song
                 $("#prev").click(function(){
+                    if(audio !== null){ 
+                        checkTmp(aud_tmp_pl);
+                        audio.pause();
+                        audio.currentTime = 0; 
+                    }
                     music_ind -= 1;
                     if(music_ind < 0){
                         music_ind = music_list.length - 1;
-                    }
-                    if(audio !== null){ 
-                        audio.pause();
-                        audio.currentTime = 0; 
                     }
                     audio = music_list[music_ind];
                     $("#currently_playing").empty();
                     $("#currently_playing").append(music_titles_list[music_ind]);
                     checkVol(audio);
+                    checkDur(audio);
+                    p_bar_w = 1;
                     audio.play();
                 })
                 // Delete will first see if a given song has had it's checkbox marked, and if it has
@@ -424,8 +540,8 @@
                     fs.readdir("./data/" + user + "/music",(err,files) =>{
                         if(err) throw err;
                       
-			            for(var i = 0; i < files.length; i++) 
-			            {
+                        for(var i = 0; i < files.length; i++) 
+                        {
                             id = "song" + i;
                             chequebox = document.getElementById(id);
                             if(chequebox.checked){
@@ -437,29 +553,9 @@
                         showMusic();
                     })
                 })
-                // the following three just change the color theme of the player
-                $("#light").click(function(){
-                    changeColor("#EFEFF0", "#1F1F1F");
-                    data = "#EFEFF0" + '\n' + "#1F1F1F";
-                    fs.writeFile(bg_path, data, (err) => {
-                        if(err) throw err;
-                    })
-                })
-                $("#dark").click(function(){
-                    changeColor("#1F1F1F", "#EFEFF0");
-                    data = "#1F1F1F" + '\n' + "#EFEFF0";
-                    fs.writeFile(bg_path, data, (err) => {
-                        if(err) throw err;
-                    })
-                })
-                $("#blue").click(function(){
-                    changeColor("#5FD0FE", "#EFEFF0");
-                    data = "#5FD0FE" + '\n' + "#EFEFF0";
-                    fs.writeFile(bg_path, data, (err) => {
-                        if(err) throw err;
-                    })
-                })
+                musicThread.on("changeThemeMode",changeThemeMode);
             })
+
         </script>
     </body>
 </html>

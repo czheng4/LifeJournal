@@ -146,7 +146,9 @@
 	<title>DocYOUment</title>
 </head>
 <body>
-
+	<audio id = "alarm">
+ 	 	<source  src="../../alarm/alarm.wav" type="audio/mpeg">
+	</audio>
 	<div class = "container">
 		<div class = "topnav">
 			<button id = "openPanel" class = "panelbn"><i class="fas fa-bars" style="font-size: 17px"></i></button>
@@ -516,6 +518,41 @@
             diaryThread.on("changeCaseSensitive",function(event,newCaseSensitive){
             	case_sensitive = (newCaseSensitive == "on");
             });
+
+            function playAlarm(time,reminder)
+            {
+            	console.log("call me");
+            	setTimeout(function(){
+            		audio = document.getElementById("alarm");
+					audio.play();
+					var confirmation = new Confirmation(
+						"ALARM_SOUND",     //type
+						"Alarm",			  //title
+						reminder.title, // text
+						["Cancel","Ok"]   //buttonlabels 
+					);
+					diaryThread.send("openConfirmation",confirmation);
+            	
+            	},time);
+         		
+			}
+			diaryThread.on("scheduleAlarm",function(event,reminder){
+
+				console.log(reminder);
+				let alarmTime = reminder.alarmTime;
+
+				alarmTime = alarmTime.split(",");
+
+				alarmTime = alarmTime.map(function(time){ return parseInt(time);});
+				console.log(alarmTime);
+				for(var i = 0; i < alarmTime.length; i++)
+				{
+		
+					console.log(reminder.startTimeMilliseconds - (new Date()).getTime() - alarmTime[i]);
+					if(reminder.startTimeMilliseconds - new Date().getTime() - alarmTime[i] > 0)
+						playAlarm(reminder.startTimeMilliseconds - new Date().getTime() - alarmTime[i], reminder);
+				}
+			})
 
 		})
 	</script>

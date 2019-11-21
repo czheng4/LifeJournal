@@ -9,9 +9,13 @@
 	--page-background: #79bff8;
 	--text-color: black;
 	--panel-color: #79bff8;
-	--hr-line:rgb(10,10,10,0.5);
+	--hr-line:rgb(10,10,10,0.2);
 	--nav-color: #4daaf6;
 	--hover-color:white;
 	--selection-background-color:red;
 	--selection-color:white;
+
+	--theme-l1:#4daaf6;
+	--theme-l2:#0c87eb;
+	--theme-l3:#0b78d1;
 }

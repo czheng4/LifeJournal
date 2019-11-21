@@ -1,3 +1,14 @@
+/*
+    calendar.js
+    ChaoHuiZheng
+    11/21/2019
+
+    This lib is for filling out all infor we need for reminder.
+    This lib is for reading reminder from files and write reminder to the files.
+*/
+
+
+
 const months = {  
 	"Jan": "1",
 	"Feb": "2",
@@ -12,21 +23,97 @@ const months = {
 	"Nov": "11",
 	"Dec": "12",
 };
+const alarmDictMilliseconds = {
+	"At time of event":0,
+	"5 minutes before": 300000,
+	"10 minutes before": 600000,
+	"15 minutes before": 900000,
+	"20 minutes before": 1.2e+6,
+	"25 minutes before": 1.5e+6,
+	"30 minutes before":1.8e+6,
+	"1 hour before": 3.6e+6,
+	"2 hours before":7.2e+6,
+	"1 day before": 8.64e+7,
+	"2 days before": 1.728e+8,
+	"1 week before":6.048e+8,
+};
 
+const weekToNumber = {
+	"Sun.": 0,
+	"Mon.": 1,
+	"Tue.": 2,
+	"Wed.": 3,
+	"Thu.": 4,
+	"Fri.": 5,
+	"Sat.": 6,
+}
+/* turn date object to a string(yyyy-mm-dd)*/
+function getDateString(date)
+{
+	let year = date.getFullYear();
+	let month = date.getMonth() + 1;
+	let day = date.getDate();
+	let content = "";
 
+	content += year;
+	if(month < 9) content += "-0" + month;
+	else content += "-" + month;
+
+	if(day < 9) content += "-0" + day;
+	else content += "-" + day;
+	return content;
+	
+}
 class Reminder
 {
 	constructor()
 	{
+		/*
+			date is yyyy-mm-dd
+			startTime and endTime is "week, month day, yerar hour:minute AM/PM" (e.g "Sun, Nov 24, 2019 7:11 PM")
+			title is the title of reminder
+			repeatText is the text of repeat.
+			alarmText is all the texts of alarm and each alram is seperated by ','.
+			alarmTime is the time in millsencond before the event happens and each time is seperated by ','
+			startTimeMilliseconds is when the event start to happens.
+			endTimeMilliseconds is when the event ends.
+	
+		*/
+		this.date = "";
 		this.startTime = "";
 		this.endTime = "";
 		this.title = "";
 		this.description = "";
-		
+		this.repeatText = "";
+		this.alarmText = "";
+
+
+		this.alarmTime = "";
 		this.startTimeMilliseconds = 0;
 		this.endTimeMilliseconds = 0;
+
+
+		/*
+			frequecy is how often this event happens(frequency = 1 for every 1 week, month, frequency = 2 for every 2 weeks ...)
+			repeatType can be 'n'(never),'w'(week),'y'(year),'m'(month),'d'(day).
+			week is set when repeatType = 'w'. week stores the day of the week in number(Sunday is 0, Monday is 1 and so on).
+			effectiveType can be 'F'(forever), 'N'(for a number of event) and 'U'(until a date)
+			effectiveData is empty when effectiveType = 'n', effectiveData = 'date' and effectiveData = 'U', effectiveData = NUMBER when effectiveType = 'N'.
+
+		*/
+		this.frequency = 0;
+		this.repeatType;
+		this.week = "";
+
+		this.effectiveType = "";
+		this.effectiveData = "";
+
 	}
-	/* 'Wed, Nov 20, 2019   10:23 PM' to date(yyyy,mm,dd,hour, minute). */
+
+
+	/* 
+		split the string 'Wed, Nov 20, 2019   10:23 PM' to get date(yyyy,mm,dd,hour, minute) to get millsenconds. 
+	*/
 	timeSplit(type)
 	{
 		let time;
@@ -53,16 +140,327 @@ class Reminder
 		
 	
 		date = new Date(year, month - 1, day, hour, minute);
-		if(type == "startTime") this.startTimeMilliseconds = date.getTime();
+		if(type == "startTime") this.startTimeMilliseconds = date.getTime() ;
 		else this.endTimeMilliseconds = date.getTime();
-
-		console.log(date);
-		console.log(date.getTime());
+	
+		//console.log(date);
+		//console.log(this.startTimeMilliseconds);
 			
+	}
+
+	/* set alarmTime. The unit is millsenconds and it's seperated by ',' 
+	   alarmDict is a dict whose key is on string, val is bool (true means the alarm is added).
+	*/
+	setAlarm(alarmDict)
+	{
+
+		/*  We have to trigger the alarm further away from the starting time. so I sorted the keys in reverse order */
+		let alarmTime = "";
+		let keys = Object.keys(alarmDict).reverse();
+		let firstAlarm = true;
+		for(var i = 0; i < keys.length; i++)
+		{
+			if(alarmDict[keys[i]] == 1) 
+			{
+				if(firstAlarm == true) 
+				{
+					this.alarmText += keys[i];
+					alarmTime += alarmDictMilliseconds[keys[i]];
+					firstAlarm = false;
+				}
+				else 
+				{
+					alarmTime += "," + alarmDictMilliseconds[keys[i]];
+					this.alarmText += "," + keys[i];
+				}
+			}
+		}
+		this.alarmTime = alarmTime;
+		
+	}
+
+	/* 
+	   set week array. 
+	   Sun. represents 0, Mon. represent 1 and so on. 
+		
+	*/
+	setRepeat(repeatString)
+	{
+		this.repeatText = repeatString;
+		let frequency;
+		let isFirst = false;
+		let arr;
+		if(repeatString == "Never") 
+		{
+			this.date = getDateString(new Date(this.startTimeMilliseconds));
+			this.repeatType = 'n';
+			return;
+		}
+		
+		arr = repeatString.split(" ");
+
+		this.frequency =  arr[1];
+		this.repeatType = arr[2][0];
+
+		for(var i = 4; i < arr.length; i++) 
+		{
+			if(isFirst == false) 
+			{
+				isFirst = true;
+				this.week += weekToNumber[arr[i]];
+			}
+			else this.week += "," + weekToNumber[arr[i]];
+		}
+		if(this.repeatType == 'w' && arr.length >= 4)
+		{	
+
+			let date = new Date(this.startTimeMilliseconds);
+
+			/* offset of date */
+			this.startTimeMilliseconds  += ( parseInt(this.week[0]) - date.getDay() ) * 1000 * 60 * 60 * 24;
+			this.endTimeMilliseconds += ( parseInt(this.week[0]) - date.getDay() ) * 1000 * 60 * 60 * 24;
+		}  
+		this.date = getDateString(new Date(this.startTimeMilliseconds))
+	}
+
+	/* set effective type and data */
+	setEffective(effectiveString)
+	{
+		let arr = effectiveString.split(" ");
+
+		if(effectiveString.indexOf("Forever") != -1) this.effectiveType = 'F';
+		else if(effectiveString.indexOf("Until") != -1) 
+		{
+			this.effectiveType = 'U';
+			this.effectiveData = arr[arr.length - 1];
+		}
+		else
+		{
+			this.effectiveType = 'N';
+			this.effectiveData = arr[1];
+		}
+	}
+
+	/* write to files */
+	writeToFile(filePath)
+	{
+		var f = new File(filePath);
+		var content = "";
+
+		content += this.title;
+		
+		content += "REMINER_ZCH";
+		content += this.startTime;
+
+		content += "REMINER_ZCH";
+		content += this.endTime;
+
+		content += "REMINER_ZCH";
+		content += this.alarmText;
+
+		content += "REMINER_ZCH";
+		content += this.description;
+
+		content += "REMINER_ZCH";
+		content += this.repeatText;
+
+		content += "REMINER_ZCH";
+		content += this.frequency;
+
+		content += "REMINER_ZCH";
+		content += this.repeatType;
+
+		content += "REMINER_ZCH";
+		content += this.week;
+
+		content += "REMINER_ZCH";
+		content += this.effectiveType;
+
+		content += "REMINER_ZCH";
+		content += this.effectiveData;
+
+		content += "REMINER_ZCH";
+		content += this.startTimeMilliseconds;
+
+		content += "REMINER_ZCH";
+		content += this.endTimeMilliseconds;
+
+		content += "REMINER_ZCH";
+		content += this.date;
+
+		f.write(content);
+	}
+
+
+	/* read from files */
+	readFromFile(filePath)
+	{
+		var {File} = require("../js/file.js");
+		let f = new File(filePath);
+		let arr = f.readBySeparator("REMINER_ZCH");
+		
+		this.title = arr[0];
+		this.startTime = arr[1];
+		this.endTime = arr[2];
+		this.alarmText = arr[3];
+		this.description = arr[4];
+		this.repeatText = arr[5];
+		this.frequency = parseInt(arr[6]);
+		this.repeatType = arr[7];
+		this.week = arr[8];
+		this.effectiveType = arr[9];
+		this.effectiveData = arr[10];
+		this.startTimeMilliseconds = parseInt(arr[11]);
+		this.endTimeMilliseconds = parseInt(arr[12]);
+		this.date = arr[13];
 	}
 }
 
+/* get reminder array */
+function getReminders(dir)
+{	
+	
+	var reminderArray = [];
+	var reminder;
+	var files = fs.readdirSync(dir);
 
+	for(var i = 0; i < files.length; i++)
+	{
+		reminder = new Reminder();
+		reminder.readFromFile(dir + "/" + files[i]);
+		reminderArray.push(reminder);
+	}
+	reminderArray = reminderArray.sort(function(r1,r2){return (r1.date > r2.date)? 1:-1;});
+
+	return reminderArray;
+}
+
+/* get the reminder dictionary */
+function getRemindersDict(dir)
+{
+	var reminderArray = getReminders(dir);
+	var dict = {};
+	var reminder;
+	for(var i = 0; i < reminderArray.length; i++)
+	{
+		reminder = reminderArray[i];
+		if(reminder.date in dict) dict[reminder.date].push(reminder);
+		else dict[reminder.date] = [reminder];
+	}
+	return dict;
+}
+
+/* return true when we can mark the reminder */
+function isMarkOnCalendar(date, reminder)
+{
+	/* 
+		dayDifference is how many days pass between date and reminder date.
+		frequency is the number of times repeating.
+	*/
+	let dayDifference = date.getTime() - reminder.startTimeMilliseconds + 86400000 - 1;
+	let frequency = reminder.frequency;
+	let reminderDate = new Date(reminder.startTimeMilliseconds);
+	let monthDifference;
+	let week;
+
+	/* date is before the reminder */
+	if(dayDifference < 0) return false;
+
+	/* Until a specific date */
+	if(reminder.effectiveType == "U" && getDateString(date) > reminder.effectiveData) return false; 
+	
+
+	dayDifference = Math.floor(dayDifference / 86400000);
+	
+	/* never repeat */
+	if(reminder.repeatType == 'n') // "Nerver"
+	{
+		if(dayDifference == 0) return true;
+		else return false;
+	}
+
+	/* evert ? days. ? means positive number */
+	if(reminder.repeatType == 'd')
+	{
+		if(dayDifference % frequency == 0) 
+		{
+			if(reminder.effectiveType == "N") // For a number of event 
+			{
+				if(dayDifference / frequency < parseInt(reminder.effectiveData)) return true;
+			}
+			else return true;
+		}
+		
+		return false;
+	}
+
+	/* repeat ? year */
+	if(reminder.repeatType == 'y')
+	{	
+
+		if((date.getFullYear() - reminderDate.getFullYear()) % frequency == 0)
+		{
+			/* they must have same day and month */
+			if(date.getMonth() == reminderDate.getMonth() && date.getDate() == reminderDate.getDate())
+			{
+				if(reminder.effectiveType == "N")
+				{
+					if((date.getFullYear() - reminderDate.getFullYear()) / frequency < parseInt(reminder.effectiveData)) return true;
+				}
+				else return true;
+			}
+		}
+		return false;
+	}
+
+	/* evert ? month */
+	if(reminder.repeatType == 'm')
+	{	
+		monthDifference = (date.getFullYear() - reminderDate.getFullYear()) * 12;
+		monthDifference += date.getMonth() - reminderDate.getMonth();
+		if(monthDifference % frequency == 0)
+		{
+			/* same day */
+			if(date.getDate() == reminderDate.getDate()) 
+			{
+				if(reminder.effectiveType == "N")
+				{
+					if( monthDifference / frequency < parseInt(reminder.effectiveData)) return true;
+				}
+				else return true;
+			}
+		}
+		return false;
+	}
+
+	/* every ? week (on Mon. Tue. and so on) */
+	if(reminder.repeatType == 'w')
+	{
+		let num_reminders = 0;
+		let total = parseInt(reminder.effectiveData);
+		/*
+		if((dayDifference % (7 * frequency) == 0)) return true;
+		*/
+		/* create week that stores interger */
+		if(reminder.week == "") week = [0];
+		else week = reminder.week.split(",").map(function(element){ return parseInt(element); });
+		
+		num_reminders = Math.floor(dayDifference / (7 * frequency)) * week.length;
+
+		//if(num_reminders > total) return false;
+
+		for(var i = 0; i < week.length; i++)
+		{
+			if(num_reminders >= total) return false;
+			num_reminders++;
+			if(( dayDifference % (7 * frequency))  ==  (week[i] - week[0]) ) return true;
+		}
+		return false;
+	}
+}
 module.exports = {
-	Reminder:Reminder
+	Reminder:Reminder,
+	getReminders:getReminders,
+	getRemindersDict:getRemindersDict,
+	isMarkOnCalendar:isMarkOnCalendar
 }

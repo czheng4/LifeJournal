@@ -106,12 +106,12 @@ function scrollToToday()
 	string_minute = prev_minute.text();
 	
 	$("#title").text("");
-	$("#title").append(string_date + " &ensp;&ensp;" + string_hour + ":" + string_minute + " " + string_period);
+	$("#title").append(string_date + " " + string_hour + ":" + string_minute + " " + string_period);
 	prev_hour.css("background-color",highlight_color);
 	prev_minute.css("background-color",highlight_color);
 	prev_period.css("background-color",highlight_color);
 	prev_date.css("background-color",highlight_color);
-	console.log(prev_hour.offset().top);
+	//console.log(prev_hour.offset().top);
 	$("#date").scrollTop(0);
 	$("#hour").scrollTop(0);
 	$("#minute").scrollTop(0);
@@ -124,6 +124,24 @@ function scrollToToday()
 
 
 $(document).ready(function(){
+
+
+/* set starting time */
+$("#startTime").click(function(){
+	timeType = "start";
+	$("#datePicker").css({"display":"block","z-index":2});
+	scrollToToday();
+})
+
+/* set ending time */
+$("#endTime").click(function(){
+	timeType = "end";
+	$("#datePicker").css({"display":"block","z-index":2});
+	scrollToToday();
+})
+
+
+
 /* reset time */
 $('body').on('click','a',function(){
 	var id = $(this).parents().attr("id");
@@ -160,7 +178,7 @@ $('body').on('click','a',function(){
 	}
 
 	$("#title").text("");
-	$("#title").append(string_date + " &ensp;&ensp;" + string_hour + ":" + string_minute + " " + string_period);
+	$("#title").append(string_date + " " + string_hour + ":" + string_minute + " " + string_period);
 
 })
 
@@ -190,6 +208,7 @@ $("#ok").click(function(){
 	$("#datePicker").css("display","none");
 
 })
+
 
 $("#cancel").click(function(){
 	$("#datePicker").css("display","none");
