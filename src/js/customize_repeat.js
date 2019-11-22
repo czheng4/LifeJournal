@@ -1,7 +1,10 @@
+
+
+/* frequency dropdown */
 $("#repeatNumberDropDown").click(function(){
 	let height1 = $("#repeatNumber").css("max-height");
 	let height2 = $("#repeatType").css("max-height");
-	//let type = $("#repeatTypeText").text();
+	
 	$("#repeatNumber").css("max-height", height1 == "0px"? "170px": "0px");
 	if(height1 == "170px" && height2 == "0px") $(".week").css("top","110px");
 	else $(".week").css("top","290px");
@@ -9,6 +12,7 @@ $("#repeatNumberDropDown").click(function(){
 
 })
 
+/* repeat type dropdown */
 $("#repeatTypeDropDown").click(function(){
 	let height1 = $("#repeatType").css("max-height");
 	let height2 = $("#repeatNumber").css("max-height");
@@ -17,6 +21,7 @@ $("#repeatTypeDropDown").click(function(){
 	else $(".week").css("top","290px");
 })
 
+/* choose a number(frequency) from "repeat number dropdown" */
 $("#repeatNumber a").click(function(){
 	let num = $(this).text();
 	let type = $("#repeatTypeText").text();
@@ -28,6 +33,7 @@ $("#repeatNumber a").click(function(){
 	if($("#repeatType").css("max-height")  == "0px") $(".week").css("top","110px");
 })
 
+/* choose a type from "repeat type dropdonw" */
 $("#repeatType a").click(function(){
 	let num = $("#repeatNumberText").text();
 	let type = $(this).text();
@@ -44,6 +50,7 @@ $("#repeatType a").click(function(){
 	
 })
 
+/* choose the week */
 $(":checkbox").on("click", function(){
 	$(this)[0].checked = !$(this)[0].checked;
 });
@@ -55,6 +62,7 @@ $("#days div").click(function(){
 
 
 
+/* open repeat options */
 $(".repeat div div").click(function(){
 	if($(this).text() == "Custom")
 	{
@@ -63,15 +71,18 @@ $(".repeat div div").click(function(){
 })
 
 
+/* opne effective options */
 $("#effectiveEntry").click(function(){
 	$(".effective").css("display","block");
 })
 
 
+/* cancel custom */
 $("#cancelCustom").click(function(){
 	$(".custom").css("display","none");
 })
 
+/* confirm custom */
 $("#okCustom").click(function(){
 
 	let s = "";

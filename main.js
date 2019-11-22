@@ -69,7 +69,8 @@ const eventList = {
     "CREATE_ALBUM":null,        // create_album.html
     "ALBUM_BACKGROUND":null,    // choose_album_background.html
     "CALENDAR":null,            // calendar.js
-    "TEXTBOX":{}                // text_box.html
+    "TEXTBOX":{},               // text_box.html
+    "MUSIC":null                // music.html
 };
 
 mainThread.on("MAIN_ALBUM_REGISTER",(event)=>{
@@ -113,6 +114,10 @@ mainThread.on("CALENDAR_REGISTER",(event)=>{
     eventList["CALENDAR"] = event;
 })
 
+mainThread.on("MUSIC_REGISTER",(event)=>{
+    eventList["MUSIC"] = event;
+})
+
 mainThread.on("TEXTBOX_REGISTER",(event,index)=>{
     eventList["TEXTBOX"][index] = event;
     console.log(eventList["TEXTBOX"]);
@@ -143,7 +148,7 @@ mainThread.on("openSetting", function(event){
         //alwaysOnTop:true,
         webPreferences: { nodeIntegration: true }
     });
-    settingWindow.webContents.openDevTools();
+    //settingWindow.webContents.openDevTools();
     settingWindow.on('closed',() => {settingWindow = null;});
     //settingWindow.on('blur',() => {settingWindow.close(); settingWindow = null;});
     settingWindow.loadFile("./src/html/setting.html");
@@ -164,6 +169,8 @@ mainThread.on("changeThemeMode",function(event,oldMode,newMode){
     if(eventList["PHOTO_TRANSFER"] != null)     eventList["PHOTO_TRANSFER"].sender.send("changeThemeMode",oldMode, newMode);
     if(eventList["CREATE_ALBUM"] != null)       eventList["CREATE_ALBUM"].sender.send("changeThemeMode",oldMode, newMode);
     if(eventList["ALBUM_BACKGROUND"] != null)   eventList["ALBUM_BACKGROUND"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["CALENDAR"] != null)   eventList["CALENDAR"].sender.send("changeThemeMode",oldMode, newMode);
+    if(eventList["MUSIC"] != null)   eventList["MUSIC"].sender.send("changeThemeMode",oldMode, newMode);
     for(var key in eventList["TEXTBOX"]) eventList["TEXTBOX"][key].sender.send("changeThemeMode",oldMode, newMode);
     
 })
@@ -257,7 +264,7 @@ mainThread.on("openPhoto", function(event){
         title: "Album",
         webPreferences: { nodeIntegration: true }
     });
-    photo.webContents.openDevTools();
+    //photo.webContents.openDevTools();
     photo.on('closed',() => { eventList["MAIN_PHOTO"] = null; eventList["MAIN_ALBUM"] = null; photo = null;});
     
     photo.on('resize',function(){
@@ -301,7 +308,7 @@ mainThread.on("openCreateAlbum",function(event){
         webPreferences: { nodeIntegration: true }
     });
     createAlbum.on('closed',()=>{ eventList["CREATE_ALBUM"] = null; createAlbum = null; });
-    createAlbum.webContents.openDevTools();
+    //createAlbum.webContents.openDevTools();
     createAlbum.loadFile("./src/html/create_album.html");
 })
 
@@ -369,7 +376,7 @@ mainThread.on("openConfirmation",function(event,data){
         webPreferences: { nodeIntegration: true }
     });
    
-    taskConfirm.webContents.openDevTools();
+    //taskConfirm.webContents.openDevTools();
     taskConfirm.on('closed',()=>{ eventList["CONFIRMATION_PAGE"] = null; taskConfirm = null; });
     //taskConfirm.on('blur',() => { taskConfirm.close(); eventList["CONFIRMATION_PAGE"] = null; taskConfirm = null;});
     taskConfirm.loadFile("./src/html/confirmation.html");
@@ -454,7 +461,7 @@ mainThread.on("openEditAlbum",function(event){
         maximizable: false,
         webPreferences: { nodeIntegration: true }
     });
-    editAlbum.webContents.openDevTools();
+    //editAlbum.webContents.openDevTools();
     editAlbum.on('closed',()=>{ 
         eventList["ALBUM_BACKGROUND"] = null;
         eventList["EDIT_ALBUM"] = null; 
@@ -502,7 +509,7 @@ mainThread.on("openTransferPhoto",function(event,albumFrom,moveFrom){
         alwaysOnTop: true,
         webPreferences: { nodeIntegration: true }
     });
-    transferPhoto.webContents.openDevTools();
+    //transferPhoto.webContents.openDevTools();
     transferPhoto.on('closed',()=>{ eventList["PHOTO_TRANSFER"] = null; transferPhoto = null; });
     transferPhoto.loadFile("./src/html/transfer_photo.html");
 })
@@ -539,7 +546,7 @@ mainThread.on("openSinglePhoto",function(event,data){
         title: "Photo",
         webPreferences: { nodeIntegration: true }
     });
-    singlePhoto.webContents.openDevTools();
+   // singlePhoto.webContents.openDevTools();
     singlePhoto.loadFile("./src/html/single_photo.html");
     singlePhoto.on('closed',()=>{ eventList["SINGLE_PHOTO"] = null; singlePhoto = null; });
     global.share.image = data;
@@ -584,7 +591,7 @@ mainThread.on("openEntry", function(event,index, data = null){
         title: "Entry",
         webPreferences: {nodeIntegration: true}
     });
-    entryWindow.webContents.openDevTools();
+    //entryWindow.webContents.openDevTools();
     entryWindow.on('closed', ()=> {
         delete entryWindows[index];
         delete eventList["TEXTBOX"][index];
@@ -709,6 +716,10 @@ mainThread.on("download", function(event,type,filenames){
            
 })
 
+mainThread.on("scheduleAlarm",function(event,reminder){
+   eventList["MAIN_DIARY"].sender.send("scheduleAlarm",reminder);
+})
+
 
 // show error meesage
 mainThread.on("errorMessage", function(event,title,content){
@@ -732,7 +743,7 @@ function createWindow()
     //login.loadFile("./src/html/progress_bar.html");
     //login.loadFile("./src/html/reminder.html");
     login.loadFile("./src/html/login.html");
-    login.webContents.openDevTools();
+    //login.webContents.openDevTools();
     login.on('closed',()=>{ login = null; })
             
 }  

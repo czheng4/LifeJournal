@@ -1,5 +1,5 @@
 /*
-    calendar.js
+    reminder.js
     ChaoHuiZheng
     11/21/2019
 

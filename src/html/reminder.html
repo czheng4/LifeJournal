@@ -78,7 +78,7 @@
 		}
 		
 		/* alarm */
-		.reminder
+		.alarm
     	{ 
     		position: absolute;
 			width: 70%;
@@ -412,7 +412,7 @@
 	</div>
 
 	<!-- reminder -->
-	<div class="reminder">
+	<div class="alarm">
 		<div style="position: relative;top: 15px; cursor: pointer;">
         	<div> <span>None</span><input type="radio" name = "alram"></div><hr>
         	<div><span>At time of event</span><input type="radio"  name = "alram"></div><hr>
@@ -618,8 +618,8 @@
        		return path + "/" + fileName;
 		}
 
-		/* show reminders text */
-		function showReminder()
+		/* show alarm text */
+		function showAlarm()
 		{
 			let string = "";
 			$("#alarmText").text("");
@@ -630,18 +630,7 @@
 			$("#alarmText").append(string);
 		}
 
-		$("#startTime").click(function(){
-			timeType = "start";
-			$("#datePicker").css({"display":"block","z-index":2});
-			scrollToToday();
-		})
-
-		$("#endTime").click(function(){
-			timeType = "end";
-			$("#datePicker").css({"display":"block","z-index":2});
-			scrollToToday();
-		})
-
+		/* close the reminder */
 		$("#close").click(function(){
 			window.location.href = "calendar.html";
 			return;
@@ -659,26 +648,37 @@
 		})
 		
 
+		/* open alarm */
 		$("#alarm").click(function(){
-			$(".reminder").css({"display":"block"});
+			$(".alarm").css({"display":"block"});
 		})
 
+		/* open repeat */
 		$("#repeat").click(function(){
 			$(".repeat").css({"display":"block"});
 		})
 		
-		$('body').on('click',".reminder div div",function(){
+
+		/* choose the alarm */
+		$('body').on('click',".alarm div div",function(){
 			let text = $(this).children("span").text();
 			$(this).children("input").prop("checked", true);
 			if(text != "None" && alarmDict[text] == 0)
 			{
 				console.log(text);
 				alarmDict[text] = 1;
-				showReminder();
+				showAlarm();
 			}
-			$(".reminder").css("display","none");
+			$(".alarm").css("display","none");
 		})
 
+		/* delete the alarm */
+		$('body').on('click',"#alarmText a",function(){
+			alarmDict[$(this).parent().text()] = 0;
+			$(this).parent().remove();
+		})
+
+		/* choose the how we want to repeat the reminder */
 		$('body').on('click',".repeat div div",function(){
 			let text = $(this).children("span").text();
 			$(this).children("input").prop("checked", true);
@@ -689,14 +689,9 @@
 		})
 
 
-		$('body').on('click',"#alarmText a",function(){
-			alarmDict[$(this).parent().text()] = 0;
-			$(this).parent().remove();
-		})
 
-
+		/* savae the reminder */
 		$("#save").click(function(){
-			//window.location.href = "calendar.html";
 
 			let isMissInfo = false;
 			if($("#startTimeText").text() == "") isMissInfo = true;
@@ -722,10 +717,6 @@
 				reminderThread.send("scheduleAlarm",reminder);
 			}
 			window.location.href = "calendar.html";
-
-
-
-
 
 		})
 		reminderThread.on("changeThemeMode",changeThemeMode);

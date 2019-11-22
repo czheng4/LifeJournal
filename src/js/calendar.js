@@ -80,9 +80,9 @@ function showCalendar(year, month, today = null)
             if(today != null && d == today) 
             {
                 if(tempDate in diaryEntries) 
-                    calendar += "<th id = \"today\" style = \"background-color:#f5f8d7\" name = \"" + tempDate + "\">" + days_array[i*7 + j] + "<span class = \"diary\" >" + dot + "</span>";
+                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + "<span class = \"diary\" >" + dot + "</span>";
                 else
-                    calendar += "<th id = \"today\" style = \"background-color:#f5f8d7\" name = \"" + tempDate + "\">" + days_array[i*7 + j];;
+                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j];
 
                 if(tempDate != "")
                 {
@@ -172,7 +172,7 @@ $("body").on("click","#calendar th",function(){
     if(daySelector != null) daySelector.removeAttr("style");
     if($(this).text() != "")
     {
-        $(this).css("background-color","#f5f8d7");
+        $(this).css({"background-color":"#f5f8d7","color":"black"});
     }
     daySelector = $(this);
 

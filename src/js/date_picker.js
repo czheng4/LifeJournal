@@ -1,3 +1,10 @@
+/*
+    date_picker.js
+    ChaoHuiZheng
+    11/21/2019
+*/
+
+
 const months = {  
 	"1": "Jan",
 	"2": "Feb",
@@ -182,6 +189,7 @@ $('body').on('click','a',function(){
 
 })
 
+/* click the "ok" button to confirm the time we choose  */
 $("#ok").click(function(){
 	if(timeType == "start") 
 	{
@@ -210,6 +218,7 @@ $("#ok").click(function(){
 })
 
 
+/* cancel the date picker */
 $("#cancel").click(function(){
 	$("#datePicker").css("display","none");
 })
