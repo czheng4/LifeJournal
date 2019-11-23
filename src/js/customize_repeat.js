@@ -68,9 +68,8 @@ $(".repeat div div").click(function(){
 	$(this).children("input").prop("checked", true);
 	if(text != "Custom") $("#repeatText").text(text);
 	if(text == "Custom") $(".custom").css("display","block");
-	
-	
 	$(".repeat").css("display","none");
+	if(text != "Custom") mutex = false;
 })
 
 
@@ -83,11 +82,12 @@ $("#effectiveEntry").click(function(){
 /* cancel custom */
 $("#cancelCustom").click(function(){
 	$(".custom").css("display","none");
+	$(".effective").css("display","none");
+	mutex = false;
 })
 
 /* confirm custom */
 $("#okCustom").click(function(){
-
 	let s = "";
 	let days = $("#days input");
 	let content = ""
@@ -105,4 +105,6 @@ $("#okCustom").click(function(){
 	if($("#effectiveText").text() != "Forever") content += " " + $("#effectiveText").text();
 	$("#repeatText").text(content);
 	$(".custom").css("display","none");
+	$(".effective").css("display","none");
+	mutex = false;
 })

@@ -135,6 +135,8 @@ $(document).ready(function(){
 
 /* set starting time */
 $("#startTime").click(function(){
+	if(mutex) return;
+	mutex = true;
 	timeType = "start";
 	$("#datePicker").css({"display":"block","z-index":2});
 	scrollToToday();
@@ -142,6 +144,8 @@ $("#startTime").click(function(){
 
 /* set ending time */
 $("#endTime").click(function(){
+	if(mutex) return;
+	mutex = true;
 	timeType = "end";
 	$("#datePicker").css({"display":"block","z-index":2});
 	scrollToToday();
@@ -214,13 +218,14 @@ $("#ok").click(function(){
  		}
 	}
 	$("#datePicker").css("display","none");
-
+	mutex = false;
 })
 
 
 /* cancel the date picker */
 $("#cancel").click(function(){
 	$("#datePicker").css("display","none");
+	mutex = false;
 })
 
 

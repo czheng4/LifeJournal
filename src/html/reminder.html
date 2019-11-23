@@ -656,7 +656,7 @@
         		$("#repeatNumber").css("max-height", "0px");
         		$("#repeatType").css("max-height","0px");
         		$(".week").css("top","110px");
-        		if(type = "week") $("#days").css("display","none");
+        		if(type != "week") $("#days").css("display","none");
 
         		type = reminder.effectiveType;
         		$("#effective_" + type).prop("checked",true);
@@ -736,11 +736,15 @@
 
 		/* open alarm */
 		$("#alarm").click(function(){
+			if(mutex) return;
+			mutex = true;
 			$(".alarm").css({"display":"block"});
 		})
 
 		/* open repeat */
 		$("#repeat").click(function(){
+			if(mutex) return;
+			mutex = true;
 			$(".repeat").css({"display":"block"});
 		})
 		
@@ -756,6 +760,7 @@
 				showAlarm();
 			}
 			$(".alarm").css("display","none");
+			mutex = false;
 		})
 
 		/* delete the alarm */
@@ -767,7 +772,6 @@
 
 		/* savae the reminder */
 		$("#save").click(function(){
-
 			let isMissInfo = false;
 			if($("#startTimeText").text() == "") isMissInfo = true;
 			if($("#endTimeText").text() == "") isMissInfo = true;
@@ -799,6 +803,7 @@
 			console.log(reminder);
 			reminderThread.send("setGlobalVal","reminder",null);
 
+			
 		})
 
 		reminderThread.on("changeThemeMode",changeThemeMode);
