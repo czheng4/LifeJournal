@@ -11,6 +11,7 @@ const os = require('os');
 const fs = require("fs");
 const mainThread = require('electron').ipcMain;
 const {Confirmation} = require("./src/js/confirmation.js");
+const {Reminder} = require("./src/js/reminder.js");
 const {Cryptography,decodeAll,encodeAll} = require("./src/js/cryptography.js");
 const cwd = process.cwd();
 var login, diary, photo, musicWindow, calendarWindow, upload, download, taskConfirm, createAlbum,entryWindow,editAlbum,transferPhoto,singlePhoto,settingWindow;
@@ -35,7 +36,8 @@ global.share = {
     status: null, 
     entryData: null, 
     albumFrom: null,
-    moveFrom: null
+    moveFrom: null,
+    reminder: null
 };
 
 var confirmation;
@@ -125,6 +127,7 @@ mainThread.on("TEXTBOX_REGISTER",(event,index)=>{
 
 // set globalVal 
 mainThread.on("setGlobalVal",function(event,key,val){
+    console.log(val);
     console.log(key + " " + val);
     global.share[key] = val;
     
@@ -720,7 +723,9 @@ mainThread.on("scheduleAlarm",function(event,reminder){
    eventList["MAIN_DIARY"].sender.send("scheduleAlarm",reminder);
 })
 
-
+mainThread.on("getReminder",function(event){
+    event.sender.send("getReminder",global.share.reminder);
+})
 // show error meesage
 mainThread.on("errorMessage", function(event,title,content){
     dialog.showErrorBox(title,content);

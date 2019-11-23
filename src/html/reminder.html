@@ -38,7 +38,7 @@
 			overflow-x: hidden;
 			white-space: normal;
 			outline: none;
-			
+			color: var(--text-color);
 			margin-left: 5%;
 			display: inline-grid;
 		}
@@ -433,12 +433,12 @@
 	<div class="repeat">
 		<h3 style="margin-left: 4.7%; margin-top: 15px;"><strong>Repeat</strong></h3>
 		<div style="position: relative;top: 15px; cursor: pointer;">
-        	<div><span>Never</span><input type="radio" name = "repeat"></div><hr>
-        	<div><span>Every 1 day</span><input type="radio"  name = "repeat"></div><hr>
-        	<div><span>Every 1 week</span><input type="radio"  name = "repeat"> </div><hr>
-        	<div><span>Every 1 month</span><input type="radio"  name = "repeat"></div><hr>
-        	<div><span>Every 1 year</span><input type="radio"  name = "repeat"></div><hr>
-        	<div><span>Custom</span><input type="radio"  name = "repeat"></div>
+        	<div><span>Never</span><input type="radio" name = "repeat" id = "repeat_n"></div><hr>
+        	<div><span>Every 1 day</span><input type="radio"  name = "repeat" id = "repeat_d"></div><hr>
+        	<div><span>Every 1 week</span><input type="radio"  name = "repeat" id = "repeat_w"> </div><hr>
+        	<div><span>Every 1 month</span><input type="radio"  name = "repeat" id = "repeat_m"></div><hr>
+        	<div><span>Every 1 year</span><input type="radio"  name = "repeat" id = "repeat_y"></div><hr>
+        	<div><span>Custom</span><input type="radio"  name = "repeat" id = "repeat_c"></div>
        	</div>
 	</div>
 
@@ -476,13 +476,13 @@
 		<div class="week">
 
 			<div id = "days" style="position: relative;top: 15px; cursor: pointer;">
-				<div>Sunday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>
-				<div>Monday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>
-				<div>Tuesday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>	
-				<div>Wednesday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>
-				<div>Thursday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>
-				<div>Friday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>
-				<div>Saturday<input type="checkbox" style="position:absolute; right: 20px"><hr style="margin-left: 0"></div>
+				<div>Sunday<input type="checkbox" style="position:absolute; right: 20px" id = "week_0"><hr style="margin-left: 0"></div>
+				<div>Monday<input type="checkbox" style="position:absolute; right: 20px" id = "week_1"><hr style="margin-left: 0"></div>
+				<div>Tuesday<input type="checkbox" style="position:absolute; right: 20px" id = "week_2"><hr style="margin-left: 0"></div>	
+				<div>Wednesday<input type="checkbox" style="position:absolute; right: 20px" id = "week_3"><hr style="margin-left: 0"></div>
+				<div>Thursday<input type="checkbox" style="position:absolute; right: 20px" id = "week_4"><hr style="margin-left: 0"></div>
+				<div>Friday<input type="checkbox" style="position:absolute; right: 20px" id = "week_5"><hr style="margin-left: 0"></div>
+				<div>Saturday<input type="checkbox" style="position:absolute; right: 20px" id = "week_6"><hr style="margin-left: 0"></div>
 			</div>
 			
 			<div id = "effectiveEntry" style="position:relative; top: 15px; cursor: pointer; width: 97%">
@@ -522,9 +522,9 @@
 	<div class="effective">
 		<h3 style = "padding: 20px 0 0 5%">Effective</h3>
 		<div id = "effective" style="position: relative;top: 15px; cursor: pointer;">
-			<div><span>Forever</span><input type="radio" name = "effective"></div><hr>
-        	<div><span>Until a date</span><input type="radio"  name = "effective"></div><hr>
-        	<div><span>For a number of events</span><input type="radio"  name = "effective"> </div>
+			<div><span>Forever</span><input type="radio" name = "effective" id = "effective_F"></div><hr>
+        	<div><span>Until a date</span><input type="radio"  name = "effective" id = "effective_U"></div><hr>
+        	<div><span>For a number of events</span><input type="radio"  name = "effective" id = "effective_N"> </div>
         </div>
 	</div>
 
@@ -583,14 +583,17 @@
 		const fs = require("fs");
 		const reminderThread = require('electron').ipcRenderer;
 		const remote = require('electron').remote;  
-		const {Reminder,getReminders} = require("../js/reminder.js");
-		const reminder = new Reminder();
+		const {Reminder} = require("../js/reminder.js");
+		var reminder = new Reminder();
 		const {Confirmation} = require("../js/confirmation.js");
 		const user = remote.getGlobal('share').user; 
 		const path = "./data/" + user + "/reminder"; 
 		const {File} = require("../js/file.js");
 		const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+		var mutex = false;
+		var filePath;
 		loadThemeMode();
+
 		var alarmDict = {
 			"At time of event":0,
 			"5 minutes before":0,
@@ -606,6 +609,75 @@
 			"1 week before":0,
 		};
 
+		/* load existing reminder */
+		function loadReminder(reminder)
+		{
+
+
+			let alarmText = reminder.alarmText.split(',');
+			let day_of_week;
+			let frequency = parseInt(reminder.frequency);
+			let repeatText = reminder.repeatText;
+			let type;
+			$("#reminderTitle").text(reminder.title);
+        	$("#description").text(reminder.description);
+        	$("#startTimeText").text(reminder.startTime);
+        	$("#endTimeText").text(reminder.endTime);
+        	$("#repeatText").text(reminder.repeatText);
+ 
+        
+        	for(var key in alarmDict) alarmDict[key] = 0; 			
+        	for(var i = 0; i < alarmText.length; i++) 
+        	{
+        		if(alarmText[i] != "") alarmDict[alarmText[i]] = 1;
+        	}
+        	showAlarm();
+        	
+
+        	/* custom */
+        	if(frequency > 2 || repeatText.split(' ').length >= 4) 
+        	{	
+        		day_of_week = reminder.week.split(',');
+        		$("#repeat_c").prop("checked", true);
+
+        		for(var i = 0; i < day_of_week.length; i++)
+        		{
+        			
+        			if(day_of_week[i] != "") $("#week_" + day_of_week[i]).prop("checked",true);
+        		}
+        		if(reminder.repeatType == 'y') type = "year";
+        		if(reminder.repeatType == 'w') type = "week";
+        		if(reminder.repeatType == 'm') type = "month";
+        		if(reminder.repeatType == 'd') type = "day";
+        		
+        		$("#repeatTypeText").text(type);
+        		$("#repeatNumberText").text(frequency);
+        		$("#customHeader").text("Every " + frequency + " " + type);
+        		$("#repeatNumber").css("max-height", "0px");
+        		$("#repeatType").css("max-height","0px");
+        		$(".week").css("top","110px");
+        		if(type = "week") $("#days").css("display","none");
+
+        		type = reminder.effectiveType;
+        		$("#effective_" + type).prop("checked",true);
+        		if(type == 'U') 
+        		{
+        			$("#until_a_date").css("display","block");
+        			$("#dateUntil").val(reminder.effectiveData);
+        			$("#effectiveText").text("Until " + reminder.effectiveData);
+
+        		}
+        		if(type == 'N') 
+        		{
+        			$("#numEvent").css("display","block");
+        			$("#repeatEventText").text(reminder.effectiveData);
+        			$("#effectiveText").text("For " + reminder.effectiveData + " events");
+        		}
+        		
+
+        	}
+        	else $("#repeat_" + reminder.repeatType).prop("checked", true);
+		}
 		/* get the file path to store the reminder */
 		function getFilePath()
 		{
@@ -627,8 +699,22 @@
 			{
 				if(alarmDict[key] == 1) string += '<div><hr style="margin-left: 0%;">' + key + '<a href="#"><i class="fas fa-times"></i></a></div>'
 			}
+			console.log(alarmDict);
+			console.log(string);
 			$("#alarmText").append(string);
 		}
+
+	$(document).ready(function(){
+
+
+		
+		reminderThread.send("getReminder");
+		reminderThread.on("getReminder",function(event,reminder1){
+			reminder =  remote.getGlobal("share").reminder;
+			console.log(reminder);
+			if(reminder != null) loadReminder(reminder);
+			else reminder = new Reminder();
+		})
 
 		/* close the reminder */
 		$("#close").click(function(){
@@ -678,17 +764,6 @@
 			$(this).parent().remove();
 		})
 
-		/* choose the how we want to repeat the reminder */
-		$('body').on('click',".repeat div div",function(){
-			let text = $(this).children("span").text();
-			$(this).children("input").prop("checked", true);
-			$("#repeatText").text(text);
-			$(".repeat").css("display","none");
-			if(text == "Custom") $(".custom").css("display","block");
-
-		})
-
-
 
 		/* savae the reminder */
 		$("#save").click(function(){
@@ -702,14 +777,18 @@
 				reminderThread.send("errorMessage","ERROR","Miss the time");
 				return;
 			}
-			reminder.setAlarm(alarmDict);
-			reminder.setRepeat($("#repeatText").text());
-			reminder.setEffective($("#effectiveText").text());
+			console.log(reminder);
+			Reminder.setAlarm(reminder,alarmDict);
+			Reminder.setRepeat(reminder,$("#repeatText").text());
+			Reminder.setEffective(reminder,$("#effectiveText").text());
 			reminder.title = $("#reminderTitle").text();
 			reminder.description = $("#description").text();
-			let filePath = getFilePath();
-			reminder.writeToFile(filePath);
-			reminder.readFromFile(filePath);
+			
+			if(reminder.filePath == "") filePath = getFilePath();
+			else filePath = reminder.filePath;
+			
+			Reminder.writeToFile(reminder,filePath);
+			Reminder.readFromFile(reminder,filePath);
 			
 			
 			if(reminder.alarmTime !== "")
@@ -717,9 +796,13 @@
 				reminderThread.send("scheduleAlarm",reminder);
 			}
 			window.location.href = "calendar.html";
+			console.log(reminder);
+			reminderThread.send("setGlobalVal","reminder",null);
 
 		})
+
 		reminderThread.on("changeThemeMode",changeThemeMode);
+	})
 	</script>
 	<script src = "../js/date_picker.js"></script>
 	<script src = "../js/customize_repeat.js"></script>

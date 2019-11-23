@@ -195,7 +195,7 @@ $("#ok").click(function(){
 	{
 		$("#startTimeText").text($("#title").text());
 		reminder.startTime = $("#title").text();
- 		reminder.timeSplit("startTime");
+ 		Reminder.timeSplit(reminder, "startTime");
  		if(reminder.endTimeMilliseconds !=0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
  		{
  			reminder.startTime = reminder.endTime;
@@ -206,7 +206,7 @@ $("#ok").click(function(){
 	{
 		$("#endTimeText").text($("#title").text());
 		reminder.endTime = $("#title").text();
- 		reminder.timeSplit("endTime");
+ 		Reminder.timeSplit(reminder,"endTime");
  		if(reminder.startTimeMilliseconds != 0 && reminder.endTimeMilliseconds < reminder.startTimeMilliseconds)
  		{
  			reminder.endTime = reminder.startTime;

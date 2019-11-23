@@ -24,7 +24,7 @@ $(".effective div div").click(function(){
 		$("#until_a_date").css("display","block");
 		$("#numEvent").css("display", "none");
 		$("#dateUntil").val(today);
-		$("#effectiveText").text("Until a date " + today);
+		$("#effectiveText").text("Until " + today);
 	}
 
 	else if(text == "For a number of events")
@@ -32,7 +32,7 @@ $(".effective div div").click(function(){
 
 		$("#until_a_date").css("display","none");
 		$("#numEvent").css("display", "block");
-		$("#effectiveText").text("For " + $("#repeatNumberText").text() + " events");
+		$("#effectiveText").text("For " + $("#repeatEventText").text() + " events");
 	}
 
 })

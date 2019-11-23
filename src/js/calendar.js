@@ -27,7 +27,7 @@ const $ = require("jQuery");
 const remote = require('electron').remote;
 const calendarThread = require('electron').ipcRenderer;
 const {getDiaryEntryDict} = require("../js/diaryEntry.js");
-const {Reminder,getReminders,getRemindersDict,isMarkOnCalendar} = require("../js/reminder.js");
+const {Reminder} = require("../js/reminder.js");
 const fs = require("fs");
 const user = remote.getGlobal('share').user;  
 const path = "./data/" + user + "/entry"; 
@@ -40,7 +40,7 @@ var currentDate;  // yyyy-mm-dd
 var daySelector = null; 
 var diaryEntries = getDiaryEntryDict(path);
 var reminderDict = {}
-var reminderArray = getReminders("./data/" + user + "/reminder");
+var reminderArray = Reminder.getReminders("./data/" + user + "/reminder");
 const dot = "&#8226";
 
 
@@ -88,7 +88,7 @@ function showCalendar(year, month, today = null)
                 {
                     for(var k = 0; k < reminderArray.length; k++)
                     {
-                        if(isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
+                        if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
                         {
                             calendar += "<span class = \"reminder\" >" + dot + "</span>";
                             if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
@@ -108,7 +108,7 @@ function showCalendar(year, month, today = null)
                 {
                     for(var k = 0; k < reminderArray.length; k++)
                     {
-                        if(isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
+                        if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
                         {
                             calendar += "<span class = \"reminder\" >" + dot + "</span>";
                             if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
@@ -205,7 +205,14 @@ $("body").on('click', "#diaryAndReminder div",function(){
     let date = temp[0];
     let index = temp[1];
     let type = temp[2];
+    let reminder;
     if(type == "D") calendarThread.send("openEntry",diaryEntries[date][index].index,diaryEntries[date][index]);
+    if(type == "R")
+    {
+        reminder = reminderDict[date][index];
+        window.location.href = "reminder.html";
+        calendarThread.send("setGlobalVal","reminder",reminder);
+    }
 })
 
 
@@ -217,7 +224,7 @@ $("#currentTime").click(function(){
 
 
 $("#reminder").click(function(){
-    window.location.href = "reminder.html"
+    window.location.href = "reminder.html";
 })
 calendarThread.on("refreshCalendar",function(){
     diaryEntries = getDiaryEntryDict(path);

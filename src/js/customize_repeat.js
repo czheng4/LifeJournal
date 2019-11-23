@@ -64,10 +64,13 @@ $("#days div").click(function(){
 
 /* open repeat options */
 $(".repeat div div").click(function(){
-	if($(this).text() == "Custom")
-	{
-		$(".repeat").css("display","block");
-	}
+	let text = $(this).children("span").text();
+	$(this).children("input").prop("checked", true);
+	if(text != "Custom") $("#repeatText").text(text);
+	if(text == "Custom") $(".custom").css("display","block");
+	
+	
+	$(".repeat").css("display","none");
 })
 
 
@@ -87,7 +90,7 @@ $("#okCustom").click(function(){
 
 	let s = "";
 	let days = $("#days input");
-
+	let content = ""
 	if(days[0].checked) s+= " Sun.";
 	if(days[1].checked) s+= " Mon.";
 	if(days[2].checked) s+= " Tue.";
@@ -96,7 +99,10 @@ $("#okCustom").click(function(){
 	if(days[5].checked) s+= " Fri.";
 	if(days[6].checked) s+= " Sat.";
 	
-	if(s == "" || $("#repeatTypeText").text().indexOf("week") == -1) $("#repeatText").text($("#customHeader").text());
-	else $("#repeatText").text($("#customHeader").text() + " on" + s);
+	if(s == "" || $("#repeatTypeText").text().indexOf("week") == -1) content += $("#customHeader").text();
+	else content =  $("#customHeader").text() + " on" + s;
+
+	if($("#effectiveText").text() != "Forever") content += " " + $("#effectiveText").text();
+	$("#repeatText").text(content);
 	$(".custom").css("display","none");
 })
