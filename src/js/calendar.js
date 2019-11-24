@@ -79,10 +79,17 @@ function showCalendar(year, month, today = null)
 
             if(today != null && d == today) 
             {
-                if(tempDate in diaryEntries) 
-                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + "<span class = \"diary\" >" + dot + "</span>";
+                if(tempDate in diaryEntries)
+                {   
+                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + "<div class = \"slot\">"
+                    for(var k = 0; k < diaryEntries[tempDate].length; k++)
+                    {
+                        calendar += "<div class = \"diaryBox\" >" + diaryEntries[tempDate][k].title + "</div>";
+                    }
+                    calendar += "</div>";
+                }
                 else
-                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j];
+                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + '<div class = "slot">';
 
                 if(tempDate != "")
                 {
@@ -90,19 +97,27 @@ function showCalendar(year, month, today = null)
                     {
                         if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
                         {
-                            calendar += "<span class = \"reminder\" >" + dot + "</span>";
+                            calendar += "<div class = \"reminderBox\" >" + reminderArray[k].title + "</div>";
                             if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
                             else reminderDict[tempDate] = [reminderArray[k]];
                         }
                     }
                 }
+                calendar += "</div>";
                 calendar += "</th>\n";
             }
             else 
             {
-                if(tempDate in diaryEntries) 
-                    calendar += "<th name = \"" + tempDate + "\">" + days_array[i*7 + j] + "<span class = \"diary\" >" + dot + "</span>";
-                else calendar += "<th name = \"" + tempDate + "\">" + days_array[i*7 + j];
+                if(tempDate in diaryEntries)
+                {
+                     calendar += '<th name = "' + tempDate + '">' + days_array[i*7 + j] + "<div class = \"slot\">"
+                    for(var k = 0; k < diaryEntries[tempDate].length; k++)
+                    {
+                        calendar += "<div class = \"diaryBox\" >" + diaryEntries[tempDate][k].title + "</div>";
+                    }
+            
+                }
+                else calendar += "<th name = \"" + tempDate + "\">" + days_array[i*7 + j] + '<div class = "slot">';
 
                 if(tempDate != "")
                 {
@@ -110,18 +125,20 @@ function showCalendar(year, month, today = null)
                     {
                         if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
                         {
-                            calendar += "<span class = \"reminder\" >" + dot + "</span>";
+                            calendar += "<div class = \"reminderBox\" >" + reminderArray[k].title + "</div>";
                             if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
                             else reminderDict[tempDate] = [reminderArray[k]];
                         }
                     }
                 }
+                calendar += "</div>";
                 calendar += "</th>\n";
             }
         }
         calendar += "</tr>\n"
         
     }
+    console.log(calendar);
     $("#calendar").text("");
     $("#calendar").append(calendar);
     $("#title").text(months[month] + "  " + year);
@@ -189,11 +206,15 @@ $("body").on("click","#calendar th",function(){
     }
     console.log(reminderDict)
     console.log(date)
+
     if(date in reminderDict)
     {
         for(var i = 0; i < reminderDict[date].length; i++)
-             content +=  '<div name = "' + date + '&' + i + '&R' + '"><span class = "reminderDot">&#8226;</span>\
-                         <span class = "diaryTitle">' + reminderDict[date][i].title + '</span></div>\n';
+             content +=  '<div name = "' + date + '&' + i + '&R' + '" class = "time">\
+                            <span class = "reminderDot">&#8226;</span>\
+                            <span class = "startTime">'+ reminderDict[date][i].startTime + '</span>\
+                            <span class = "endTime">' + reminderDict[date][i].endTime + '</span>\
+                         <span class = "reminderTitle">' + reminderDict[date][i].title + '</span></div>\n';
     }
 
     $("#diaryAndReminder").append(content);
@@ -247,6 +268,15 @@ calendarThread.on("refreshCalendar",function(){
         $("#diaryAndReminder").append(content);
     }
 })
+
+calendarThread.on("resizeCalendar",function(event,width){
+    let w = 0.83 * width / 7 + "px";
+    $(".slot").css("width", w);
+
+})
+
+calendarThread.send("resizeCalendar");
+
 
 calendarThread.on("changeThemeMode",changeThemeMode);
 })

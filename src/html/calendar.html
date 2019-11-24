@@ -22,10 +22,12 @@
         td, th 
         {
             border: 2px solid black;
-            padding: 8px;
+
+            padding-left: 4px;
             width: 500px;
             height: 50px;
             font-size: 15px;
+            overflow-x: hidden;
         }
 
         .box
@@ -48,6 +50,7 @@
         }
         a:hover
         {
+            text-decoration: none;
             color:blue;
         }
 
@@ -58,17 +61,27 @@
             overflow: scroll;
         }
 
-        .diary
+        .reminderBox
         {
-            position:relative; 
-            left: 10%; 
-            color: red;
+            background: blue;
+            color:black;
+            border: 1px solid blue;
+            border-radius: 3px;
+            font-size:11px;
+            width: 100%;
+            margin-top: 2px;
+            overflow: hidden;
         }
-        .reminder
+        .diaryBox
         {
-            position:relative; 
-            left: 10%; 
-            color: blue;
+            background: red;
+            color:black;
+            border: 1px solid red;
+            border-radius: 3px;
+            font-size:11px;
+            width: 100%;
+            margin-top: 2px;
+            overflow: hidden;
         }
         .reminderDot
         {
@@ -88,9 +101,35 @@
             left: 10px;
             bottom: 3.5px;
         }
+        .reminderTitle
+        {
+            position: relative;
+            left: 100px;
+            bottom: 5px;
+        }
         .diaryAndReminder div:hover
         {
             background-color: silver;
+        }
+        .slot
+        {
+            width: 200px;
+        }
+
+        .startTime
+        {
+            position: absolute;
+            margin-left: 7px;
+        }
+        .endTime
+        {
+            position: absolute;
+            margin-left: 7px;
+            top:25px;
+        }
+        .time
+        {
+            position: relative; margin-bottom: 15px;
         }
     </style>
 </head>
@@ -99,7 +138,7 @@
     <span class="dot" style="position: fixed; left: 17%; top: 3%; background-color: blue; z-index: 2"><span style="position: relative; left: 30px; font-size: 25px;bottom:13px; z-index: 2">Reminders</span></span>
     <span class="dot" style="position: fixed; right: 30%;top: 3%; background-color: red;z-index: 2"><span style="position: relative; left: 20px; font-size: 25px;bottom:13px;z-index: 2">Diaries</span></span>
 
-    <a href = "#" id = "reminder" style="top: 80%; position: fixed; right: 10%;font-size: 40px;"><i class="fas fa-plus-circle"></i></a>
+    <a href = "#" id = "reminder" style="top: 80%; position: fixed; right: 10%;font-size: 40px;z-index: 2"><i class="fas fa-plus-circle"></i></a>
 
 <div class="box" style = "margin-top:50px;">
     <div>
@@ -108,11 +147,11 @@
         <table>
             <tr>
                 <th colspan="7" style="background-color: var(--theme-l1);font-size: 25px">
-                <a href = "#" id = "previous" style="position: relative; left: 2%"><i class="fas fa-arrow-left"></i></a >
+                <a href = "#" id = "previous" style="position: relative; left: 2%"><i class="fas fa-arrow-left"></i></a>
+                <a href = "#" id = "currentTime" style="position: relative; left: 3%">today</a>
                 <a href = "#" id = "next" style="position: relative; left: 4%"><i class="fas fa-arrow-right"></i></a>
     
                 <span id = "title" style="position: relative; left: 35%"> Oct</span>
-                <a id = "currentTime" href = "#" style="position: relative; left: 62%"><i class="fas fa-calendar-check"></i></a>
                 <a href = "#" style="position: relative; left: 66%"><i class="fas fa-search"></i></a>
                 <br>
                 <a href = "#" style="position: relative; left: 22%">Month</a>
@@ -128,7 +167,7 @@
                 <th>Fri</th>
                 <th>Sat</th>
             </tr>
-            <tbody id = "calendar">
+            <tbody id = "calendar"> 
             </tbody>
             <tr>
                 <th colspan="7">
@@ -179,6 +218,7 @@
                 <th colspan="7">
                     
                 <div id = "diaryAndReminder" class = "diaryAndReminder">
+                   
                 </div>                  
                 </th>
             </tr>
@@ -187,6 +227,6 @@
     </div>
 </div>
 
-<script src="../js/calendar.js"></script>
+<script src = "../js/calendar.js"></script>
 </body>
 </html>

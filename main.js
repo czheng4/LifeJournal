@@ -340,6 +340,15 @@ mainThread.on("openCalendar", function(event){
     calendarWindow.webContents.openDevTools();
     calendarWindow.on('closed',() => { eventList["CALENDAR"] = null;calendarWindow = null;});
     calendarWindow.loadFile("./src/html/calendar.html");
+
+    calendarWindow.on('resize',function(){
+        console.log(calendarWindow.getSize()[0]);
+        eventList["CALENDAR"].sender.send("resizeCalendar",calendarWindow.getSize()[0]);
+    })
+})
+
+mainThread.on("resizeCalendar",function(event){
+    event.sender.send("resizeCalendar",calendarWindow.getSize()[0]);
 })
 
 mainThread.on("closeCalendar", function(event){
