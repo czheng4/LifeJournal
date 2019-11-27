@@ -41,6 +41,7 @@ var daySelector = null;
 var diaryEntries = getDiaryEntryDict(path);
 var reminderDict = {}
 var reminderArray = Reminder.getReminders("./data/" + user + "/reminder");
+var slot_width;
 const dot = "&#8226";
 
 
@@ -86,7 +87,6 @@ function showCalendar(year, month, today = null)
                     {
                         calendar += "<div class = \"diaryBox\" >" + diaryEntries[tempDate][k].title + "</div>";
                     }
-                    calendar += "</div>";
                 }
                 else
                     calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + '<div class = "slot">';
@@ -138,7 +138,7 @@ function showCalendar(year, month, today = null)
         calendar += "</tr>\n"
         
     }
-    console.log(calendar);
+    //console.log(calendar);
     $("#calendar").text("");
     $("#calendar").append(calendar);
     $("#title").text(months[month] + "  " + year);
@@ -146,9 +146,60 @@ function showCalendar(year, month, today = null)
 function markToday()
 {
     var date = new Date();
+
     showCalendar(date.getFullYear(),date.getMonth() + 1, date.getDate());
+    showReminderDiary( $("#today").attr("name"));
+    $(".slot").css("width", slot_width);
+
 }
 
+
+function showReminderDiary(date)
+{   
+    content  = "";
+    $("#diaryAndReminder").text("");
+    if(date != undefined && date in diaryEntries) 
+    {
+        entryArray = diaryEntries[date];
+        for(i = 0; i < entryArray.length; i++)
+        {
+            content +=  '<div name = "' + date + '&' + i + '&D' + '"><span class = "diaryDot">&#8226;</span>\
+                         <span class = "diaryTitle">' + entryArray[i].title + '</span></div>\n';
+        }
+       
+    }
+    console.log(reminderDict)
+    console.log(date)
+
+    if(date in reminderDict)
+    {
+        for(var i = 0; i < reminderDict[date].length; i++)
+        {
+            startHM = reminderDict[date][i].startTime.replace(/,\s/g,' ').split(' ');
+            startHM = startHM[startHM.length - 2] + " " + startHM[startHM.length - 1];
+           
+            endHM = reminderDict[date][i].endTime.replace(/,\s/g,' ').split(' ');
+            endHM = endHM[endHM.length - 2] + " " + endHM[endHM.length - 1];
+            console.log(reminderDict[date][i].endTimeMilliseconds)
+            console.log(reminderDict[date][i].startTimeMilliseconds)
+            dayDifference = Math.floor((reminderDict[date][i].endTimeMilliseconds - reminderDict[date][i].startTimeMilliseconds) / (1000 * 60 * 60 * 24));
+            if(dayDifference > 0) 
+            {
+                reminderTitleStyle = '"left: 180px"';
+                endHM += " (in " + dayDifference + " days)";
+            }
+            else reminderTitleStyle = ""
+           
+            content +=  '<div name = "' + date + '&' + i + '&R' + '" class = "time">\
+                            <span class = "reminderDot">&#8226;</span>\
+                            <span class = "startTime">'+ startHM + '</span>\
+                            <span class = "endTime">' + endHM + '</span>\
+                         <span class = "reminderTitle" style = ' + reminderTitleStyle + '>' + reminderDict[date][i].title + '</span></div>\n';
+        }
+    }
+
+    $("#diaryAndReminder").append(content);
+}
 $(document).ready(function(){
 
 calendarThread.send("CALENDAR_REGISTER");
@@ -157,11 +208,13 @@ markToday();
 $("#previous").click(function(){
     if((currentMonth - 1) == 0) showCalendar(currentYear - 1, 12);
     else showCalendar(currentYear, currentMonth - 1);
+    $(".slot").css("width", slot_width);
 })
 
 $("#next").click(function(){
     if((currentMonth + 1) == 13) showCalendar(currentYear + 1, 1);
     else showCalendar(currentYear, currentMonth + 1);
+    $(".slot").css("width", slot_width);
 })
 
 $("#year").change(function(){
@@ -169,6 +222,8 @@ $("#year").change(function(){
     let newYear = $(this).children("option:selected").val();
     let newMonth = $("#month").children("option:selected").val();
     showCalendar(parseInt(newYear),parseInt(newMonth));
+    $(".slot").css("width", slot_width);
+
 })
 
 $("#month").change(function(){
@@ -176,6 +231,7 @@ $("#month").change(function(){
     let newMonth = $(this).children("option:selected").val();
 
     showCalendar(parseInt(newYear),parseInt(newMonth));
+    $(".slot").css("width", slot_width);
 })
 
 
@@ -183,7 +239,10 @@ $("body").on("click","#calendar th",function(){
     let date = $(this).attr("name");
     let entryArray;
     let content = "";
-
+    let dayDifference = 0;
+    let startHM;
+    let endHM;
+    let reminderTitleStyle = "";
     currentDate = date;
     if(daySelector == null) daySelector = $("#today");
     if(daySelector != null) daySelector.removeAttr("style");
@@ -210,11 +269,28 @@ $("body").on("click","#calendar th",function(){
     if(date in reminderDict)
     {
         for(var i = 0; i < reminderDict[date].length; i++)
-             content +=  '<div name = "' + date + '&' + i + '&R' + '" class = "time">\
+        {
+            startHM = reminderDict[date][i].startTime.replace(/,\s/g,' ').split(' ');
+            startHM = startHM[startHM.length - 2] + " " + startHM[startHM.length - 1];
+           
+            endHM = reminderDict[date][i].endTime.replace(/,\s/g,' ').split(' ');
+            endHM = endHM[endHM.length - 2] + " " + endHM[endHM.length - 1];
+            console.log(reminderDict[date][i].endTimeMilliseconds)
+            console.log(reminderDict[date][i].startTimeMilliseconds)
+            dayDifference = Math.floor((reminderDict[date][i].endTimeMilliseconds - reminderDict[date][i].startTimeMilliseconds) / (1000 * 60 * 60 * 24));
+            if(dayDifference > 0) 
+            {
+                reminderTitleStyle = '"left: 180px"';
+                endHM += " (in " + dayDifference + " days)";
+            }
+            else reminderTitleStyle = ""
+           
+            content +=  '<div name = "' + date + '&' + i + '&R' + '" class = "time">\
                             <span class = "reminderDot">&#8226;</span>\
-                            <span class = "startTime">'+ reminderDict[date][i].startTime + '</span>\
-                            <span class = "endTime">' + reminderDict[date][i].endTime + '</span>\
-                         <span class = "reminderTitle">' + reminderDict[date][i].title + '</span></div>\n';
+                            <span class = "startTime">'+ startHM + '</span>\
+                            <span class = "endTime">' + endHM + '</span>\
+                         <span class = "reminderTitle" style = ' + reminderTitleStyle + '>' + reminderDict[date][i].title + '</span></div>\n';
+        }
     }
 
     $("#diaryAndReminder").append(content);
@@ -267,11 +343,13 @@ calendarThread.on("refreshCalendar",function(){
         
         $("#diaryAndReminder").append(content);
     }
+    $(".slot").css("width", slot_width);
 })
 
 calendarThread.on("resizeCalendar",function(event,width){
-    let w = 0.83 * width / 7 + "px";
-    $(".slot").css("width", w);
+    slot_width = 0.83 * width / 7 + "px";
+    $(".slot").css("width", slot_width);
+    //console.log($("table").css("height"));
 
 })
 

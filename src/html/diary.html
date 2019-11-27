@@ -189,6 +189,7 @@
 		const {File} = require("../js/file.js");
 		const {getDiaryEntry,diaryEntry,addDiaryEntry} = require("../js/diaryEntry.js");
 		const {Search} = require("../js/search.js");
+		const {Reminder,getDateString} = require("../js/reminder.js");
 		const user = remote.getGlobal('share').user;  
        	const path = "./data/" + user + "/entry"; 
 		const setting = new File("./data/" + user + "/setting.txt");
@@ -361,7 +362,7 @@
 						
 						if(isFindInTitle === false && isFindInEntry === false) return;
 					}
-
+					
 					$("#" + index).append(
 						'<div class = "date">'
 							+ myDiaryEntry.year +'<br>'  
@@ -536,6 +537,57 @@
             	},time);
          		
 			}
+			function scheduleAlarm()
+			{
+				let reminderArray = Reminder.getReminders("./data/" + user + "/reminder");
+				let alarmTime;
+				let today = new Date();
+
+				let todayMilliseconds = today.getTime();
+				let beginningReminderDate = new Date(getDateString(today).replace(/-/g,"/"));
+				let reminderDate = new Date();
+				
+				let hour;
+				let minute;
+				let timeInterval;
+
+				console.log(today);
+				for(var i = 0; i < reminderArray.length; i++)
+				{
+					console.log(reminderArray[i].alarmTime)
+					if(reminderArray[i].alarmTime == "") continue;
+					alarmTime = reminderArray[i].alarmTime.split(",");
+					alarmTime = alarmTime.map(function(time){ return parseInt(time);});
+					console.log(alarmTime.length);
+					for(var j = 0; j < alarmTime.length; j++)
+					{
+						console.log(alarmTime[j]);
+						hour = parseInt(reminderArray[i].startTimeHourMinute);
+						minute = parseInt(reminderArray[i].startTimeHourMinute.substr(3))
+						reminderDate.setTime(todayMilliseconds + alarmTime[j]);
+						reminderDate.setHours(hour);
+						reminderDate.setMinutes(minute);
+						console.log(reminderDate)
+						console.log(reminderDate.getTime())
+						console.log(todayMilliseconds);
+						timeInterval = reminderDate.getTime() - todayMilliseconds - alarmTime[j];
+						if(timeInterval < 0 || timeInterval > 1000 * 600) continue;
+						beginningReminderDate = new Date(getDateString(reminderDate).replace(/-/g,"/"));
+
+						if(Reminder.isMarkOnCalendar(beginningReminderDate, reminderArray[i]))
+						{
+							console.log("call reminder " + reminderArray[i].title + " in " + timeInterval);
+							playAlarm(timeInterval, reminderArray[i]);
+						}
+					}
+					//if(reminder.)
+				}
+				console.log(reminderArray);
+			}
+			
+			scheduleAlarm();
+			/* we schedule the alarm every ten minutes as setInterval and setTimeOut function may have delay*/
+			setInterval(scheduleAlarm,1000 * 600);
 			diaryThread.on("scheduleAlarm",function(event,reminder){
 
 				console.log(reminder);
@@ -547,7 +599,7 @@
 				console.log(alarmTime);
 				for(var i = 0; i < alarmTime.length; i++)
 				{
-		
+					
 					console.log(reminder.startTimeMilliseconds - (new Date()).getTime() - alarmTime[i]);
 					if(reminder.startTimeMilliseconds - new Date().getTime() - alarmTime[i] > 0)
 						playAlarm(reminder.startTimeMilliseconds - new Date().getTime() - alarmTime[i], reminder);

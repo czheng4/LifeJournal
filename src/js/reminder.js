@@ -82,6 +82,7 @@ class Reminder
 			alarmTime is the time in millsencond before the event happens and each time is seperated by ','
 			startTimeMilliseconds is when the event start to happens.
 			endTimeMilliseconds is when the event ends.
+			startTimeHourMinute store the hour and minute of starting time with the format of "hour:minute"
 	
 		*/
 		this.date = "";
@@ -91,7 +92,7 @@ class Reminder
 		this.description = "";
 		this.repeatText = "";
 		this.alarmText = "";
-
+		this.startTimeHourMinute = "";
 
 		this.alarmTime = "";
 		this.startTimeMilliseconds = 0;
@@ -115,6 +116,8 @@ class Reminder
 
 		/* filenmae is where we store this reminder */
 		this.filePath = "";
+
+
 	}
 
 
@@ -147,7 +150,15 @@ class Reminder
 		
 	
 		date = new Date(year, month - 1, day, hour, minute);
-		if(type == "startTime") reminder.startTimeMilliseconds = date.getTime() ;
+		if(type == "startTime") 
+		{
+			reminder.startTimeMilliseconds = date.getTime();
+			if(hour < 10) reminder.startTimeHourMinute = '0' + hour + ':';
+			else reminder.startTimeHourMinute = hour + ':';
+
+			if(minute < 10) reminder.startTimeHourMinute += '0' + minute;
+			else reminder.startTimeHourMinute += minute;
+		}
 		else reminder.endTimeMilliseconds = date.getTime();
 	
 		//console.log(date);
@@ -186,7 +197,10 @@ class Reminder
 				}
 			}
 		}
+		console.log(reminder.alarmText);
+		
 		reminder.alarmTime = alarmTime;
+		console.log(reminder.alarmTime);
 		
 	}
 
@@ -204,7 +218,9 @@ class Reminder
 		let arr;
 		if(repeatString == "Never") 
 		{
-			reminder.date = getDateString(new Date(this.startTimeMilliseconds));
+
+			reminder.date = getDateString(new Date(reminder.startTimeMilliseconds));
+			console.log(reminder.date);
 			reminder.repeatType = 'n';
 			return;
 		}
@@ -241,7 +257,7 @@ class Reminder
 	{
 		let arr = effectiveString.split(" ");
 
-		if(effectiveString.indexOf("Forever") != -1) this.effectiveType = 'F';
+		if(effectiveString.indexOf("Forever") != -1) reminder.effectiveType = 'F';
 		else if(effectiveString.indexOf("Until") != -1) 
 		{
 			reminder.effectiveType = 'U';
@@ -306,6 +322,12 @@ class Reminder
 		content += "REMINER_ZCH";
 		content += reminder.filePath;
 
+		content += "REMINER_ZCH";
+		content += reminder.startTimeHourMinute;
+
+		content += "REMINER_ZCH";
+		content += reminder.alarmTime;
+
 		f.write(content);
 	}
 
@@ -332,6 +354,8 @@ class Reminder
 		reminder.endTimeMilliseconds = parseInt(arr[12]);
 		reminder.date = arr[13];
 		reminder.filePath = arr[14];
+		reminder.startTimeHourMinute = arr[15];
+		reminder.alarmTime = arr[16];
 	}
 
 	/* get reminder array */
@@ -349,7 +373,10 @@ class Reminder
 			reminderArray.push(reminder);
 			console.log()
 		}
-		reminderArray = reminderArray.sort(function(r1,r2){return (r1.date > r2.date)? 1:-1;});
+		reminderArray = reminderArray.sort(function(r1,r2){
+			if(r1.date == r2.date) return (r1.startTimeHourMinute > r2.startTimeHourMinute)? 1 : -1;
+			else return (r1.date > r2.date)? 1:-1;
+		});
 	
 		return reminderArray;
 	}
@@ -481,5 +508,6 @@ class Reminder
 
 
 module.exports = {
-	Reminder:Reminder
+	Reminder:Reminder,
+	getDateString:getDateString
 }
