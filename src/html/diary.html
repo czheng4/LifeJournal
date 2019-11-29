@@ -187,13 +187,16 @@
 		const {changeThemeMode, loadThemeMode} = require("../js/theme.js")
 		const {Confirmation} = require("../js/confirmation.js");
 		const {File} = require("../js/file.js");
-		const {getDiaryEntry,diaryEntry,addDiaryEntry} = require("../js/diaryEntry.js");
+		const {diaryEntry,addToDiaryEntry,findDiaryEntry,changeFromDiaryEntry} = require("../js/diaryEntry.js");
 		const {Search} = require("../js/search.js");
 		const {Reminder,getDateString} = require("../js/reminder.js");
 		const user = remote.getGlobal('share').user;  
        	const path = "./data/" + user + "/entry"; 
 		const setting = new File("./data/" + user + "/setting.txt");
 		const mode = loadThemeMode();
+
+		var diaryEntryDict = remote.getGlobal('share').diaryEntryDict;
+		var diaryEntries = remote.getGlobal('share').diaryEntries;
 
 		var search = (mode == "dark")? new Search("red") : new Search("#FFFF00");
 		
@@ -328,7 +331,7 @@
 
 			diaryThread.send("MAIN_DIARY_REGISTER");
 
-			diaryEntries = getDiaryEntry(path);
+			
 			showDiaryEntry(startingShowIndex,endingShowIndex);
 
 			/*
@@ -337,19 +340,51 @@
 				"ADD":    create a new entry
 				"DELETE": delete the entry
 			*/
-			diaryThread.on("reload",function(event,type, index, filePath){
+			diaryThread.on("reload",function(event,type, entryData){
 
 				if(type == "CANCEL") return;
+				
+				let indexOfArray = entryData.indexOfArray;
+				let filePath = entryData.filePath;
+				
+				/* open from the calendar.So we have to find the where it's in the array of diaryEntries */
+				if(indexOfArray == -1) indexOfArray = findDiaryEntry(diaryEntries, entryData);
 				if(type == "CHANGE")
 				{
+
 					let myDiaryEntry = new diaryEntry(filePath);
 					let title = myDiaryEntry.title;
 					let entry = myDiaryEntry.entry.replace(/  +/g," ");
 					let isFindSearchValue;
 					let isFindInTitle;
+					let index;
 
-					diaryEntries[index] = myDiaryEntry;
-					$('#' + index).text("");
+					entryData.indexOfArray = indexOfArray;
+					index = changeFromDiaryEntry(diaryEntries,myDiaryEntry, entryData);
+					diaryThread.send("refreshCalendar","CHANGE",myDiaryEntry, entryData);
+
+					/* change the date. So, we remove the original one and add the new one */
+					if(index != -1)
+					{
+						$("#" + indexOfArray).remove();
+						if(searchValue == "")
+						{
+							startingShowIndex = 0;
+							endingShowIndex = index + 10;
+							showDiaryEntry(startingShowIndex, endingShowIndex);
+						}
+						else
+						{
+							numFind = 0;
+							startingSearchIndex = 0;
+							endingSearchIndex = searchInterval;
+							searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+						}
+						return;
+					}
+					
+					/* only change the content of the entry, not position */
+					$('#' + indexOfArray).text("");
 					
 					if(searchValue != "")
 					{
@@ -362,14 +397,14 @@
 						
 						if(isFindInTitle === false && isFindInEntry === false) return;
 					}
-					
-					$("#" + index).append(
+
+					$("#" + indexOfArray).append(
 						'<div class = "date">'
 							+ myDiaryEntry.year +'<br>'  
 							+ myDiaryEntry.month + '<br>'
 							+ myDiaryEntry.day + '\
 						</div>\
-						<div class="boxed" name = "' + index + '">\
+						<div class="boxed" name = "' + indexOfArray + '">\
 							<span class = "title">' + title + '</span>\
 							<br>\
   							<span>' + entry + '</span>\
@@ -380,13 +415,17 @@
 				if(type == "DELETE")
 				{
 					/* should change to use remover later on. Should make a big change on photo moudule too */
-					//$("#" + index).remove();
-					$("#" + index).css("display","none");
-					diaryEntries[index].isdeleted = true;
+					
+					$("#" + indexOfArray).remove();
+					diaryEntries[indexOfArray].isdeleted = true;
+					
+					diaryThread.send("refreshCalendar","DELETE",diaryEntries[indexOfArray]);
+					
 				}
 				if(type == "ADD")
 				{	
-					let index = addDiaryEntry(diaryEntries,filePath);
+					let index = addToDiaryEntry(diaryEntries,entryData);
+			
 					if(searchValue == "")
 					{
 						startingShowIndex = 0;
@@ -400,6 +439,7 @@
 						endingSearchIndex = searchInterval;
 						searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
 					}
+					diaryThread.send("refreshCalendar","ADD",entryData);
 				}
 				
 			})
@@ -419,9 +459,9 @@
 			})
 
 			$('body').on('click','.boxed',function(){
-				let index = parseInt($(this).attr("name"));
-				diaryEntries[index].index = index;
-				diaryThread.send("openEntry",index,diaryEntries[index]);
+				let indexOfArray = parseInt($(this).attr("name"));
+				diaryEntries[indexOfArray].indexOfArray = indexOfArray;
+				diaryThread.send("openEntry",diaryEntries[indexOfArray].indexOfWindow,diaryEntries[indexOfArray]);
 			})
 
 			$("#openPanel").click(function(){

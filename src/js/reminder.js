@@ -382,9 +382,9 @@ class Reminder
 	}
 	
 	/* get the reminder dictionary */
-	static getRemindersDict(dir)
+	static getRemindersDict(reminderArray)
 	{
-		var reminderArray = getReminders(dir);
+		//var reminderArray = getReminders(dir);
 		var dict = {};
 		var reminder;
 		for(var i = 0; i < reminderArray.length; i++)

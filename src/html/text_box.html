@@ -203,6 +203,7 @@ img
         }
     </style>
 </head>
+
 <body>
 
 <div id = "photos" class="slideshow-container">
@@ -301,7 +302,7 @@ img
             {
                 filePath = entryData.filePath;
                 $("#title").text(entryData.title.replace("\n",""));
-                 $("#entryHighlight").text(entryData.entry);
+                $("#entryHighlight").text(entryData.entry);
 
                 $("#entry").text(entryData.entry);
 
@@ -471,7 +472,7 @@ img
             let entryEventKey;
             
             if(entryData == null) entryEventKey = 0xffffff;
-            else entryEventKey = entryData.index;
+            else entryEventKey = entryData.indexOfArray;
             entryThread.send("TEXTBOX_REGISTER",entryEventKey);
            
             load();
@@ -697,7 +698,7 @@ img
                 var album = remote.getGlobal('share').album; 
                 var isFresh = false;
                 var temp;
-                if(entryData == null) entryThread.send("closeEntry");
+                if(entryData == null) entryThread.send("closeEntry","DELETE", null);
                 else 
                 {
 
@@ -716,8 +717,7 @@ img
 
                     entryThread.send("refreshPhotos");
                     entryThread.send("refreshSinglePhoto");
-                    entryThread.send("refreshCalendar");
-                    entryThread.send("closeEntry","DELETE", entryData.index);
+                    entryThread.send("closeEntry","DELETE", entryData);
 
                 }
             })
@@ -782,8 +782,8 @@ img
 
                 }
 
-                if(entryData == null) entryThread.send("closeEntry", "CANCEL", 0xffffff);
-                else entryThread.send("closeEntry","CANCEL",entryData.index);
+                if(entryData == null) entryThread.send("closeEntry", "CANCEL", null);
+                else entryThread.send("closeEntry","CANCEL",entryData);
             })
 
             /* 
@@ -798,7 +798,6 @@ img
                 var entry = $("#entry").val();;
                 var date = $("#date").val();
                 var content = "";
-
                 content += title;
 
                 content += "TITLE_ENTRY_DATE_PHOTO:"
@@ -841,9 +840,12 @@ img
                     }
                 }
 
-                entryThread.send("refreshCalendar");
-                if(entryData == null) entryThread.send("closeEntry","ADD",0xffffff,filePath);
-                else entryThread.send("closeEntry","CHANGE",entryData.index,filePath);
+                if(entryData == null) 
+                {
+                  
+                    entryThread.send("closeEntry","ADD",new diaryEntry(filePath));
+                }
+                else entryThread.send("closeEntry","CHANGE",entryData);
 
 
    			})

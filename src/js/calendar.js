@@ -26,8 +26,8 @@ const months = {
 const $ = require("jQuery");
 const remote = require('electron').remote;
 const calendarThread = require('electron').ipcRenderer;
-const {getDiaryEntryDict} = require("../js/diaryEntry.js");
-const {Reminder} = require("../js/reminder.js");
+const {addToDiaryEntryDict,deleteFromDiaryEntryDict,changeFromDiaryEntryDict} = require("../js/diaryEntry.js");
+const {Reminder,getDateString} = require("../js/reminder.js");
 const fs = require("fs");
 const user = remote.getGlobal('share').user;  
 const path = "./data/" + user + "/entry"; 
@@ -38,14 +38,15 @@ var currentYear;
 var currentMonth;
 var currentDate;  // yyyy-mm-dd
 var daySelector = null; 
-var diaryEntries = getDiaryEntryDict(path);
+var diaryEntryDict = remote.getGlobal('share').diaryEntryDict;
 var reminderDict = {}
-var reminderArray = Reminder.getReminders("./data/" + user + "/reminder");
+var reminderArray = remote.getGlobal('share').reminderArray;
 var slot_width;
+var markDay;
 const dot = "&#8226";
 
 
-function showCalendar(year, month, today = null)
+function showCalendar(year, month, markDay = null)
 {
     currentMonth = month;
     currentYear = year;
@@ -78,67 +79,38 @@ function showCalendar(year, month, today = null)
             if(d.length == 1) tempDate = stringDate + "0" + d;
             if(d.length == 2) tempDate = stringDate + d;
 
-            if(today != null && d == today) 
-            {
-                if(tempDate in diaryEntries)
-                {   
-                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + "<div class = \"slot\">"
-                    for(var k = 0; k < diaryEntries[tempDate].length; k++)
-                    {
-                        calendar += "<div class = \"diaryBox\" >" + diaryEntries[tempDate][k].title + "</div>";
-                    }
-                }
-                else
-                    calendar += '<th id = "today" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + '<div class = "slot">';
-
-                if(tempDate != "")
-                {
-                    for(var k = 0; k < reminderArray.length; k++)
-                    {
-                        if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
-                        {
-                            calendar += "<div class = \"reminderBox\" >" + reminderArray[k].title + "</div>";
-                            if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
-                            else reminderDict[tempDate] = [reminderArray[k]];
-                        }
-                    }
-                }
-                calendar += "</div>";
-                calendar += "</th>\n";
-            }
-            else 
-            {
-                if(tempDate in diaryEntries)
-                {
-                     calendar += '<th name = "' + tempDate + '">' + days_array[i*7 + j] + "<div class = \"slot\">"
-                    for(var k = 0; k < diaryEntries[tempDate].length; k++)
-                    {
-                        calendar += "<div class = \"diaryBox\" >" + diaryEntries[tempDate][k].title + "</div>";
-                    }
+            if(markDay != null && tempDate == markDay) calendar += '<th id = "markDay" style = "background-color:#f5f8d7; color:black" name = "' + tempDate + '">' + days_array[i*7 + j] + "<div class = \"slot\">";
+            else  calendar += '<th name = "' + tempDate + '">' + days_array[i*7 + j] + "<div class = \"slot\">";
             
-                }
-                else calendar += "<th name = \"" + tempDate + "\">" + days_array[i*7 + j] + '<div class = "slot">';
-
-                if(tempDate != "")
+            if(tempDate in diaryEntryDict)
+            {   
+                
+                for(var k = 0; k < diaryEntryDict[tempDate].length; k++)
                 {
-                    for(var k = 0; k < reminderArray.length; k++)
+                    if(diaryEntryDict[tempDate][k].isdeleted == false) calendar += "<div class = \"diaryBox\" >" + diaryEntryDict[tempDate][k].title + "</div>";
+                }
+            }
+
+            if(tempDate != "")
+            {
+                for(var k = 0; k < reminderArray.length; k++)
+                {
+                    if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
                     {
-                        if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
-                        {
-                            calendar += "<div class = \"reminderBox\" >" + reminderArray[k].title + "</div>";
-                            if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
-                            else reminderDict[tempDate] = [reminderArray[k]];
-                        }
+                        calendar += "<div class = \"reminderBox\" >" + reminderArray[k].title + "</div>";
+                        if(tempDate in reminderDict) reminderDict[tempDate].push(reminderArray[k]);
+                        else reminderDict[tempDate] = [reminderArray[k]];
                     }
                 }
-                calendar += "</div>";
-                calendar += "</th>\n";
             }
+            calendar += "</div>";
+            calendar += "</th>\n";
+            
         }
         calendar += "</tr>\n"
         
     }
-    //console.log(calendar);
+    
     $("#calendar").text("");
     $("#calendar").append(calendar);
     $("#title").text(months[month] + "  " + year);
@@ -146,9 +118,9 @@ function showCalendar(year, month, today = null)
 function markToday()
 {
     var date = new Date();
-
-    showCalendar(date.getFullYear(),date.getMonth() + 1, date.getDate());
-    showReminderDiary( $("#today").attr("name"));
+    markDay = getDateString(date);
+    showCalendar(date.getFullYear(),date.getMonth() + 1, markDay);
+    showReminderDiary( $("#markDay").attr("name"));
     $(".slot").css("width", slot_width);
 
 }
@@ -158,12 +130,13 @@ function showReminderDiary(date)
 {   
     content  = "";
     $("#diaryAndReminder").text("");
-    if(date != undefined && date in diaryEntries) 
+    if(date != undefined && date in diaryEntryDict) 
     {
-        entryArray = diaryEntries[date];
+        entryArray = diaryEntryDict[date];
         for(i = 0; i < entryArray.length; i++)
         {
-            content +=  '<div name = "' + date + '&' + i + '&D' + '"><span class = "diaryDot">&#8226;</span>\
+            console.log(entryArray[i].isdeleted)
+            if(entryArray[i].isdeleted == false) content +=  '<div name = "' + date + '&' + i + '&D' + '"><span class = "diaryDot">&#8226;</span>\
                          <span class = "diaryTitle">' + entryArray[i].title + '</span></div>\n';
         }
        
@@ -244,56 +217,15 @@ $("body").on("click","#calendar th",function(){
     let endHM;
     let reminderTitleStyle = "";
     currentDate = date;
-    if(daySelector == null) daySelector = $("#today");
+    if(daySelector == null) daySelector = $("#markDay");
     if(daySelector != null) daySelector.removeAttr("style");
     if($(this).text() != "")
     {
         $(this).css({"background-color":"#f5f8d7","color":"black"});
     }
     daySelector = $(this);
-
-    $("#diaryAndReminder").text("");
-    if(date != undefined && date in diaryEntries) 
-    {
-        entryArray = diaryEntries[date];
-        for(i = 0; i < entryArray.length; i++)
-        {
-            content +=  '<div name = "' + date + '&' + i + '&D' + '"><span class = "diaryDot">&#8226;</span>\
-                         <span class = "diaryTitle">' + entryArray[i].title + '</span></div>\n';
-        }
-       
-    }
-    console.log(reminderDict)
-    console.log(date)
-
-    if(date in reminderDict)
-    {
-        for(var i = 0; i < reminderDict[date].length; i++)
-        {
-            startHM = reminderDict[date][i].startTime.replace(/,\s/g,' ').split(' ');
-            startHM = startHM[startHM.length - 2] + " " + startHM[startHM.length - 1];
-           
-            endHM = reminderDict[date][i].endTime.replace(/,\s/g,' ').split(' ');
-            endHM = endHM[endHM.length - 2] + " " + endHM[endHM.length - 1];
-            console.log(reminderDict[date][i].endTimeMilliseconds)
-            console.log(reminderDict[date][i].startTimeMilliseconds)
-            dayDifference = Math.floor((reminderDict[date][i].endTimeMilliseconds - reminderDict[date][i].startTimeMilliseconds) / (1000 * 60 * 60 * 24));
-            if(dayDifference > 0) 
-            {
-                reminderTitleStyle = '"left: 180px"';
-                endHM += " (in " + dayDifference + " days)";
-            }
-            else reminderTitleStyle = ""
-           
-            content +=  '<div name = "' + date + '&' + i + '&R' + '" class = "time">\
-                            <span class = "reminderDot">&#8226;</span>\
-                            <span class = "startTime">'+ startHM + '</span>\
-                            <span class = "endTime">' + endHM + '</span>\
-                         <span class = "reminderTitle" style = ' + reminderTitleStyle + '>' + reminderDict[date][i].title + '</span></div>\n';
-        }
-    }
-
-    $("#diaryAndReminder").append(content);
+    markDay = daySelector.attr("name");
+    showReminderDiary(date);
 })
 
 /* open associated diary entry */
@@ -303,7 +235,7 @@ $("body").on('click', "#diaryAndReminder div",function(){
     let index = temp[1];
     let type = temp[2];
     let reminder;
-    if(type == "D") calendarThread.send("openEntry",diaryEntries[date][index].index,diaryEntries[date][index]);
+    if(type == "D") calendarThread.send("openEntry",diaryEntryDict[date][index].indexOfWindow,diaryEntryDict[date][index]);
     if(type == "R")
     {
         reminder = reminderDict[date][index];
@@ -323,26 +255,27 @@ $("#currentTime").click(function(){
 $("#reminder").click(function(){
     window.location.href = "reminder.html";
 })
-calendarThread.on("refreshCalendar",function(){
-    diaryEntries = getDiaryEntryDict(path);
-    showCalendar(currentYear,currentMonth);
-    
-    let date = currentDate;
-    let entryArray;
-    let content = "";
-    $("#diaryAndReminder").text("");
-    if(date != undefined && date in diaryEntries) 
+calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData){
+    console.log(type, entryData);
+    if(type == "DELETE")
     {
-       
-        entryArray = diaryEntries[date];
-        for(i = 0; i < entryArray.length; i++)
-        {
-            content +=  '<div name = "' + date + '&' + i + '"><span class = "diaryDot">&#8226;</span>\
-                         <span class = "diaryTitle">' + entryArray[i].title + '</span></div>\n';
-        }
+        deleteFromDiaryEntryDict(diaryEntryDict,entryData);
         
-        $("#diaryAndReminder").append(content);
     }
+    if(type == "ADD")
+    {
+        addToDiaryEntryDict(diaryEntryDict,entryData);
+        
+    }
+    if(type  == "CHANGE")
+    {
+        changeFromDiaryEntryDict(diaryEntryDict,entryData,oldEntryData);
+    }
+    
+    showCalendar(currentYear,currentMonth,markDay);
+    daySelector = null;
+    showReminderDiary(currentDate);
+
     $(".slot").css("width", slot_width);
 })
 

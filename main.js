@@ -1,4 +1,3 @@
-// 10/01/2019
 // please download libs below
 // nmp install bootstrap
 // nmp install jquery
@@ -13,7 +12,7 @@ const mainThread = require('electron').ipcMain;
 const {Confirmation} = require("./src/js/confirmation.js");
 const {Reminder} = require("./src/js/reminder.js");
 const {Cryptography,decodeAll,encodeAll} = require("./src/js/cryptography.js");
-const cwd = process.cwd();
+const {addToDiaryEntryDict,deleteFromDiaryEntryDict,changeFromDiaryEntryDict} = require("./src/js/diaryEntry.js");
 var login, diary, photo, musicWindow, calendarWindow, upload, download, taskConfirm, createAlbum,entryWindow,editAlbum,transferPhoto,singlePhoto,settingWindow;
 
 var entryWindows = {};
@@ -37,7 +36,10 @@ global.share = {
     entryData: null, 
     albumFrom: null,
     moveFrom: null,
-    reminder: null
+    reminder: null,
+    diaryEntryDict: null,
+    diaryEntries: null,
+    reminderArray: null
 };
 
 var confirmation;
@@ -112,7 +114,6 @@ mainThread.on("ALBUM_BACKGROUND_REGISTER",(event)=>{
 })
 
 mainThread.on("CALENDAR_REGISTER",(event)=>{
-    console.log("ccc");
     eventList["CALENDAR"] = event;
 })
 
@@ -127,7 +128,6 @@ mainThread.on("TEXTBOX_REGISTER",(event,index)=>{
 
 // set globalVal 
 mainThread.on("setGlobalVal",function(event,key,val){
-    console.log(val);
     console.log(key + " " + val);
     global.share[key] = val;
     
@@ -357,8 +357,22 @@ mainThread.on("closeCalendar", function(event){
     eventList["CALENDAR"] = null;
 })
 
-mainThread.on("refreshCalendar",function(event){
-    if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("refreshCalendar");
+mainThread.on("refreshCalendar",function(event,type, entryData, oldEntryData = null){
+    if(type == "DELETE")
+    {
+        deleteFromDiaryEntryDict(global.share.diaryEntryDict,entryData);
+        if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("refreshCalendar",type,entryData);
+    }
+    if(type == "ADD")
+    {
+        addToDiaryEntryDict(global.share.diaryEntryDict,entryData);
+        if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("refreshCalendar",type,entryData);
+    }
+    if(type  == "CHANGE")
+    {
+        changeFromDiaryEntryDict(global.share.diaryEntryDict,entryData, oldEntryData);
+        if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("refreshCalendar",type,entryData,oldEntryData);
+    }
 })
 // deletion confirm window
 mainThread.on("openConfirmation",function(event,data){
@@ -613,12 +627,16 @@ mainThread.on("openEntry", function(event,index, data = null){
     entryWindows[index] = entryWindow;
 })
 
-mainThread.on("closeEntry",function(event, type, index, filePath = null){
+mainThread.on("closeEntry",function(event, type, entryData){
     
-    eventList["MAIN_DIARY"].sender.send("reload",type, index, filePath);
-    entryWindows[index].destroy();
-    delete entryWindow[index];
-    delete eventList["TEXTBOX"][index];
+    let indexOfWindow;
+    if(entryData == null || type == "ADD") indexOfWindow = 0xffffff;
+    else indexOfWindow = entryData.indexOfWindow;
+
+    if(entryData != null) eventList["MAIN_DIARY"].sender.send("reload",type, entryData);
+    entryWindows[indexOfWindow].destroy();
+    delete entryWindow[indexOfWindow];
+    delete eventList["TEXTBOX"][indexOfWindow];
     
 })
 

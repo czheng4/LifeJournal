@@ -55,6 +55,8 @@
 		const remote = require('electron').remote;  
 		const {decodeAll,encodeAll} = require("../js/cryptography.js")
 		const {loadThemeMode} = require("../js/theme.js");
+		const {getDiaryEntryDict,getDiaryEntry} = require("../js/diaryEntry.js");
+		const {Reminder} = require("../js/reminder.js");
 		loadThemeMode();
 		
 
@@ -65,7 +67,9 @@
 		var num_dir = Math.floor(files.length / 2);
 		var finish = 0; // keep track the number of dir we finish decodeing or encoding.
 		var i = 0;	// iterate through the directory
-		
+		var diaryEntryDict;
+		var diaryEntries;
+		var reminders;
 		if(status === "loading") $("h2").text("Loading your info.......");
 		if(status === "saving") $("h2").text("Saving your info.......");
 
@@ -94,7 +98,17 @@
     			{
     				clearInterval(progress);
     				clearInterval(loadDiary);
-    				if(status === "loading")window.location.href = "diary.html";
+    				if(status === "loading")
+    				{
+    					diaryEntries = getDiaryEntry("./data/" + user + "/entry");
+    					diaryEntryDict = getDiaryEntryDict(diaryEntries);
+    					progressThread.send("setGlobalVal","diaryEntryDict",diaryEntryDict);
+    					progressThread.send("setGlobalVal","diaryEntries",diaryEntries);
+
+    					reminders = Reminder.getReminders("./data/" + user + "/reminder");
+    					progressThread.send("setGlobalVal","reminderArray",reminders);
+    					window.location.href = "diary.html";
+    				}
 
     				/* close the diary and open the sign in page */
     				if(status === "saving") progressThread.send("closeDiary");
