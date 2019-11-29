@@ -104,6 +104,8 @@ function addToDiaryEntry(diaryEntries, myDiaryEntry)
 	return index;
 }
 
+
+/* find the index of where the diaryEntry is in the array by using binary search */
 function findDiaryEntry(diaryEntries, myDiaryEntry)
 {
 	var myDate = myDiaryEntry.date; 
@@ -143,6 +145,7 @@ function findDiaryEntry(diaryEntries, myDiaryEntry)
 	return -1;
 }
 
+/* add the diaryEntry to the dictionary*/
 function addToDiaryEntryDict(diaryEntryDict, myDiaryEntry)
 {
 	var myDate = myDiaryEntry.date;
@@ -152,6 +155,7 @@ function addToDiaryEntryDict(diaryEntryDict, myDiaryEntry)
 
 }
 
+/* delete the diaryEntry from dictionary */
 function deleteFromDiaryEntryDict(diaryEntryDict,myDiaryEntry)
 {
 	let date = myDiaryEntry.date;
@@ -166,6 +170,7 @@ function deleteFromDiaryEntryDict(diaryEntryDict,myDiaryEntry)
 	}
 }
 
+/* change the diaryEntry info in the array */
 function changeFromDiaryEntry(diaryEntries,myDiaryEntry,oldDiaryEntry)
 {
 	if(oldDiaryEntry.date == myDiaryEntry.date) 
@@ -179,6 +184,8 @@ function changeFromDiaryEntry(diaryEntries,myDiaryEntry,oldDiaryEntry)
 		return addToDiaryEntry(diaryEntries, myDiaryEntry);
 	}
 }
+
+/* change the diaryEntry in the dictionary */
 function changeFromDiaryEntryDict(diaryEntryDict,myDiaryEntry, oldDiaryEntry)
 {
 	let date = myDiaryEntry.date;
@@ -199,6 +206,7 @@ function changeFromDiaryEntryDict(diaryEntryDict,myDiaryEntry, oldDiaryEntry)
 		addToDiaryEntryDict(diaryEntryDict,myDiaryEntry);
 	}
 }
+
 /* return sorted array of diaryEntries */
 function getDiaryEntry(dir)
 {

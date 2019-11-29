@@ -257,21 +257,11 @@ $("#reminder").click(function(){
 })
 calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData){
     console.log(type, entryData);
-    if(type == "DELETE")
-    {
-        deleteFromDiaryEntryDict(diaryEntryDict,entryData);
-        
-    }
-    if(type == "ADD")
-    {
-        addToDiaryEntryDict(diaryEntryDict,entryData);
-        
-    }
-    if(type  == "CHANGE")
-    {
-        changeFromDiaryEntryDict(diaryEntryDict,entryData,oldEntryData);
-    }
     
+    if(type == "DELETE") deleteFromDiaryEntryDict(diaryEntryDict,entryData);
+    if(type == "ADD") addToDiaryEntryDict(diaryEntryDict,entryData);
+    if(type  == "CHANGE") changeFromDiaryEntryDict(diaryEntryDict,entryData,oldEntryData);
+
     showCalendar(currentYear,currentMonth,markDay);
     daySelector = null;
     showReminderDiary(currentDate);
