@@ -40,12 +40,12 @@ var currentDate;  // yyyy-mm-dd
 var daySelector = null; 
 var diaryEntryDict = remote.getGlobal('share').diaryEntryDict;
 var reminderDict = {}
-var reminderArray = remote.getGlobal('share').reminderArray;
+var reminderArray;
 var slot_width;
-var markDay;
+var markDay = remote.getGlobal('share').markDay;
 const dot = "&#8226";
 
-
+console.log(reminderArray);
 function showCalendar(year, month, markDay = null)
 {
     currentMonth = month;
@@ -95,6 +95,7 @@ function showCalendar(year, month, markDay = null)
             {
                 for(var k = 0; k < reminderArray.length; k++)
                 {
+                    if(reminderArray[k].isdeleted == true) continue;
                     if(Reminder.isMarkOnCalendar(new Date(tempDate.replace(/-/g,"/")), reminderArray[k]))
                     {
                         calendar += "<div class = \"reminderBox\" >" + reminderArray[k].title + "</div>";
@@ -118,9 +119,10 @@ function showCalendar(year, month, markDay = null)
 function markToday()
 {
     var date = new Date();
-    markDay = getDateString(date);
+   
+    if(markDay == null) markDay = getDateString(date);
     showCalendar(date.getFullYear(),date.getMonth() + 1, markDay);
-    showReminderDiary( $("#markDay").attr("name"));
+    showReminderDiary(markDay);
     $(".slot").css("width", slot_width);
 
 }
@@ -177,16 +179,22 @@ $(document).ready(function(){
 
 calendarThread.send("CALENDAR_REGISTER");
 
-markToday();
+calendarThread.send("getReminderArray");
+calendarThread.on("getReminderArray",function(event,reminderArray1){
+    reminderArray = reminderArray1;
+    markToday();
+})
+
+
 $("#previous").click(function(){
     if((currentMonth - 1) == 0) showCalendar(currentYear - 1, 12);
-    else showCalendar(currentYear, currentMonth - 1);
+    else showCalendar(currentYear, currentMonth - 1,markDay);
     $(".slot").css("width", slot_width);
 })
 
 $("#next").click(function(){
     if((currentMonth + 1) == 13) showCalendar(currentYear + 1, 1);
-    else showCalendar(currentYear, currentMonth + 1);
+    else showCalendar(currentYear, currentMonth + 1,markDay);
     $(".slot").css("width", slot_width);
 })
 
@@ -194,7 +202,7 @@ $("#year").change(function(){
 
     let newYear = $(this).children("option:selected").val();
     let newMonth = $("#month").children("option:selected").val();
-    showCalendar(parseInt(newYear),parseInt(newMonth));
+    showCalendar(parseInt(newYear),parseInt(newMonth),markDay);
     $(".slot").css("width", slot_width);
 
 })
@@ -203,7 +211,7 @@ $("#month").change(function(){
     let newYear = $("#year").children("option:selected").val();
     let newMonth = $(this).children("option:selected").val();
 
-    showCalendar(parseInt(newYear),parseInt(newMonth));
+    showCalendar(parseInt(newYear),parseInt(newMonth),markDay);
     $(".slot").css("width", slot_width);
 })
 
@@ -238,8 +246,10 @@ $("body").on('click', "#diaryAndReminder div",function(){
     if(type == "D") calendarThread.send("openEntry",diaryEntryDict[date][index].indexOfWindow,diaryEntryDict[date][index]);
     if(type == "R")
     {
+
         reminder = reminderDict[date][index];
         window.location.href = "reminder.html";
+        calendarThread.send("setGlobalVal","markDay",markDay);
         calendarThread.send("setGlobalVal","reminder",reminder);
     }
 })
@@ -248,11 +258,16 @@ $("body").on('click', "#diaryAndReminder div",function(){
 /* mark today */ 
 $("#currentTime").click(function(){
     daySelector = null;
-    markToday();
+    var date = new Date();
+    showCalendar(date.getFullYear(),date.getMonth() + 1, getDateString(date));
+    showReminderDiary(getDateString(date));
+    $(".slot").css("width", slot_width);
 })
 
 
 $("#reminder").click(function(){
+   
+    calendarThread.send("setGlobalVal","markDay",markDay);
     window.location.href = "reminder.html";
 })
 calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData){
@@ -268,6 +283,7 @@ calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData)
 
     $(".slot").css("width", slot_width);
 })
+
 
 calendarThread.on("resizeCalendar",function(event,width){
     slot_width = 0.83 * width / 7 + "px";

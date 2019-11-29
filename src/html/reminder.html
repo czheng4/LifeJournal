@@ -40,6 +40,7 @@
 			outline: none;
 			color: var(--text-color);
 			margin-left: 5%;
+			margin-right: 5%;
 			display: inline-grid;
 		}
 		
@@ -576,7 +577,11 @@
 			<span>Repeat</span>
 			<span id = "repeatText" style="position: absolute; right: 5%">Never</span>
 		</div>
-		
+
+		<div style="width: 100%">
+
+			<span id = "delete" style="position: absolute; right: 5%; margin-top: 30px; cursor: pointer;"><i class="fas fa-trash"></i></span>
+		</div>
 	</div>
 	<script type="text/javascript">
 		const $ = require("jQuery");
@@ -584,7 +589,7 @@
 		const reminderThread = require('electron').ipcRenderer;
 		const remote = require('electron').remote;  
 		const {Reminder} = require("../js/reminder.js");
-		var reminder = new Reminder();
+		var reminder;
 		const {Confirmation} = require("../js/confirmation.js");
 		const user = remote.getGlobal('share').user; 
 		const path = "./data/" + user + "/reminder"; 
@@ -716,10 +721,15 @@
 			else reminder = new Reminder();
 		})
 
+
+		reminderThread.on("REMINDER_CANCELLATION",function(event){
+			window.location.href = "calendar.html";
+		})
+
 		/* close the reminder */
 		$("#close").click(function(){
-			window.location.href = "calendar.html";
-			return;
+			
+			
 			/* send the message to main.js to open cofimation page */
 			var confirmation = new Confirmation(
 				"REMINDER_CANCELLATION",     //type
@@ -728,11 +738,32 @@
 				["Cancel","Yes"]   //buttonlabels 
 			);
 			reminderThread.send("openConfirmation",confirmation);
+
 		})
-		reminderThread.on("REMINDER_CANCELLATION",function(){
-			console.log("canel");
+
+		/* delete the reminder */
+		$("#delete").click(function(){
+			
+			
+			/* send the message to main.js to open cofimation page */
+			var confirmation = new Confirmation(
+				"REMINDER_DELETION",     //type
+				"Discard",			  //title
+				"Are your sure you want to delete this reminder", // text
+				["Cancel","Yes"]   //buttonlabels 
+			);
+			reminderThread.send("openConfirmation",confirmation);
+
 		})
-		
+		reminderThread.on("REMINDER_DELETION",function(event){
+			if(reminder.filePath != "") 
+			{
+				fs.unlinkSync(reminder.filePath);
+				reminderThread.send("updateReminders","DELETE",reminder);
+			}
+			window.location.href = "calendar.html";
+		})
+
 
 		/* open alarm */
 		$("#alarm").click(function(){
@@ -773,6 +804,7 @@
 		/* savae the reminder */
 		$("#save").click(function(){
 			let isMissInfo = false;
+			let updateType;
 			if($("#startTimeText").text() == "") isMissInfo = true;
 			if($("#endTimeText").text() == "") isMissInfo = true;
 
@@ -788,8 +820,16 @@
 			reminder.title = $("#reminderTitle").text();
 			reminder.description = $("#description").text();
 			
-			if(reminder.filePath == "") filePath = getFilePath();
-			else filePath = reminder.filePath;
+			if(reminder.filePath == "") 
+			{
+				updateType = "ADD";
+				filePath = getFilePath();
+			}
+			else 
+			{
+				filePath = reminder.filePath;
+				updateType = "CHANGE";
+			}
 			
 			Reminder.writeToFile(reminder,filePath);
 			//Reminder.readFromFile(reminder,filePath);
@@ -802,6 +842,7 @@
 			window.location.href = "calendar.html";
 			console.log(reminder);
 			reminderThread.send("setGlobalVal","reminder",null);
+			reminderThread.send("updateReminders",updateType,reminder);
 
 			
 		})

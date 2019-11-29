@@ -118,6 +118,9 @@ class Reminder
 		this.filePath = "";
 
 
+		/* vitually delete this reminder */
+		this.isdeleted = false;
+		
 	}
 
 
@@ -371,7 +374,6 @@ class Reminder
 			reminder = new Reminder();
 			Reminder.readFromFile(reminder,dir + "/" + files[i]);
 			reminderArray.push(reminder);
-			console.log()
 		}
 		reminderArray = reminderArray.sort(function(r1,r2){
 			if(r1.date == r2.date) return (r1.startTimeHourMinute > r2.startTimeHourMinute)? 1 : -1;
@@ -381,6 +383,94 @@ class Reminder
 		return reminderArray;
 	}
 	
+	static addToReminders(reminderArray, reminder)
+	{
+		var myDate = reminder.date; 
+		var tempDate;
+		var start = 0;
+		var end = reminderArray.length - 1;
+		var middle;
+		var index;
+	
+		/* binary search to add it to reminder array */
+		while(start <= end)
+		{
+			//console.log(start + " " + end);
+			middle = Math.floor((start + end) / 2);
+			tempDate = reminderArray[middle].date;
+			if(tempDate == myDate) 
+			{
+				index = middle;
+				
+				while((index - 1) >= 0 && reminderArray[index - 1].date == myDate) index--; 
+				
+				while(index <= end && reminderArray[index].date == myDate)
+				{
+					if(reminderArray[index].startTimeHourMinute < reminder.startTimeHourMinute) index++;
+					else break;
+				}
+				break;
+			}
+			else if(tempDate < myDate) start = middle + 1;
+			else end = middle - 1;
+		}
+
+		if(start > end) index = start;
+
+		reminderArray.splice(index,0,reminder);
+		return index;
+	}
+
+	static findReminder(reminderArray,reminder)
+	{
+		var myDate = reminder.date; 
+		var tempDate;
+		var start = 0;
+		var end = reminderArray.length - 1;
+		var middle;
+		var index;
+		var filePath = reminder.filePath;
+	
+		/* binary search to find where the reminder is in the reminderArray */
+		while(start <= end)
+		{
+			middle = Math.floor((start + end) / 2);
+			tempDate = reminderArray[middle].date;
+			if(tempDate == myDate) 
+			{
+				index = middle;
+
+				while(index >= 0 && myDate == reminderArray[index].date) 
+				{
+					if(filePath == reminderArray[index].filePath) return index;
+					else index--;
+				}
+				index = middle + 1;
+				while(index <= end && reminderArray[index].date == myDate)
+				{
+					if(filePath == reminderArray[index].filePath) return index;
+					else index++;
+				}
+				return -1;
+			}
+			else if(tempDate < myDate) start = middle + 1;
+			else end = middle - 1;
+		}
+
+		return -1;
+	}
+	static deleteFromReminderArray(reminderArray,reminder)
+	{
+		let index = Reminder.findReminder(reminderArray,reminder);
+		if(index != -1) reminderArray[index].isdeleted = true;
+
+	}
+	static changeFromReminders(reminderArray,reminder)
+	{
+		let index = Reminder.findReminder(reminderArray,reminder);
+		if(index != -1) reminderArray[index] = reminder;
+	}
+
 	/* get the reminder dictionary */
 	static getRemindersDict(reminderArray)
 	{

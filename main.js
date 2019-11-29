@@ -39,7 +39,8 @@ global.share = {
     reminder: null,
     diaryEntryDict: null,
     diaryEntries: null,
-    reminderArray: null
+    reminderArray: null,
+    markDay: null
 };
 
 var confirmation;
@@ -374,6 +375,31 @@ mainThread.on("refreshCalendar",function(event,type, entryData, oldEntryData = n
         if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("refreshCalendar",type,entryData,oldEntryData);
     }
 })
+
+
+
+mainThread.on("updateReminders", function(event, type, reminder){
+    if(type == "DELETE")
+    {
+        Reminder.deleteFromReminderArray(global.share.reminderArray,reminder);
+        //if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("updateReminders",type,reminder);
+        //console.log(index);
+    }
+    if(type == "ADD")
+    {
+        Reminder.addToReminders(global.share.reminderArray,reminder);
+        //console.log(global.share.reminderArray);
+        //if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("updateReminders",type,reminder);
+    }
+    if(type == "CHANGE")
+    {
+        Reminder.changeFromReminders(global.share.reminderArray,reminder);
+    }
+})
+
+mainThread.on("getReminderArray",function(event){
+    event.sender.send("getReminderArray",global.share.reminderArray);
+})
 // deletion confirm window
 mainThread.on("openConfirmation",function(event,data){
     
@@ -456,6 +482,11 @@ mainThread.on("closeConfirmation",function(event,confirmation){
             case "REMINDER_CANCELLATION":
                 eventList["TASK_CONFIRM"].sender.send("REMINDER_CANCELLATION");
                 break;
+
+            case "REMINDER_DELETION":
+                 eventList["TASK_CONFIRM"].sender.send("REMINDER_DELETION");
+                 break;
+
             case "SIGN_OUT":
                 global.share.status = "saving";
                 diary.loadFile("./src/html/progress_bar.html");

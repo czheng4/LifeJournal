@@ -696,7 +696,7 @@ img
             /* delet the entry including photos */
             entryThread.on("ENTRY_DELETION",function(){
                 var album = remote.getGlobal('share').album; 
-                var isFresh = false;
+                var isRefresh = false;
                 var temp;
                 if(entryData == null) entryThread.send("closeEntry","DELETE", null);
                 else 
@@ -712,7 +712,7 @@ img
                         temp = entryData.photo[i];
                         temp = temp.split('/');
                         temp = temp[temp.length - 2];
-                        if(temp == album) isFresh = true;
+                        if(temp == album) isRefresh = true;
                     }
 
                     entryThread.send("refreshPhotos");
