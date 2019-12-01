@@ -36,7 +36,7 @@ global.share = {
     entryData: null, 
     albumFrom: null,
     moveFrom: null,
-    reminder: null,
+   // reminder: null,
     diaryEntryDict: null,
     diaryEntries: null,
     reminderArray: null,
@@ -379,22 +379,11 @@ mainThread.on("refreshCalendar",function(event,type, entryData, oldEntryData = n
 
 
 mainThread.on("updateReminders", function(event, type, reminder){
-    if(type == "DELETE")
-    {
-        Reminder.deleteFromReminderArray(global.share.reminderArray,reminder);
-        //if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("updateReminders",type,reminder);
-        //console.log(index);
-    }
-    if(type == "ADD")
-    {
-        Reminder.addToReminders(global.share.reminderArray,reminder);
-        //console.log(global.share.reminderArray);
-        //if(eventList["CALENDAR"] != null) eventList["CALENDAR"].sender.send("updateReminders",type,reminder);
-    }
-    if(type == "CHANGE")
-    {
-        Reminder.changeFromReminders(global.share.reminderArray,reminder);
-    }
+    if(type == "DELETE") Reminder.deleteFromReminderArray(global.share.reminderArray,reminder);
+    if(type == "ADD") Reminder.addToReminders(global.share.reminderArray,reminder);
+    if(type == "CHANGE") Reminder.changeFromReminders(global.share.reminderArray,reminder);
+    eventList["MAIN_DIARY"].sender.send("updateReminders",type, reminder);
+    
 })
 
 mainThread.on("getReminderArray",function(event){
@@ -484,15 +473,26 @@ mainThread.on("closeConfirmation",function(event,confirmation){
                 break;
 
             case "REMINDER_DELETION":
-                 eventList["TASK_CONFIRM"].sender.send("REMINDER_DELETION");
-                 break;
-
+                eventList["TASK_CONFIRM"].sender.send("REMINDER_DELETION");
+                break;
+            case "ALARM_SOUND":
+                eventList["TASK_CONFIRM"].sender.send("ALARM_SOUND_RENEW",confirmation.data);
+                break;
             case "SIGN_OUT":
                 global.share.status = "saving";
                 diary.loadFile("./src/html/progress_bar.html");
                 break;
         }
        
+    }
+    else
+    {
+        switch(confirmation.type)
+        {
+            case "ALARM_SOUND":
+                eventList["TASK_CONFIRM"].sender.send("ALARM_SOUND_CANCEL");
+                break;
+        }
     }
     eventList["CONFIRMATION_PAGE"] = null;
 })
@@ -777,9 +777,11 @@ mainThread.on("download", function(event,type,filenames){
            
 })
 
+/*
 mainThread.on("scheduleAlarm",function(event,reminder){
    eventList["MAIN_DIARY"].sender.send("scheduleAlarm",reminder);
 })
+*/
 
 mainThread.on("getReminder",function(event){
     event.sender.send("getReminder",global.share.reminder);

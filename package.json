@@ -1,7 +1,7 @@
 {
-  "name": "2019fall_iron-man",
+  "name": "myDiary",
   "version": "1.0.0",
-  "description": "cs340 project",
+  "description": "myDiary",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -10,12 +10,12 @@
     "type": "git",
     "url": "git+https://github.com/utk-cs/2019fall_iron-man.git"
   },
-  "author": "",
+  "author": "ChaoHui Zheng",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/utk-cs/2019fall_iron-man/issues"
+    "url": ""
   },
-  "homepage": "https://github.com/utk-cs/2019fall_iron-man#readme",
+  "homepage": "",
   "devDependencies": {
     "electron": "^6.0.5"
   },

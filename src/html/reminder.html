@@ -761,6 +761,7 @@
 				fs.unlinkSync(reminder.filePath);
 				reminderThread.send("updateReminders","DELETE",reminder);
 			}
+			reminderThread.send("setGlobalVal","reminder",null);
 			window.location.href = "calendar.html";
 		})
 
@@ -834,11 +835,12 @@
 			Reminder.writeToFile(reminder,filePath);
 			//Reminder.readFromFile(reminder,filePath);
 			
-			
+			/*
 			if(reminder.alarmTime !== "")
 			{
 				reminderThread.send("scheduleAlarm",reminder);
 			}
+			*/
 			window.location.href = "calendar.html";
 			console.log(reminder);
 			reminderThread.send("setGlobalVal","reminder",null);

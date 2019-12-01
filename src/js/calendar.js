@@ -123,6 +123,7 @@ function markToday()
     if(markDay == null) markDay = getDateString(date);
     showCalendar(date.getFullYear(),date.getMonth() + 1, markDay);
     showReminderDiary(markDay);
+    currentDate = markDay;
     $(".slot").css("width", slot_width);
 
 }

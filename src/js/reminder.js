@@ -120,6 +120,7 @@ class Reminder
 
 		/* vitually delete this reminder */
 		this.isdeleted = false;
+		this.isSchedule = false;
 		
 	}
 
@@ -468,7 +469,12 @@ class Reminder
 	static changeFromReminders(reminderArray,reminder)
 	{
 		let index = Reminder.findReminder(reminderArray,reminder);
-		if(index != -1) reminderArray[index] = reminder;
+		if(index != -1) 
+		{
+			reminderArray[index] = reminder;
+			reminderArray[index].isSchedule = false;
+		}
+		
 	}
 
 	/* get the reminder dictionary */

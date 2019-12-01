@@ -194,8 +194,8 @@
        	const path = "./data/" + user + "/entry"; 
 		const setting = new File("./data/" + user + "/setting.txt");
 		const mode = loadThemeMode();
-
-		var diaryEntryDict = remote.getGlobal('share').diaryEntryDict;
+		var reminderArray = remote.getGlobal('share').reminderArray;
+		
 		var diaryEntries = remote.getGlobal('share').diaryEntries;
 
 		var search = (mode == "dark")? new Search("red") : new Search("#FFFF00");
@@ -221,7 +221,7 @@
         var endingShowIndex = showInterval;
         var numFind = 0;
         var case_sensitive = (setting.readDict()["caseSensitive"] == "on");
-
+       	var alarmId = [];
 
         /* search the entry contains searchValue form diaryEntries[start] to diaryEntries[end-1] */
         function searchDiaryEntry(searchValue,start,end)
@@ -331,7 +331,7 @@
 
 			diaryThread.send("MAIN_DIARY_REGISTER");
 
-			
+		
 			showDiaryEntry(startingShowIndex,endingShowIndex);
 
 			/*
@@ -560,26 +560,44 @@
             	case_sensitive = (newCaseSensitive == "on");
             });
 
+
+
+            diaryThread.on("ALARM_SOUND_RENEW",function(event,reminder){
+            	reminder.isSchedule = false;
+            	playAlarm(1000 * 60 * 1, reminder);
+            	audio.pause();
+            })
+            diaryThread.on("ALARM_SOUND_CANCEL",function(event){
+            	audio.pause();
+            })
             function playAlarm(time,reminder)
             {
+            	
             	console.log("call me");
-            	setTimeout(function(){
+
+            	let id = setTimeout(function(){
+            		if(reminder.isdeleted == true || reminder.isSchedule == true) return;
             		audio = document.getElementById("alarm");
 					audio.play();
 					var confirmation = new Confirmation(
 						"ALARM_SOUND",     //type
 						"Alarm",			  //title
 						reminder.title, // text
-						["Cancel","Ok"]   //buttonlabels 
+						["CLOSE","SNOOZE FOR 5 MINUTES"],   //buttonlabels 
+						false,
+						reminder
 					);
 					diaryThread.send("openConfirmation",confirmation);
-            	
+            		reminder.isSchedule = true;
             	},time);
-         		
+            	console.log(id);
+            	alarmId.push(id);
+            	return id;
+            	
 			}
 			function scheduleAlarm()
 			{
-				let reminderArray = Reminder.getReminders("./data/" + user + "/reminder");
+				
 				let alarmTime;
 				let today = new Date();
 
@@ -591,14 +609,13 @@
 				let minute;
 				let timeInterval;
 
-				console.log(today);
 				for(var i = 0; i < reminderArray.length; i++)
 				{
-					console.log(reminderArray[i].alarmTime)
-					if(reminderArray[i].alarmTime == "") continue;
+					console.log(reminderArray[i])
+					if(reminderArray[i].alarmTime == "" || reminderArray[i].isSchedule == true || reminderArray[i].isdeleted == true) continue;
 					alarmTime = reminderArray[i].alarmTime.split(",");
 					alarmTime = alarmTime.map(function(time){ return parseInt(time);});
-					console.log(alarmTime.length);
+					//console.log(alarmTime.length);
 					for(var j = 0; j < alarmTime.length; j++)
 					{
 						console.log(alarmTime[j]);
@@ -607,9 +624,9 @@
 						reminderDate.setTime(todayMilliseconds + alarmTime[j]);
 						reminderDate.setHours(hour);
 						reminderDate.setMinutes(minute);
-						console.log(reminderDate)
-						console.log(reminderDate.getTime())
-						console.log(todayMilliseconds);
+						//console.log(reminderDate)
+						//console.log(reminderDate.getTime())
+						//console.log(todayMilliseconds);
 						timeInterval = reminderDate.getTime() - todayMilliseconds - alarmTime[j];
 						if(timeInterval < 0 || timeInterval > 1000 * 600) continue;
 						beginningReminderDate = new Date(getDateString(reminderDate).replace(/-/g,"/"));
@@ -620,30 +637,23 @@
 							playAlarm(timeInterval, reminderArray[i]);
 						}
 					}
-					//if(reminder.)
+					
 				}
-				console.log(reminderArray);
+				//console.log(reminderArray);
 			}
 			
 			scheduleAlarm();
 			/* we schedule the alarm every ten minutes as setInterval and setTimeOut function may have delay*/
 			setInterval(scheduleAlarm,1000 * 600);
-			diaryThread.on("scheduleAlarm",function(event,reminder){
+			diaryThread.on("updateReminders",function(event,type, reminder){
 
-				console.log(reminder);
-				let alarmTime = reminder.alarmTime;
-
-				alarmTime = alarmTime.split(",");
-
-				alarmTime = alarmTime.map(function(time){ return parseInt(time);});
-				console.log(alarmTime);
-				for(var i = 0; i < alarmTime.length; i++)
-				{
-					
-					console.log(reminder.startTimeMilliseconds - (new Date()).getTime() - alarmTime[i]);
-					if(reminder.startTimeMilliseconds - new Date().getTime() - alarmTime[i] > 0)
-						playAlarm(reminder.startTimeMilliseconds - new Date().getTime() - alarmTime[i], reminder);
-				}
+				if(type == "DELETE") Reminder.deleteFromReminderArray(reminderArray,reminder);
+    			if(type == "ADD") Reminder.addToReminders(reminderArray,reminder);
+    			if(type == "CHANGE") Reminder.changeFromReminders(reminderArray,reminder);
+    			for(var i = 0; i < alarmId.length; i++) clearTimeout(alarmId[i]);
+    			console.log("rechedule");
+    			alarmId = [];
+				scheduleAlarm();
 			})
 
 		})
