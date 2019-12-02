@@ -17,6 +17,7 @@
             background-color: lightblue;
             height: 60px;
             width: 100%;
+            z-index: 2;
         }
 
         .bottomFeature
@@ -26,6 +27,7 @@
             bottom: 0px;
             height: 60px;
             width: 100%;
+            z-index: 2;
         }
         button
         {
@@ -34,7 +36,7 @@
             color:var(--text-color);
             background-color: var(--nav-color);
             
-            margin-top: 15px;
+            margin-top: 5px;
             font-size: 20px;
 
         }
@@ -64,26 +66,347 @@
         {
             outline:none;
         }
+        .playOrder
+        {
+            position: absolute;
+            top:30px;
+            left:53%;
+            width:170px;
+            height: 105px;
+            border: 1px solid black;
+           
+            padding: 0px 0px 0px 0px;
+            display: none;
+            z-index: 2;
+            background-color: red;
+        }
+        .create
+        {
+            position: fixed;
+            top:40%;
+            text-align: center;
+            width: 80%;
+            height: 20%;
+            left:10%;
+            border: 1px solid black;
+            z-index: 2;
+            background-color: red;
+            display: none;
+        }
+
+        .importCategory
+        {
+            position: fixed;
+            top:25%;
+            text-align: center;
+            width: 80%;
+            height: 50%;
+            left:10%;
+            border: 1px solid black;
+            z-index: 2;
+            background-color: red;  
+            display: none;
+        }
+        .categoryDropdown
+        {
+            font-size: 20px;  
+            border: none;
+            outline: none;
+            padding: 7px 16px;
+            background-color: blue;
+            color: black;
+            position: relative;
+            text-align: left;
+            margin-left: 5%;
+            margin-right: 5%;
+            margin-top: 5%;
+            width: 90%;
+            border-radius: 13px;
+
+        }
+        .categoryDropdown:focus
+        {
+            outline:none;
+        }
+
+        .categoryContent
+        {   
+            transition: 0.5s;
+            position: absolute;
+            margin-left: 5%;
+            width: 90%;
+            background-color: blue;
+            box-shadow: 0px 4px 8px 0px;
+            height: 100
+            z-index: 2;
+            max-height: 0%;
+            overflow: scroll;
+            border-radius: 10px;
+            
+        }
+        .categoryContent a 
+        {
+
+            color:black;
+            padding: 7px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+        .categoryContent a:hover
+        {
+            background-color: pink;
+        }
+        hr
+        {
+            background-color: black;
+            margin: 0px 0px 0px 0px;
+        }
+        .musicContent
+        {
+            position: fixed;
+            overflow: scroll;
+            top: 70px;
+            height: 90%;
+            width: 100%;
+            border: 1px solid red;
+        }
+
+      
+        .musicCategoryTitle
+        {
+           position: absolute;
+           width: 100%;
+           padding-left: 5%;
+          
+                  
+           cursor: pointer;
+           background-color: lightblue;
+        }
+        .musicCategorySong
+        {   
+            margin-left: 5%;
+        }
+        .musicCategorySong a
+        {
+            margin-left: 30px;
+        }
+        .volumeController
+        {
+            color:blue;
+            position:absolute; 
+            left: 41%; 
+            margin-top: 15px; 
+            display: block;
+        }
+        a:hover
+        {
+            text-decoration: none;
+        }
         </style>
     </head>
 
     <body>
         <div class = "topFeature">
             <div style="position: relative">
-                <button id = "upload" style = "position:absolute; left: 60%"><i class="fas fa-file-import"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                <i class="fas fa-random"></i>
-                <i class="fas fa-recycle"></i>
-                <i class="fas fa-pause"></i>
-                <i class="fas fa-play"></i>
-                <i class="fas fa-step-forward"></i>
-                <i class="fas fa-long-arrow-alt-right"></i>
+                <input type="text" id = "search" style = "font-size: 18px;width: 35%;position: absolute;left: 30px;top:15px; border-radius: 5px"placeholder="Search ...">
+
+                <button id = "order" style = "position:absolute; left: 53%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "upload" style = "position:absolute; left: 65%"><i class="fas fa-file-import"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "createCategoryWindow" style = "position:absolute; left: 77%"> <i class="fas fa-plus"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "select" style = "position:absolute; left: 89%"><i class="fas fa-mouse-pointer"></i><span class = "shortcut"> ctr-x/alt-x </span></button>
+
+                <span style="position: absolute; left: 53%; margin-top: 35px;">order</span>
+                <span style="position: absolute; left: 64.4%; margin-top: 35px;">import</span>
+                <span style="position: absolute; left: 76.4%; margin-top: 35px;">create</span>
+                <span style="position: absolute; left: 88.3%; margin-top: 35px;">select</span>
+               
+               
+               
             </div>
         </div>
+       
         <div class="bottomFeature">
             <div>
-                <input type="range" id="start" name="volume" min="0" max="11" value = '0' style="color:blue">
-                <label for="volume">Volume</label>
+                
+               
+                   
+                <button id = "volume" class = "volume" style = "position:absolute; left: 41%"> <i class="fas fa-volume-up"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <input type="range" id="start" name="volume" min="0" max="11" value = '0' class ="volumeController">
+                
+                <button id = "previous" style = "position:absolute; left: 53%"><i class="fas fa-step-backward"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "playPause" style = "position:absolute; left: 65%"> <i class="fas fa-play"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "next" style = "position:absolute; left: 77%"> <i class="fas fa-step-forward"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "playList" style = "position:absolute; left: 89%"> <i class="fas fa-list"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <i class="fas fa-pause"></i>
+
+                <span style="position: absolute; left: 51.7%; margin-top: 35px;">previous</span>
+                <span style="position: absolute; left: 65.2%; margin-top: 35px;">play</span>
+                <span style="position: absolute; left: 77%; margin-top: 35px;">next</span>
+                <span style="position: absolute; left: 88.3%; margin-top: 35px;">play list</span>    
             </div>
         </div>
+        <!-- play order chooser -->
+        <div class = "playOrder">
+            <span id = "inOrder" style=" position: relative; left: 20px; top: 5px; cursor: pointer;"><i class="fas fa-long-arrow-alt-right"></i>&emsp;in order&emsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
+            <hr style="margin: 10px 0px 5px 0px;">
+             <span id = "random" style=" position: relative; left: 20px; cursor: pointer; "><i class="fas fa-random"></i>&emsp;random&emsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
+            <hr style="margin: 5px 0px 5px 0px;">
+            <span id = "single" style=" width: 100%; position: relative; left: 20px; cursor: pointer;"> <i class="fas fa-recycle"></i></i>&emsp;single&emsp;&ensp;&nbsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
+
+        </div>
+
+        <!-- create a new album -->
+        <div class="create">
+           
+            <input type="text" id = "categoryName" class="form-control" placeholder="Enter category name" style="width: 90%; margin-left: 5%; margin-top: 1%;">
+
+            <div style="text-align: right; margin-right: 5%; margin-top: 3%;">
+                <button id = "cancelCategory" type="button" class="btn btn-primary">Cancel</button>
+                &nbsp;&nbsp;
+                <button id = "createCategory" type="button" class="btn btn-danger">Create</button>
+            </div>
+        </div>
+
+        <!-- choose the category to import -->
+        <div class="importCategory">
+            <button class = "categoryDropdown" type="button"><span id = "chosenCategory">Import to ...</span><i class="fa fa-caret-down" style="position:absolute; left:90%; font-size: 30px"></i></button>
+            <div class = "categoryContent"> 
+            </div>
+            
+            <div style="text-align: right; position: relative; right: 5%; top: 55%;">
+                <button id = "cancelImport" type="button" class="btn btn-primary" style="width: 100px">Cancel</button>
+                &nbsp;&nbsp;
+                <button id = "yesImport" type="button" class="btn btn-danger" style="width: 100px">yes</button>
+            </div>
+        </div>
+
+        <div class="musicContent">
+            <div style="position: relative; width: 100%;"><span class = "musicCategoryTitle">Category</span>
+                <div class = "musicCategorySong">
+                    <br>
+                    <i class="fas fa-plus-square"></i><a href="#">1</a>
+                    <hr>
+                    <i class="fas fa-plus-square"></i><a href="#">2</a>
+
+                </div>
+            </div>
+            <div style="position: relative; width: 100%;"><span class = "musicCategoryTitle">Category</span>
+                <div class = "musicCategorySong">
+                    <br>
+                    <i class="fas fa-plus-square"></i><a href="#" contenteditable="true">1</a>
+                    <hr>
+
+                    <i class="fas fa-plus-square"></i><a href="#">2</a>
+
+                </div>
+            </div>
+        </div>
+
     </body>
+    <script type="text/javascript">
+        const $ = require("jQuery");
+        const remote = require('electron').remote;
+        const musicThread = require('electron').ipcRenderer;
+       
+        const fs = require("fs");
+        const user = remote.getGlobal('share').user;  
+        const path = "./data/" + user + "/music/";
+
+        var playOrder = null; 
+        //const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+        //loadThemeMode();
+
+        /* play order */
+        $(".playOrder span").click(function(){
+           
+            if(playOrder != null) 
+            {
+                playOrder.css("color","");
+                playOrder.children()[1].style.visibility = "hidden";
+            }
+
+            playOrder = $(this);
+           
+            $("#order").text("");
+            $("#order").append(playOrder.children()[0].outerHTML + '<span class = "shortcut"> ctr-i/alt-i </span>');
+            $(".playOrder").css("display","none");
+        })
+        $("#order").click(function(){
+            $(".playOrder").css("display","block");
+        })
+
+
+        /* create the new category */
+        $("#createCategoryWindow").click(function(){
+            $(".create").css("display","block");
+        })
+        $("#createCategory").click(function(){
+            /* remove the trailing space */
+            var dir = path + $("#categoryName").val().replace(/\s+$/,"");
+            /* check if the album exists */
+            if(fs.existsSync(dir) === true) musicThread.send("errorMessage","ERROR","The album exists");
+            else 
+            {
+                fs.mkdirSync(dir);
+                $(".create").css("display","none");
+            }
+           
+        })
+        $("#cancelCategory").click(function(){
+             $(".create").css("display","none");
+        })
+
+        /* import the music */
+        $("#upload").click(function(){
+            $(".importCategory").css("display","block");
+        })
+
+        $(".categoryDropdown").click(function(){
+            let max_height = $(".categoryContent").css("max-height");
+            let dirs;
+            let content = "";
+            console.log(max_height);
+            if(max_height == "0%")
+            {
+                dirs = fs.readdirSync(path);
+                for(var i = 0; i < dirs.length; i++) content += '<a href = "#">' + dirs[i] + '</a>';
+                $(".categoryContent").text(""); 
+                $(".categoryContent").append(content);
+                $(".categoryContent").css("max-height","50%");
+            }
+            else $(".categoryContent").css("max-height","0%");
+        })
+
+        $('body').on("click",".categoryContent a",function(){
+            $("#chosenCategory").text($(this).text());    
+            $(".categoryContent").css("max-height","0%");
+        })
+
+        $("#cancelImport").click(function(){
+             $(".importCategory").css("display","none");
+        })
+
+        $("#yesImport").click(function(){
+            let category = $("#chosenCategory").text();
+            if(category == "Import to ...") musicThread.send("errorMessage","ERROR","Select one category");
+            else
+            {
+                $(".importCategory").css("display","none");
+                musicThread.send("upload","music/" + category + "/");
+            }
+        })
+
+
+
+       
+        
+    </script>
 </html>

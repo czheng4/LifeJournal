@@ -239,7 +239,7 @@ mainThread.on("openMusic", function(event){
         title: "Music",
         webPreferences: { nodeIntegration: true }
     });
-    //musicWindow.webContents.openDevTools();
+    musicWindow.webContents.openDevTools();
     musicWindow.on('closed',() => { musicWindow = null;});
     musicWindow.loadFile("./src/html/music.html");
 })

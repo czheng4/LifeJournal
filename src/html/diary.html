@@ -570,6 +570,8 @@
             diaryThread.on("ALARM_SOUND_CANCEL",function(event){
             	audio.pause();
             })
+
+            /* play the alram */
             function playAlarm(time,reminder)
             {
             	
@@ -595,6 +597,8 @@
             	return id;
             	
 			}
+
+			/* schedue the alarm */
 			function scheduleAlarm()
 			{
 				
@@ -645,6 +649,8 @@
 			scheduleAlarm();
 			/* we schedule the alarm every ten minutes as setInterval and setTimeOut function may have delay*/
 			setInterval(scheduleAlarm,1000 * 600);
+
+			/* update the reminders */
 			diaryThread.on("updateReminders",function(event,type, reminder){
 
 				if(type == "DELETE") Reminder.deleteFromReminderArray(reminderArray,reminder);
