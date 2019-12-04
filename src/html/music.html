@@ -152,6 +152,7 @@
             text-decoration: none;
             display: block;
             text-align: left;
+
         }
         .categoryContent a:hover
         {
@@ -167,7 +168,7 @@
             position: fixed;
             overflow: scroll;
             top: 70px;
-            height: 90%;
+            bottom: 70px;
             width: 100%;
             border: 1px solid red;
         }
@@ -177,7 +178,7 @@
         {
            position: absolute;
            width: 100%;
-           padding-left: 5%;
+           padding-left: 20px;
           
                   
            cursor: pointer;
@@ -185,17 +186,25 @@
         }
         .musicCategorySong
         {   
-            margin-left: 5%;
+            margin-left: 20px;
         }
         .musicCategorySong a
         {
+            cursor: pointer;
             margin-left: 30px;
+            width: 80%;
+            /*
+            position: absolute;
+            left: 70px;
+            overflow: hidden;
+            */
+           
         }
         .volumeController
         {
             color:blue;
             position:absolute; 
-            left: 41%; 
+             left: 41%; 
             margin-top: 15px; 
             display: block;
         }
@@ -203,12 +212,70 @@
         {
             text-decoration: none;
         }
-        </style>
+
+
+        .volumeSlider
+        {
+            -webkit-appearance: none;
+            background: linear-gradient(to right, green 0%, green 50%, #fff 50%, #fff 100%);
+            border: solid 1px #00b300;
+            border-radius: 8px;
+            height: 7px;
+            width: 10%;
+            outline: none; 
+            left: 38.5%; 
+            margin-top: 40px; 
+            position: absolute;
+            transition: background 450ms ease-in;
+        }
+
+        .musicSlider
+        {
+            -webkit-appearance: none;
+            border: solid 1px #00b300;
+            border-radius: 8px;
+            height: 7px;
+            width: 27%;
+            outline: none; 
+            left: 6%; 
+            margin-top: 20px; 
+            position: absolute;
+        }
+        .musicCurrentTime
+        {
+            width: 5%;
+            text-align: right;
+            margin-top: 10px; 
+            position: absolute;
+
+        }
+        .musicDuration
+        {
+            width: 5%;
+            text-align: left;
+            margin-top: 10px; 
+            position: absolute;
+            left:34%;
+
+        }
+        .playingSongName
+        {
+            text-align: left;
+            margin-top: 35px; 
+            position: absolute;
+            left:6%;
+        }
+
+
+        
+    </style>
     </head>
 
     <body>
+
         <div class = "topFeature">
             <div style="position: relative">
+                <input type="range" min="0" max="11" value="7" step="1">
                 <input type="text" id = "search" style = "font-size: 18px;width: 35%;position: absolute;left: 30px;top:15px; border-radius: 5px"placeholder="Search ...">
 
                 <button id = "order" style = "position:absolute; left: 53%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
@@ -231,12 +298,17 @@
        
         <div class="bottomFeature">
             <div>
-                
+                <span class="playingSongName">123</span>
                
-                   
+                <span class="musicCurrentTime">0:12</span>
+
+                <input type="range" min="0" max="11" value="0" step="1" class = "musicSlider" id = "musicSlider">
+                <span class="musicDuration">1:00</span>
+                
                 <button id = "volume" class = "volume" style = "position:absolute; left: 41%"> <i class="fas fa-volume-up"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
-                <input type="range" id="start" name="volume" min="0" max="11" value = '0' class ="volumeController">
+
+                <input type="range" class = "volumeSlider"  id="start" name="volume" min="0.0" max="1.0" value = '0.5' step = 0.01>
                 
                 <button id = "previous" style = "position:absolute; left: 53%"><i class="fas fa-step-backward"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
@@ -244,8 +316,8 @@
                 
                 <button id = "next" style = "position:absolute; left: 77%"> <i class="fas fa-step-forward"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
-                <button id = "playList" style = "position:absolute; left: 89%"> <i class="fas fa-list"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                <i class="fas fa-pause"></i>
+                <button id = "playList" style = "position:absolute; left: 89%" name = "pause"> <i class="fas fa-list"></i><span class = "shortcut"> space </span></button>
+                
 
                 <span style="position: absolute; left: 51.7%; margin-top: 35px;">previous</span>
                 <span style="position: absolute; left: 65.2%; margin-top: 35px;">play</span>
@@ -288,17 +360,18 @@
             </div>
         </div>
 
-        <div class="musicContent">
-            <div style="position: relative; width: 100%;"><span class = "musicCategoryTitle">Category</span>
-                <div class = "musicCategorySong">
+        <div id = "musicContent" class="musicContent">
+            <div><span class = "musicCategoryTitle" name = "1"> 1 </span><span style="right: 30px; position: absolute;">▲</span>
+               
+                <div class = "musicCategorySong" id = "myMusic_1">
                     <br>
-                    <i class="fas fa-plus-square"></i><a href="#">1</a>
+                    <i class="fas fa-plus-square"></i><a href="#" contenteditable="true">1232rfrienierfieofjewiohfiewnviowhfioewhioewfhfioewhfiowehfiowehfiowe hwoifheio hfiwoehfi owh fiow1</a><input type="checkbox" style="position: absolute; right: 20px">
                     <hr>
-                    <i class="fas fa-plus-square"></i><a href="#">2</a>
+                    <i class="fas fa-plus-square"></i><a href="#" style="position: absolute;">2435</a><input type="checkbox" style="position: absolute; right: 20px">
 
                 </div>
             </div>
-            <div style="position: relative; width: 100%;"><span class = "musicCategoryTitle">Category</span>
+            <div><span class = "musicCategoryTitle">Category▲</span>
                 <div class = "musicCategorySong">
                     <br>
                     <i class="fas fa-plus-square"></i><a href="#" contenteditable="true">1</a>
@@ -319,10 +392,54 @@
         const fs = require("fs");
         const user = remote.getGlobal('share').user;  
         const path = "./data/" + user + "/music/";
+        const {Music,secondsToTimeString} = require("../js/music.js")
 
         var playOrder = null; 
+        var playingMusic = new Audio();
+        playingMusic.volume = 0.5;
+        var musicDict = {};
+        var newMusic;
+        var myMusicIndex;
+        var myMusicCategory;
+        var myMusicCurrentTime = -1;
+        var myMusicDuration = 0;
         //const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
         //loadThemeMode();
+
+
+
+        function showMusic()
+        {
+            var dirs = fs.readdirSync(path);
+
+            var files;
+            var content = "";
+            for(var i = 0; i < dirs.length; i++)
+            {
+                files = fs.readdirSync(path + dirs[i]);
+                files = files.sort(function(m1,m2){return parseInt(m1) - parseInt(m2);});
+                musicDict[dirs[i]] = [];
+                content += '<div style = "margin-top:5px">\
+                                <div class = "musicCategoryTitle" name = "' + dirs[i] + '">' + dirs[i] + '\
+                                    <span style="right: 30px; position: absolute; cursor:pointer">▲</span>\
+                                </div>\
+                            </div><br>\
+                            <div class = "musicCategorySong" id = "myMusic_' + dirs[i] + '">';
+                for(var j = 0; j < files.length; j++)
+                {
+                    newMusic = new Music("../." + path + dirs[i] + '/' + files[j],files[j]);
+                    musicDict[dirs[i]].push(newMusic);
+                    
+                    content += '<i class="fas fa-plus-square"></i>&emsp;' + (j + 1) + '.<a href="#" contenteditable="true" name = "'+ j  + '_' + dirs[i] +'">' + newMusic.name + '</a>';
+                    if(j != files.length - 1) content += '<hr>';
+                }
+                content += "</div>"
+            }
+            $("#musicContent").text("");
+            $("#musicContent").append(content);
+
+        }
+       // showMusic();
 
         /* play order */
         $(".playOrder span").click(function(){
@@ -404,6 +521,120 @@
             }
         })
 
+        /* hide and display the music */
+        $("body").on("click", ".musicCategoryTitle",function(){
+            let name = $(this).attr("name");
+            let display = $("#myMusic_" + name).css("display");
+            if(display == "none")
+            {
+                $(this).children()[0].innerHTML = String.fromCharCode(9660);
+                $("#myMusic_" + name).css("display","block");
+            }
+            else
+            {
+                $(this).children()[0].innerHTML = String.fromCharCode(9650);
+                $("#myMusic_" + name).css("display","none");
+            }      
+        })
+
+        /* play and pause the music */
+        $("#playPause").click(function(){
+            type = $(this).attr("name");
+            $(this).text("");
+            if(type == "pause")
+            {
+                $(this).attr("name","play");
+                $(this).append('<i class="fas fa-play"></i><span class = "shortcut"> space </span>');
+                playingMusic.play();
+            }
+            else
+            {
+                $(this).attr("name","pause");
+                $(this).append('<i class="fas fa-pause"></i><span class = "shortcut"> space </span>');
+                playingMusic.pause();
+            }
+        })
+
+
+        /* play the music we click */
+        $("body").on("click",".musicCategorySong a",function(){
+            let music = $(this).attr("name");
+            let category = $(this).parents()[0].id;
+            let index = parseInt(music);
+
+            category = category.substr(category.indexOf('_') + 1);
+            playingMusic.pause();
+            playingMusic.src = musicDict[category][index].src;
+            playingMusic.play();
+            myMusicIndex = index;
+            myMusicCategory = category;
+           
+        })
+
+        /* update the musicCurrentTime */
+        playingMusic.addEventListener("timeupdate",function(){
+            let time = parseInt(playingMusic.currentTime);
+            
+            let percent;
+            if(myMusicCurrentTime != time)
+            {
+                myMusicCurrentTime = time;
+                $(".musicCurrentTime").text(secondsToTimeString(time));
+                percent = time / myMusicDuration * 100;
+                $(".musicSlider").val(time);
+                //console.log(percent);
+                $(".musicSlider").css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
+            }
+        })
+
+        /* when loading a new music, I reset the min, max, val of range, musicCurrentTime,playingSongName and musicDuration */
+        playingMusic.addEventListener("loadedmetadata",function(){
+            //console.log(playingMusic.duration);
+            let timeStr = secondsToTimeString(playingMusic.duration);
+            myMusicCurrentTime = -1;
+            myMusicDuration = parseInt(playingMusic.duration);
+            $(".musicSlider").val(0);
+            $(".musicSlider").attr("min", 0);
+            $(".musicSlider").attr("max",myMusicDuration);
+            $(".playingSongName").text(musicDict[myMusicCategory][myMusicIndex].name);
+            //console.log($(".musicSlider").attr("value"));
+            
+            $(".musicCurrentTime").text("0:00");
+            $(".musicDuration").text(timeStr);
+        })
+
+        /* the music ends and play the next song */
+        playingMusic.addEventListener("ended",function(){
+            console.log("ended");
+            myMusicIndex = (myMusicIndex + 1) % musicDict[myMusicCategory].length;
+            playingMusic.src = musicDict[myMusicCategory][myMusicIndex].src;
+            console.log(playingMusic.src);
+            playingMusic.play();
+        })
+
+
+
+        /* sldie the music controler. So I update the currentTime and range track color */
+        $(".musicSlider").on('input',function(){
+            playingMusic.currentTime = this.value;
+            let percent = (this.value / this.max) * 100;
+            $(this).css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
+        })
+
+        $(".volumeSlider").on('input',function(){
+            let percent = (this.value / this.max) * 100;
+            playingMusic.volume = this.value;
+
+            $(this).css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
+        })
+        /* disable 'enter' ket when typing title */
+        $("body").keydown(function(event){
+            if (event.which == '13') 
+            {
+                event.preventDefault();
+                $("a").blur();
+            }
+        })
 
 
        
