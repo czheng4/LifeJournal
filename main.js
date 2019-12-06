@@ -478,6 +478,10 @@ mainThread.on("closeConfirmation",function(event,confirmation){
             case "ALARM_SOUND":
                 eventList["TASK_CONFIRM"].sender.send("ALARM_SOUND_RENEW",confirmation.data);
                 break;
+
+            case "MUSIC_DELETION":
+                eventList["TASK_CONFIRM"].sender.send("MUSIC_DELETION");
+                break;
             case "SIGN_OUT":
                 global.share.status = "saving";
                 diary.loadFile("./src/html/progress_bar.html");

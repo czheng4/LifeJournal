@@ -161,7 +161,7 @@
         hr
         {
             background-color: black;
-            margin: 0px 0px 0px 0px;
+            margin: -1px 0px 0px 0px;
         }
         .musicContent
         {
@@ -183,6 +183,7 @@
                   
            cursor: pointer;
            background-color: lightblue;
+           z-index: 2;
         }
         .musicCategorySong
         {   
@@ -191,8 +192,8 @@
         .musicCategorySong a
         {
             cursor: pointer;
-            margin-left: 30px;
-            width: 80%;
+            margin-left: 17px;
+            margin-right: 30px;
             /*
             position: absolute;
             left: 70px;
@@ -275,21 +276,25 @@
 
         <div class = "topFeature">
             <div style="position: relative">
-                <input type="range" min="0" max="11" value="7" step="1">
-                <input type="text" id = "search" style = "font-size: 18px;width: 35%;position: absolute;left: 30px;top:15px; border-radius: 5px"placeholder="Search ...">
+            
+                <input type="text" id = "search" style = "font-size: 18px;width: 40%;position: absolute;left: 15px;top:15px; border-radius: 5px"placeholder="Search ...">
 
-                <button id = "order" style = "position:absolute; left: 53%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                
-                <button id = "upload" style = "position:absolute; left: 65%"><i class="fas fa-file-import"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                
-                <button id = "createCategoryWindow" style = "position:absolute; left: 77%"> <i class="fas fa-plus"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                
-                <button id = "select" style = "position:absolute; left: 89%"><i class="fas fa-mouse-pointer"></i><span class = "shortcut"> ctr-x/alt-x </span></button>
 
-                <span style="position: absolute; left: 53%; margin-top: 35px;">order</span>
-                <span style="position: absolute; left: 64.4%; margin-top: 35px;">import</span>
-                <span style="position: absolute; left: 76.4%; margin-top: 35px;">create</span>
-                <span style="position: absolute; left: 88.3%; margin-top: 35px;">select</span>
+                <button id = "delete" style = "position:absolute; left: 48%"> <i class="fas fa-trash"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "transfer" style = "position:absolute; left: 57%"> <i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "order" style = "position:absolute; left: 66%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "upload" style = "position:absolute; left: 75%"><i class="fas fa-file-import"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "createCategoryWindow" style = "position:absolute; left: 84%"> <i class="fas fa-plus"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                
+                <button id = "select" style = "position:absolute; left: 93%"><i class="fas fa-mouse-pointer"></i><span class = "shortcut"> ctr-x/alt-x </span></button>
+                 <span style="position: absolute; left: 47.3%; margin-top: 35px;">delete</span>
+                  <span style="position: absolute; left: 55.8%; margin-top: 35px;">transfer</span>
+                <span style="position: absolute; left: 65.9%; margin-top: 35px;">order</span>
+                <span style="position: absolute; left: 74.4%; margin-top: 35px;">import</span>
+                <span style="position: absolute; left: 83.4%; margin-top: 35px;">create</span>
+                <span style="position: absolute; left: 92.2%; margin-top: 35px;">select</span>
                
                
                
@@ -354,9 +359,9 @@
             </div>
             
             <div style="text-align: right; position: relative; right: 5%; top: 55%;">
-                <button id = "cancelImport" type="button" class="btn btn-primary" style="width: 100px">Cancel</button>
+                <button id = "cancelImportTransfer" type="button" class="btn btn-primary" style="width: 100px">Cancel</button>
                 &nbsp;&nbsp;
-                <button id = "yesImport" type="button" class="btn btn-danger" style="width: 100px">yes</button>
+                <button id = "yesImportTransfer" type="button" class="btn btn-danger" style="width: 100px">yes</button>
             </div>
         </div>
 
@@ -388,7 +393,7 @@
         const $ = require("jQuery");
         const remote = require('electron').remote;
         const musicThread = require('electron').ipcRenderer;
-       
+        const {Confirmation} = require("../js/confirmation.js");
         const fs = require("fs");
         const user = remote.getGlobal('share').user;  
         const path = "./data/" + user + "/music/";
@@ -403,6 +408,9 @@
         var myMusicCategory;
         var myMusicCurrentTime = -1;
         var myMusicDuration = 0;
+        var visible = {false:"hidden",true:"visible"};
+        var isSelect = false;
+        var typeTransferImport = "";
         //const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
         //loadThemeMode();
 
@@ -421,17 +429,24 @@
                 musicDict[dirs[i]] = [];
                 content += '<div style = "margin-top:5px">\
                                 <div class = "musicCategoryTitle" name = "' + dirs[i] + '">' + dirs[i] + '\
-                                    <span style="right: 30px; position: absolute; cursor:pointer">▲</span>\
+                                    <span style="right: 60px; position: absolute; cursor:pointer">▲</span>\
+                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "" name = "myMusic_' + dirs[i] + '">\
                                 </div>\
-                            </div><br>\
+                                <br>\
+                            </div>\
                             <div class = "musicCategorySong" id = "myMusic_' + dirs[i] + '">';
                 for(var j = 0; j < files.length; j++)
                 {
-                    newMusic = new Music("../." + path + dirs[i] + '/' + files[j],files[j]);
+                    newMusic = new Music(path + dirs[i] + '/' + files[j],files[j]);
                     musicDict[dirs[i]].push(newMusic);
-                    
-                    content += '<i class="fas fa-plus-square"></i>&emsp;' + (j + 1) + '.<a href="#" contenteditable="true" name = "'+ j  + '_' + dirs[i] +'">' + newMusic.name + '</a>';
-                    if(j != files.length - 1) content += '<hr>';
+                    console.log(files[j]);
+                    content += '<div><hr>\
+                                    <i class="fas fa-plus-square"></i>\
+                                    <a href="#" contenteditable="true" name = "'+ j  + '_' + dirs[i] +'">' + newMusic.name + '</a>\
+                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "' + j + "-" + dirs[i] + '">\
+                                </div>';
+                    //if(j != files.length - 1) content += '<hr></div>';
+                    //else content += '</div>'
                 }
                 content += "</div>"
             }
@@ -439,7 +454,7 @@
             $("#musicContent").append(content);
 
         }
-       // showMusic();
+       showMusic();
 
         /* play order */
         $(".playOrder span").click(function(){
@@ -483,6 +498,8 @@
 
         /* import the music */
         $("#upload").click(function(){
+            typeTransferImport = "import";
+            $("#chosenCategory").text("Import to ...");
             $(".importCategory").css("display","block");
         })
 
@@ -507,17 +524,83 @@
             $(".categoryContent").css("max-height","0%");
         })
 
-        $("#cancelImport").click(function(){
+        $("#cancelImportTransfer").click(function(){
              $(".importCategory").css("display","none");
         })
 
-        $("#yesImport").click(function(){
+        $("#yesImportTransfer").click(function(){
             let category = $("#chosenCategory").text();
-            if(category == "Import to ...") musicThread.send("errorMessage","ERROR","Select one category");
+            let checkboxes;
+            let value,index;
+            let from,to;
+            let content = "";
+            let category_index;
+            let newFileName;
+            if(typeTransferImport == "import")
+            {
+                if(category == "Import to ...") musicThread.send("errorMessage","ERROR","Select one category");
+                else
+                {
+                    $(".importCategory").css("display","none");
+                    musicThread.send("upload","music/" + category + "/");
+                }
+            }
             else
             {
-                $(".importCategory").css("display","none");
-                musicThread.send("upload","music/" + category + "/");
+                if(category == "Transfer to ...") musicThread.send("errorMessage","ERROR","Select one category");
+                else
+                {
+                    $(".importCategory").css("display","none");
+                    checkboxes = $("[type='checkbox']");
+                    to = path + category + "/";
+                    
+                    category_index = musicDict[category].length;
+                    
+                    
+                    var files = fs.readdirSync(to).sort(function(t1,t2){return parseInt(t1) - parseInt(t2);});
+                    
+                    /* name our files with number. Therefore, we can have multiple same files */
+                    if(files.length == 0) num = 1;
+                    /* grab the biggest number */
+                    else num =  1 + parseInt(files[files.length - 1]);
+                    
+
+
+                    for(var i = 0; i < checkboxes.length; i++)
+                    {
+                        
+                        if(checkboxes[i].value != "" && checkboxes[i].checked)
+                        {
+
+                            value = checkboxes[i].value;
+                            value = value.split('-');
+                            index = parseInt(value[0]);
+
+                            from = musicDict[value[1]][index].filePath;
+                            newFileName = num + "-" + musicDict[value[1]][index].name;
+                            
+
+                            fs.renameSync(from, to + newFileName);
+                            newMusic = new Music(to + newFileName, newFileName);
+                            musicDict[category].push(newMusic);
+                            
+
+                            content += '<div><hr>\
+                                    <i class="fas fa-plus-square"></i>\
+                                    <a href="#" contenteditable="true" name = "'+ category_index  + '_' + category +'">' + newMusic.name + '</a>\
+                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:' + visible[isSelect] + '" value = "' + category_index + "-" + category + '"></div>';
+                           
+                            checkboxes[i].parentElement.remove();
+                            num++;
+                            category_index++;
+                              
+                        }
+
+                    }
+                    
+                    if(content != "") $("#myMusic_" + category).append(content);
+                    
+                }
             }
         })
 
@@ -557,10 +640,11 @@
 
 
         /* play the music we click */
-        $("body").on("click",".musicCategorySong a",function(){
+        $("body").on("click",".musicCategorySong div a",function(){
             let music = $(this).attr("name");
-            let category = $(this).parents()[0].id;
+            let category = $(this).parents()[1].id;
             let index = parseInt(music);
+           
 
             category = category.substr(category.indexOf('_') + 1);
             playingMusic.pause();
@@ -627,7 +711,85 @@
 
             $(this).css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
         })
-        /* disable 'enter' ket when typing title */
+
+
+
+        /* hide/display checkbox */
+        $("#select").click(function(event){
+            isSelect = !isSelect;
+            $("[type='checkbox']").css("visibility",visible[isSelect]);
+            
+        })
+
+        /* check all checkboxes under a certain category */
+        $("[type='checkbox']").click(function(event){
+            let name = $(this).attr("name");
+            let checked;
+            if(name != undefined)
+            {   
+                checked = $(this).prop("checked");
+                $("#" + name + " [type='checkbox']").prop("checked",checked);
+                event.stopPropagation();
+            }
+        })
+
+        /* delete the music */
+        $("#delete").click(function(){
+            var confirmation = new Confirmation(
+                "MUSIC_DELETION",     //type
+                "Delete",             //title
+                "Are you sure you want to delete the musics you selected?", // text
+                ["Cancel","Delete"]   //buttonlabels 
+            );
+            musicThread.send("openConfirmation",confirmation);
+        })
+
+        musicThread.on("MUSIC_DELETION",function(){
+            let checkboxes = $("[type='checkbox']");
+            let name,value;
+            let files;
+            let index;
+            let category;
+            console.log(checkboxes[0]);
+            for(var i = 0; i < checkboxes.length; i++)
+            {
+               
+                if(checkboxes[i].checked)
+                {
+                    if(checkboxes[i].value == "")
+                    {
+
+                        name = checkboxes[i].name;
+                        name = name.substr(8); // the first 8 letter is myMusic_
+                        files = fs.readdirSync(path + name);
+                        if(files.length == 0) 
+                        {
+                            fs.rmdirSync(path + name);
+                            checkboxes[i].parentElement.parentElement.remove();
+                            $("#myMusic_" + name).remove();
+
+                        }
+                    }
+                    else
+                    {   
+                        value = checkboxes[i].value;
+                        value = value.split('-');
+                        category = value[1];
+                        index = parseInt(value[0]);
+                        checkboxes[i].parentElement.remove();
+                        fs.unlinkSync(musicDict[category][index].filePath);
+                    }
+                }
+            }
+        })
+
+
+        $("#transfer").click(function(){
+            typeTransferImport = "transfer";
+            $("#chosenCategory").text("Transfer to ...");
+            $(".importCategory").css("display","block");
+        })
+        /* disable 'enter' key when typing title */
         $("body").keydown(function(event){
             if (event.which == '13') 
             {

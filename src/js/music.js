@@ -1,10 +1,15 @@
 
 class Music
 {
-	constructor(src, fileName)
+	constructor(filePath, fileName)
 	{
-		this.src = src;
-		this.name = fileName.substring(fileName.indexOf('-') + 1, fileName.indexOf(".mp3"));
+		let suffix;
+		this.filePath = filePath;
+		this.src = "../." + filePath;
+		suffix = fileName.indexOf(".mp3");
+		if(suffix != -1) this.name = fileName.substring(fileName.indexOf('-') + 1, suffix);
+		else this.name = fileName.substr(fileName.indexOf('-') + 1);
+
 		this.isdelete = false;
 	}
 }
