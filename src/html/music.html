@@ -624,6 +624,14 @@ $(document).ready(function(){
 
         $("body").on("click",".playList div a",function(){
             let index = $(this).attr("name");
+
+            if($("#playPause").attr("name") == "pause")
+            {   
+                $("#playPause").text("");
+                $("#playPause").attr("name","play");
+                $("#playPauseText").text("pause");
+                $("#playPause").append('<i class="fas fa-play"></i><span class = "shortcut"> space </span>');
+            }   
             $("#playList_" + playingMusicNode.val.index).css("color","");
             $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
             playingMusicNode = musicNodePointers[index];
@@ -636,6 +644,7 @@ $(document).ready(function(){
         $("body").on("click",".playList div button",function(){
             let index = $(this).attr("name");
             
+            if(playingMusicNode == musicNodePointers[index]) next();
             musicListDict[myMusicCategory][orderType].erase(musicNodePointers[index]);
             $(this).parent().remove();
             // console.log(index);
@@ -1124,9 +1133,8 @@ $(document).ready(function(){
             //$(this).text();
         })
 
-
-        $("#next").click(function(){
-            
+        function next()
+        {
             if(playingMusicNode == null) return;
             $("#playList_" + playingMusicNode.val.index).css("color","");
             $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
@@ -1140,7 +1148,8 @@ $(document).ready(function(){
 
                 $(".playList").scrollTop(0);
             }
-        })
+        }
+        $("#next").click(next);
 
         $("#previous").click(function(){
             if(playingMusicNode == null) return;
