@@ -194,6 +194,7 @@
             cursor: pointer;
             margin-left: 17px;
             margin-right: 30px;
+            color: inherit;
             /*
             position: absolute;
             left: 70px;
@@ -331,12 +332,12 @@
        
         <div class="bottomFeature">
             <div>
-                <span class="playingSongName">123</span>
+                <span class="playingSongName"></span>
                
-                <span class="musicCurrentTime">0:12</span>
+                <span class="musicCurrentTime">0:00</span>
 
                 <input type="range" min="0" max="11" value="0" step="1" class = "musicSlider" id = "musicSlider">
-                <span class="musicDuration">1:00</span>
+                <span class="musicDuration">0:00</span>
                 
                 <button id = "volume" class = "volume" style = "position:absolute; left: 41%"> <i class="fas fa-volume-up"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
@@ -360,8 +361,6 @@
         </div>
 
         <div class="playList">
-            <a href="#" class="playListSong">123</a>
-            <hr>
         </div>
 
         <!-- play order chooser -->
@@ -432,7 +431,7 @@
         const fs = require("fs");
         const user = remote.getGlobal('share').user;  
         const path = "./data/" + user + "/music/";
-        const {Music,secondsToTimeString,generatePlayList,findMusicOfList} = require("../js/music.js")
+        const {Music,secondsToTimeString,generatePlayList,findMusicOfList,replaceMusicOfList} = require("../js/music.js")
 
        
         var playingMusic = new Audio();
@@ -440,7 +439,7 @@
         var musicDict = {};
         var musicListDict = {};
         var newMusic;
-        var myMusicCategory;
+        var myMusicCategory = null;
         var myMusicCurrentTime = -1;
         var myMusicDuration = 0;
         var visible = {false:"hidden",true:"visible"};
@@ -476,9 +475,12 @@ $(document).ready(function(){
         function showMusic()
         {
             var dirs = fs.readdirSync(path);
-
             var files;
             var content = "";
+
+            /* sor the dirs by birthtime */
+            //dirs = dirs.sort(function(t1, t2) { return fs.statSync(path + t1).birthtime - fs.statSync(path + t2).birthtime; })
+
             for(var i = 0; i < dirs.length; i++)
             {
                 musicListDict[dirs[i]] = {'i':null, 'r':null, 's':null};
@@ -495,12 +497,12 @@ $(document).ready(function(){
                             <div class = "musicCategorySong" id = "myMusic_' + dirs[i] + '">';
                 for(var j = 0; j < files.length; j++)
                 {
-                    newMusic = new Music(path + dirs[i] + '/' + files[j],files[j]);
-                    newMusic.index = j;
+                    newMusic = new Music(path + dirs[i] + '/' + files[j],files[j], dirs[i]);
+                    newMusic.musicIndex = j;
                     musicDict[dirs[i]].push(newMusic);
-                    content += '<div><hr>\
+                    content += '<div id = "' + j + '_' + dirs[i] + '"><hr>\
                                     <i class="fas fa-plus-square" style = "cursor:pointer" name = "' + j + '_' + dirs[i] +'"></i>\
-                                    <a href="#" contenteditable="true" name = "'+ j  + '_' + dirs[i] +'">' + newMusic.name + '</a>\
+                                    <a href="#" contenteditable="false" name = "'+ j  + '_' + dirs[i] +'">' + newMusic.name + '</a>\
                                     <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "' + j + "-" + dirs[i] + '">\
                                 </div>';
                     
@@ -521,9 +523,9 @@ $(document).ready(function(){
 
         
             }
-            console.log(musicDict["1234"].length);
+            //console.log(musicDict["1234"].length);
             //generatePlayList(musicDict["1234"],musicNodePointers);
-
+            console.log(musicDict);
             $("#musicContent").text("");
             $("#musicContent").append(content);
 
@@ -533,7 +535,7 @@ $(document).ready(function(){
         /* it shows the playing list */
         function showMusicList()
         {
-           
+            if(myMusicCategory == null) return;
             let content = "";
             let node;
             let list;
@@ -541,6 +543,9 @@ $(document).ready(function(){
             //let orderType = playOrder.text().replace(/\s+/g,"")[0];
             
             console.log(playingMusicNode);
+            console.log(myMusicCategory);
+            console.log(musicListDict[myMusicCategory][orderType]);
+
             if(musicListDict[myMusicCategory][orderType] == null) 
             {   
                 if(orderType == 's')
@@ -599,9 +604,7 @@ $(document).ready(function(){
             else $('.playList').css("visibility","hidden");
 
         })
-        $(".playList").on("focusout",function(){
-            console.log(123);
-        })
+        
         $("body").on("click",".playList #playListTitle",function(){
             let indexOfTitle = (parseInt($(this).children()[0].id) + 1) % 3;
             if(indexOfTitle == 0) orderType = 'i';
@@ -622,6 +625,7 @@ $(document).ready(function(){
         $("body").on("click",".playList div a",function(){
             let index = $(this).attr("name");
             $("#playList_" + playingMusicNode.val.index).css("color","");
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
             playingMusicNode = musicNodePointers[index];
             
             playingMusic.pause();
@@ -663,13 +667,27 @@ $(document).ready(function(){
         })
         $("#createCategory").click(function(){
             /* remove the trailing space */
-            var dir = path + $("#categoryName").val().replace(/\s+$/,"");
+            let name = $("#categoryName").val().replace(/\s+$/,"");
+            var dir = path + name;
+            var content = "";
+
             /* check if the album exists */
-            if(fs.existsSync(dir) === true) musicThread.send("errorMessage","ERROR","The album exists");
+            if(fs.existsSync(dir) === true) musicThread.send("errorMessage","ERROR","The album exists or is empty");
             else 
             {
                 fs.mkdirSync(dir);
+
+                content += '<div style = "margin-top:5px">\
+                                <div class = "musicCategoryTitle" name = "' + name + '">' + name + '\
+                                    <span style="right: 60px; position: absolute; cursor:pointer">▼</span>\
+                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "" name = "myMusic_' + name + '">\
+                                </div>\
+                                <br>\
+                            </div>\
+                            <div class = "musicCategorySong" id = "myMusic_' + name + '"></div>';
+                musicDict[name] = [];
                 $(".create").css("display","none");
+                $("#musicContent").append(content);
             }
            
         })
@@ -762,13 +780,13 @@ $(document).ready(function(){
                             
 
                             fs.renameSync(from, to + newFileName);
-                            newMusic = new Music(to + newFileName, newFileName);
+                            newMusic = new Music(to + newFileName, newFileName, category);
                             musicDict[category].push(newMusic);
                             
 
                             content += '<div><hr>\
                                     <i class="fas fa-plus-square"></i>\
-                                    <a href="#" contenteditable="true" name = "'+ category_index  + '_' + category +'">' + newMusic.name + '</a>\
+                                    <a href="#" contenteditable="' + isSelect + '" name = "'+ category_index  + '_' + category +'">' + newMusic.name + '</a>\
                                     <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:' + visible[isSelect] + '" value = "' + category_index + "-" + category + '"></div>';
                            
                             checkboxes[i].parentElement.remove();
@@ -827,9 +845,14 @@ $(document).ready(function(){
             }
         })
 
-
+        var renameMusic = null;
         /* play the music we click */
         $("body").on("click",".musicCategorySong div a",function(){
+            if(isSelect == true)
+            {
+                renameMusic = $(this);
+                return;
+            }
             let music = $(this).attr("name");
             let category = $(this).parents()[1].id;
             let index = parseInt(music);
@@ -843,7 +866,16 @@ $(document).ready(function(){
             }   
             console.log(playingMusicNode);
             $("#playList_" + playingMusicNode.val.index).css("color","");
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+            
             category = category.substr(category.indexOf('_') + 1);
+            myMusicCategory = category;
+            if(playingMusicNode.val.category != category) 
+            {
+                console.log(playingMusicNode.val.category);
+                showMusicList();
+            }
+            
 
             playingMusicNode = findMusicOfList(musicDict[category][index], musicListDict[category][orderType]);
             //console.log(playingMusicNode);
@@ -851,7 +883,7 @@ $(document).ready(function(){
             playingMusic.src = playingMusicNode.val.src;
             playingMusic.play();
            
-            myMusicCategory = category;
+            
            
         })
 
@@ -868,8 +900,8 @@ $(document).ready(function(){
             //console.log(newNode);
             newNode.val.index = musicNodePointers.length;
             musicNodePointers.push(newNode);
-            
-            content = '<div id = "playList_" + ' + newNode.val.index + '>\
+
+            content = '<div id = "playList_' + newNode.val.index + '">\
                                 <a href="#" name = "' + newNode.val.index + '">' + newNode.val.name + '</a>\
                                 <button style = "position:absolute; right: 15px; font-size:1rem; margin-top:-2px;" name = "' + newNode.val.index + '"><i class="fas fa-trash"></i></button>\
                             <hr></div>';
@@ -900,6 +932,8 @@ $(document).ready(function(){
             //console.log(playingMusic.duration);
 
             $("#playList_" + playingMusicNode.val.index).css("color","blue");
+            //console.log("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category);
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","blue");
             let timeStr = secondsToTimeString(playingMusic.duration);
             myMusicCurrentTime = -1;
             myMusicDuration = parseInt(playingMusic.duration);
@@ -918,6 +952,8 @@ $(document).ready(function(){
             //let orderType = playOrder.text().replace(/\s+/g,"")[0];
             console.log("ended");
             $("#playList_" + playingMusicNode.val.index).css("color","");
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+
             playingMusicNode = playingMusicNode.next;
            
             playingMusic.src = playingMusicNode.val.src;
@@ -948,6 +984,7 @@ $(document).ready(function(){
         $("#select").click(function(event){
             isSelect = !isSelect;
             $("[type='checkbox']").css("visibility",visible[isSelect]);
+            $(".musicCategorySong div a").prop("contenteditable",isSelect);
             
         })
 
@@ -1022,13 +1059,13 @@ $(document).ready(function(){
             let content = "";
             for(var i = category_index; i < files.length + category_index; i++)
             {
-                newMusic = new Music(path + category + '/' + files[i - category_index],files[i - category_index]);
+                newMusic = new Music(path + category + '/' + files[i - category_index],files[i - category_index], category);
                 musicDict[category].push(newMusic);
                    
                 content += '<div><hr>\
                                 <i class="fas fa-plus-square"></i>\
-                                <a href="#" contenteditable="true" name = "'+ i + '_' + category +'">' + newMusic.name + '</a>\
-                                <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "' + i + "-" + category + '">\
+                                <a href="#" contenteditable="' + isSelect + '" name = "'+ i + '_' + category +'">' + newMusic.name + '</a>\
+                                <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:"' + visible[isSelect] + '" value = "' + i + "-" + category + '">\
                             </div>';
             }
             if(content != "") $("#myMusic_" + category).append(content);
@@ -1042,13 +1079,90 @@ $(document).ready(function(){
             $(".importCategory").css("display","block");
         })
 
+        /* rename */
+        $('body').on('blur',".musicCategorySong div a",function(){
+            //console.log(renameMusic[0]);
+            if(isSelect == false || renameMusic == null) return;
+            let music = renameMusic.attr("name");
+            let category = renameMusic.parents()[1].id;
+            let index = parseInt(music);
+            let newMusic;
+            let nodes;
+            category = category.substr(category.indexOf('_') + 1);
 
+
+            console.log(category, index);
+            console.log(musicDict[category]);
+            console.log(musicDict[category][index].filePath);
+            console.log(musicDict[category][index].fileName);
+            let newName = parseInt(musicDict[category][index].fileName) + "-" + $(this).text();
+
+            console.log(newName);
+            fs.renameSync(musicDict[category][index].filePath, path + category + "/" + newName);
+
+            newMusic = new Music(path + category + '/' + newName, newName, category);
+            for(var key in musicListDict)
+            {   
+                for(var type of ['i','r','s'])
+                {
+                    //console.log(key, type);
+                    //console.log(musicListDict[key][type]);
+                    nodes = replaceMusicOfList(musicDict[category][index], newMusic, musicListDict[key][type]);
+                    console.log(nodes);
+                    /* update the name in the play list */
+                    if(nodes != null)
+                    {
+                        for(var i = 0; i < nodes.length; i++)
+                        {                    
+                           $("#playList_" + nodes[i].val.index).children()[0].innerHTML = nodes[i].val.name;
+                        }
+                    }
+                    
+                }
+            }
+            musicDict[category][index] = newMusic;
+            //$(this).text();
+        })
+
+
+        $("#next").click(function(){
+            
+            if(playingMusicNode == null) return;
+            $("#playList_" + playingMusicNode.val.index).css("color","");
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+            playingMusic.pause();
+            playingMusicNode = playingMusicNode.next;
+            playingMusic.src = playingMusicNode.val.src;
+            playingMusic.play();
+
+            if(playingMusicNode == musicListDict[playingMusicNode.val.category][orderType].head)
+            {
+
+                $(".playList").scrollTop(0);
+            }
+        })
+
+        $("#previous").click(function(){
+            if(playingMusicNode == null) return;
+            $("#playList_" + playingMusicNode.val.index).css("color","");
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+            playingMusic.pause();
+            playingMusicNode = playingMusicNode.previous;
+            playingMusic.src = playingMusicNode.val.src;
+            playingMusic.play();
+
+            if(playingMusicNode == musicListDict[playingMusicNode.val.category][orderType].tail) $(".playList").scrollTop(0xfffffff);
+        })
+        
+
+        
         /* disable 'enter' key when typing title */
         $("body").keydown(function(event){
             if (event.which == '13') 
             {
                 event.preventDefault();
-                $("a").blur();
+                console.log(renameMusic);
+                if(isSelect == true && renameMusic != null)renameMusic.blur();
             }
         })
 

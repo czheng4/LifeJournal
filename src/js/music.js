@@ -9,21 +9,21 @@ const {List} = require("../js/list.js");
 const {Random} = require("../js/cryptography.js");
 class Music
 {
-	constructor(filePath = null, fileName = null)
+	constructor(filePath = null, fileName = null, category = null)
 	{
-		if(filePath == null || fileName == null) return;
+		if(filePath == null || fileName == null || category == null) return;
 		let suffix;
+		this.fileName = fileName;
 		this.filePath = filePath;
 		this.src = "../." + filePath;
+		this.category = category;
 		suffix = fileName.indexOf(".mp3");
 		if(suffix != -1) this.name = fileName.substring(fileName.indexOf('-') + 1, suffix);
 		else this.name = fileName.substr(fileName.indexOf('-') + 1);
 
 		this.isdelete = false;
-		this.node = null;
-		//this.randomNode = null;		// play in random order.
-		//this.orderNode = null;		// play in order.
-		this.index = -1;
+		this.musicIndex = -1; // this is the index of musicDict[][]. It's for comuunication between play list and the music list.
+		this.index = -1;	// this is the index of musicNodePointers  array. it's for qucik deletion and insetion.
 	}
 	deepCopy()
 	{
@@ -33,6 +33,10 @@ class Music
 		newMusic.src = this.src;
 		newMusic.name = this.name;
 		newMusic.index = -1;
+		newMusic.category = this.category;
+		newMusic.musicIndex = this.musicIndex;
+		newMusic.fileName = this.fileName;
+		
 		return newMusic;
 	}
 }
@@ -46,16 +50,42 @@ function secondsToTimeString(seconds)
 	else return min + ":" + sec; 
 }
 
-function findMusicOfList(music, list)
+/* find the node which has the same src as music.src */
+function findMusicOfList(music, list, findAll = false)
 {
 	if(music == null || list == null) return null;
 	var node = list.head;
+	var rv = [];
+
 	for(var i = 0; i < list.size; i++)
 	{
-		if(music.src == node.val.src) return node;
+		if(music.src == node.val.src) 
+		{
+			if(findAll == true) rv.push(node);
+			else return node;
+		}
 		node = node.next;
 	}
+	if(rv.length > 0) return rv;
 	return null;
+}
+
+/* replace */
+function replaceMusicOfList(music, newMusic, list)
+{
+	if(music == null || list == null || newMusic == null) return null;
+	
+	var nodes = findMusicOfList(music, list, findAll = true);
+	
+	if(nodes == null) return null;
+	for(var i = 0; i < nodes.length; i++)
+	{
+		nodes[i].val.src = newMusic.src;
+		nodes[i].val.filePath = newMusic.filePath;
+		nodes[i].val.fileName = newMusic.fileName;
+		nodes[i].val.name = newMusic.name;
+	}
+	return nodes;
 }
 
 
@@ -79,6 +109,7 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 		{
 			newNode = list.push_back(music[i].deepCopy());
 			newNode.val.index = pointers_length;
+			//newNode.val.musicIndex = music[i].musicIndex;
 			musicNodePointers.push(newNode);
 			pointers_length++;
 		}
@@ -90,6 +121,7 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 		{
 			newNode = list.push_back(music[0].deepCopy());
 			newNode.val.index = pointers_length;
+			//newNode.val.musicIndex = music[0].musicIndex;
 			musicNodePointers.push(newNode);
 		}
 		return list;
@@ -111,6 +143,7 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 		newNode = list.push_back(music[musicIndexArray[i]].deepCopy());
 
 		newNode.val.index = pointers_length;
+		//newNode.val.musicIndex = music[musicIndexArray[i]].musicIndex;
 		musicNodePointers.push(newNode);
 		pointers_length++;
 	}
@@ -124,5 +157,6 @@ module.exports = {
 	Music:Music,
 	secondsToTimeString:secondsToTimeString,
 	generatePlayList:generatePlayList,
-	findMusicOfList:findMusicOfList
+	findMusicOfList:findMusicOfList,
+	replaceMusicOfList:replaceMusicOfList
 }
