@@ -31,8 +31,8 @@
 	
 */
 
-const fs = require('fs');
-const path = require('path');
+//const this.fs = require('this.fs');
+//const this.path = require('this.path');
 /* generate utf8 table from 0 to 55203 */
 var utf8_table_to_character = {}
 var utf8_table_to_number = {}
@@ -113,6 +113,8 @@ class Cryptography
 	// you may change the size to supporot multiple languages for this app.
 	constructor(seed,size = 1000)
 	{
+		this.fs = require("fs");
+		this.path = require("path");
 		if(size > 55203) this.size = 55203;
 		else this.size = size;
 		
@@ -153,7 +155,7 @@ class Cryptography
 
 		// encodeing
 		var encode = "";
-		var content = fs.readFileSync(from,"utf8");
+		var content = this.fs.readFileSync(from,"utf8");
 		for(var i = 0; i < content.length; i++)
 		{
 			// find the normal value of character in utf8 table,
@@ -164,7 +166,7 @@ class Cryptography
 			
 		}
 
-		fs.writeFileSync(to,encode,"utf8",function(err){
+		this.fs.writeFileSync(to,encode,"utf8",function(err){
 			if(err) throw err;
 		})
 	}
@@ -174,7 +176,7 @@ class Cryptography
 	{
 		//decodeing 
 		var decode = "";
-		var content = fs.readFileSync(from,'utf8');
+		var content = this.fs.readFileSync(from,'utf8');
 		
 		for(var i = 0; i < content.length; i++)
 		{
@@ -186,7 +188,7 @@ class Cryptography
 			
 			decode += utf8_table_to_character[num];
 		}
-		fs.writeFileSync(to,decode,"utf8",function(err){
+		this.fs.writeFileSync(to,decode,"utf8",function(err){
 			if(err) throw err;
 		})
 	}
@@ -237,19 +239,19 @@ class Cryptography
 		*/
 		var date;
 		var random = new Random(to);
-		var content = fs.readFileSync(from);
+		var content = this.fs.readFileSync(from);
 		for(var i = 0; i < bytes; i++)
 		{	
 			content[i] = content[i] + this.character_to_number[utf8_table_to_character[i]];
 		}
-		fs.writeFileSync(to,content);
+		this.fs.writeFileSync(to,content);
 		
 		/* keep same date */
-		date = fs.statSync(from).mtime
-		fs.open(to, (err,fd)=>{
-			fs.futimesSync(fd, date, date);
+		date = this.fs.statSync(from).mtime
+		this.fs.open(to, (err,fd)=>{
+			this.fs.futimesSync(fd, date, date);
 		})
-		if(isDelete == true) fs.unlinkSync(from);
+		if(isDelete == true) this.fs.unlinkSync(from);
 		
 	}
 	decodeRawData(from,to, bytes = 100,isDelete = false)
@@ -259,20 +261,20 @@ class Cryptography
 		*/
 		var date;
 		var random = new Random(from);
-		var content = fs.readFileSync(from)
+		var content = this.fs.readFileSync(from)
 		for(var i = 0; i < bytes; i++)
 		{
 			content[i] = content[i] - this.character_to_number[utf8_table_to_character[i]];
 		}
 
-		fs.writeFileSync(to,content);
+		this.fs.writeFileSync(to,content);
 
 		/* keep same date */
-		date = fs.statSync(from).mtime
-		fs.open(to, (err,fd)=>{
-			fs.futimesSync(fd, date, date);
+		date = this.fs.statSync(from).mtime
+		this.fs.open(to, (err,fd)=>{
+			this.fs.futimesSync(fd, date, date);
 		})
-		if(isDelete == true) fs.unlinkSync(from);
+		if(isDelete == true) this.fs.unlinkSync(from);
 		
 	}
 }
@@ -283,17 +285,17 @@ function decodeAll(dir)
 
 	/* traverse the ENCODE_DIR and decode all the files to DIR */
 	var e = new Cryptography(dir,50000);
-	var basename = path.parse(dir).base;
-	var from = path.join(path.parse(dir).dir, "ENCODE" + path.parse(dir).base);
+	var basename = e.path.parse(dir).base;
+	var from = e.path.join(e.path.parse(dir).dir, "ENCODE" + e.path.parse(dir).base);
 	var files;
 	
 	/* decode files.
 	   the reason I don't empty the DIR is the user may exit the program the way it didn't get the chance to encode.
 	*/
-	files = fs.readdirSync(from);
+	files = e.fs.readdirSync(from);
 	for(var i = 0; i < files.length; i++)
 	{
-		e.decodeRawData(path.join(from,files[i]), path.join(dir,files[i]),20);
+		e.decodeRawData(e.path.join(from,files[i]), e.path.join(dir,files[i]),20);
 	}
 }
 
@@ -303,19 +305,19 @@ function encodeAll(dir)
 
 	/* traverse the DIR and encode all the files to ENCODE_DIR */
 	var e = new Cryptography(dir,50000);
-	var basename = path.parse(dir).base;
+	var basename = e.path.parse(dir).base;
 	var files;
-	var to = path.join(path.parse(dir).dir, "ENCODE" + path.parse(dir).base);
+	var to = e.path.join(e.path.parse(dir).dir, "ENCODE" + e.path.parse(dir).base);
 	
 	/* delete the original files in ENCODE_DIR in case the users add and delete files */
-	files = fs.readdirSync(to);
-	for(var i = 0; i < files.length; i++) fs.unlinkSync(path.join(to,files[i]));
+	files = e.fs.readdirSync(to);
+	for(var i = 0; i < files.length; i++) e.fs.unlinkSync(e.path.join(to,files[i]));
 	
 	/* encode and delete the corresponding decoded files */
-	files = fs.readdirSync(dir);
+	files = e.fs.readdirSync(dir);
 	for(var i = 0; i < files.length; i++)
 	{
-		e.encodeRawData(path.join(dir,files[i]), path.join(to,files[i]),20,true);
+		e.encodeRawData(e.path.join(dir,files[i]), e.path.join(to,files[i]),20,true);
 	}
 
 
