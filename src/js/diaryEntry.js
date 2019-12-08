@@ -62,6 +62,7 @@ class diaryEntry
 		this.month = months[ymd[1]];
 		this.day = ymd[2];
 		this.isdeleted = false;
+		this.isShow = false;
 	}
 
 }
@@ -100,8 +101,16 @@ function addToDiaryEntry(diaryEntries, myDiaryEntry)
 
 	if(start > end) index = start;
 
+
+	diaryEntries.push(myDiaryEntry);
+	myDiaryEntry.indexOfArray = diaryEntries.length - 1;
+
+	return index - 1;
+	
+	/*
 	diaryEntries.splice(index,0,myDiaryEntry);
 	return index;
+	*/
 }
 
 
@@ -221,6 +230,7 @@ function getDiaryEntry(dir)
 		diaryEntries.push(entry);
 	}
 	diaryEntries = diaryEntries.sort(function(d1,d2){return (d1.date > d2.date)? 1:-1;});
+	for(var i = 0; i < diaryEntries.length; i++) diaryEntries[i].indexOfArray = i;
 
 	return diaryEntries;
 }

@@ -142,6 +142,11 @@
         {
         	background-color: #FFFF00;
         }
+
+        .diaryElement
+        {
+        	position: relative;
+        }
 	</style>
 	<title>DocYOUment</title>
 </head>
@@ -194,13 +199,13 @@
        	const path = "./data/" + user + "/entry"; 
 		const setting = new File("./data/" + user + "/setting.txt");
 		const mode = loadThemeMode();
+		const visible = {true: "none", false: "block"};
 		var reminderArray = remote.getGlobal('share').reminderArray;
 		
 		var diaryEntries = remote.getGlobal('share').diaryEntries;
 
 		var search = (mode == "dark")? new Search("red") : new Search("#FFFF00");
 		
-       
 
        	/*
 			searchValue is the value read from search bar.
@@ -223,115 +228,127 @@
         var case_sensitive = (setting.readDict()["caseSensitive"] == "on");
        	var alarmId = [];
 
-        /* search the entry contains searchValue form diaryEntries[start] to diaryEntries[end-1] */
+       	/* diaryEntriesElements is for match the id to diaryEntries array */
+       	var diaryEntriesElements = document.getElementsByClassName("diaryElement");
+
+       
+       	
+       	/* i is the indexOfArray */
+       	function entryString(i, myDiaryEntry, title, entry, isTitle = true, isHide = true)
+       	{
+       		let content = "";
+       		if(isTitle) content += '<div id = "'+ i + '" class = "diaryElement" style="display:' + visible[isHide] + '">';
+       		content += '\
+						<div class = "date">'
+							+ myDiaryEntry.year +'<br>'
+							+ myDiaryEntry.month + '<br>'
+							+ myDiaryEntry.day + '\
+							</div>\
+							<div class="boxed" name = "' + i + '">\
+								<span class = "title">' + title + '</span>\
+								<br>\
+  								<span>' + entry + '</span>\
+  						</div><hr>';
+			if(isTitle) content += '</div>'
+			return content;
+		}
+
+        /* search the entry contains searchValue form diaryEntriesElements[start] to diaryEntriesElements[end-1] */
         function searchDiaryEntry(searchValue,start,end)
         {
         	console.log("search");
-        	if(start == 0) $("#diaryEntries").text("");
         	var s = "";
         	var title;
         	var entry;
         	var myDiaryEntry;
        		var isFindInTitle;
        		var isFindInEntry;
+       		var isHide = false;
+       		var id;
        		isOnSearchProcess = true;
 
-       		if(end > diaryEntries.length) end = diaryEntries.length;
+       		if(end > diaryEntriesElements.length) end = diaryEntriesElements.length;
 			for(var i = start; i < end; i++)
 			{
-				myDiaryEntry = diaryEntries[i];
+				isHide = false;
+				id = diaryEntriesElements[i].id;
+				myDiaryEntry = diaryEntries[id];
 
-				/* we may have deleted entry */
-				if(myDiaryEntry.isdeleted == true) continue;
-				
 				title = myDiaryEntry.title;
 				entry = myDiaryEntry.entry.replace(/  +/g," ");
 				
 				/* highlight the searchValue */ 
-				
 				title = search.search(title,searchValue,case_sensitive);
 				isFindInTitle = search.isFindSearchValue();	
 				entry = search.search(entry,searchValue,case_sensitive);
 				isFindInEntry = search.isFindSearchValue();
-					
-				if(isFindInTitle === false && isFindInEntry === false) continue;
-
 				
-				numFind++;
-				s += '\
-					<div id = "'+ i + '" style="position: relative">\
-						<div class = "date">'
-							+ myDiaryEntry.year +'<br>'
-							+ myDiaryEntry.month + '<br>'
-							+ myDiaryEntry.day + '\
-						</div>\
-						<div class="boxed" name = "' + i + '">\
-							<span class = "title">' + title + '</span>\
-							<br>\
-  							<span>' + entry + '</span>\
-  						</div>\
-  						<hr>\
-					</div>\
-					'
+				if(isFindInTitle === false && isFindInEntry === false) isHide = true;
+
+				if(isHide == true) $("#" + id).css("display","none");
+				else
+				{	
+					$("#" + id).css("display","block");
+					$("#" + id).text("");
+					$("#" + id).append(entryString(id, myDiaryEntry, title, entry, false));
+					numFind++;
+				}
+				
+				
 			}
 			
-			$("#diaryEntries").append(s);
 			startingSearchIndex = endingSearchIndex;
 			endingSearchIndex += searchInterval;
 			isOnSearchProcess = false;
 
 			/* recusively call it until we find at least 5 entries or traverse all the entries */
-			if(numFind <= searchInterval && startingSearchIndex < diaryEntries.length) searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+			if(numFind <= searchInterval && startingSearchIndex < diaryEntriesElements.length) searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
 
         }
-       
+       	
+       	function initializeDiaryEntry()
+       	{
+       		var s = "";
+			for(var i = 0; i < diaryEntries.length; i++)
+				s += '<div id = "'+ i + '" class = "diaryElement" style="display: none"></div>'
+			
+			$("#diaryEntries").append(s);
+       	}
 
-        /* show the diary entry from diaryEntries[start] to diaryEntries[end-1] */
+        /* show the diary entry from diaryEntriesElements[start] to diaryEntriesElements[end-1] */
         function showDiaryEntry(start, end)
         {
+        	
         	console.log("show");
-        	if(start == 0) $("#diaryEntries").text("");
+        	
         	var s = "";
         	var title;
         	var entry;
         	var myDiaryEntry;
-       	
-       		if(end > diaryEntries.length) end = diaryEntries.length;
+       		var id;
+       		if(end > diaryEntriesElements.length) end =diaryEntriesElements.length;
 			for(var i = start; i < end; i++)
 			{
 
-				myDiaryEntry = diaryEntries[i];
-				/* we may have deleted entry */
-				if(myDiaryEntry.isdeleted == true) continue;
-				
+				id = diaryEntriesElements[i].id;
+				myDiaryEntry = diaryEntries[id];
+
 				title = myDiaryEntry.title;
 				entry = myDiaryEntry.entry.replace(/  +/g," ");
 				
-				s += '\
-					<div id = "'+ i + '" style="position: relative">\
-						<div class = "date">'
-							+ myDiaryEntry.year +'<br>'
-							+ myDiaryEntry.month + '<br>'
-							+ myDiaryEntry.day + '\
-						</div>\
-						<div class="boxed" name = "' + i + '">\
-							<span class = "title">' + title + '</span>\
-							<br>\
-  							<span>' + entry + '</span>\
-  						</div>\
-  					<hr>\
-					</div>\
-					'
+				$("#" + id).css("display","block");
+				$("#" + id).text("");
+				$("#" + id).append(entryString(id, myDiaryEntry, title, entry, false, false));
 			}
 			startingShowIndex = endingShowIndex;
 			endingShowIndex += showInterval;
-			$("#diaryEntries").append(s);
+			
         }
 		$(document).ready(function(){
 
 			diaryThread.send("MAIN_DIARY_REGISTER");
 
-		
+			initializeDiaryEntry();
 			showDiaryEntry(startingShowIndex,endingShowIndex);
 
 			/*
@@ -346,46 +363,31 @@
 				
 				let indexOfArray = entryData.indexOfArray;
 				let filePath = entryData.filePath;
+				let isHide = false;
+				let title;
+				let entry;
+				let isFindSearchValue;
+				let isFindInTitle;
+				let index;
+				let content;
+				let myDiaryEntry;
 				
 				/* open from the calendar.So we have to find the where it's in the array of diaryEntries */
 				if(indexOfArray == -1) indexOfArray = findDiaryEntry(diaryEntries, entryData);
+					
 				if(type == "CHANGE")
-				{
-
-					let myDiaryEntry = new diaryEntry(filePath);
-					let title = myDiaryEntry.title;
-					let entry = myDiaryEntry.entry.replace(/  +/g," ");
-					let isFindSearchValue;
-					let isFindInTitle;
-					let index;
-
+				{	
+					
+					myDiaryEntry = new diaryEntry(filePath);
+					title = myDiaryEntry.title;
+					entry = myDiaryEntry.entry.replace(/  +/g," ");
+					
 					entryData.indexOfArray = indexOfArray;
-					index = changeFromDiaryEntry(diaryEntries,myDiaryEntry, entryData);
+					
 					diaryThread.send("refreshCalendar","CHANGE",myDiaryEntry, entryData);
+					
+					
 
-					/* change the date. So, we remove the original one and add the new one */
-					if(index != -1)
-					{
-						$("#" + indexOfArray).remove();
-						if(searchValue == "")
-						{
-							startingShowIndex = 0;
-							endingShowIndex = index + 10;
-							showDiaryEntry(startingShowIndex, endingShowIndex);
-						}
-						else
-						{
-							numFind = 0;
-							startingSearchIndex = 0;
-							endingSearchIndex = searchInterval;
-							searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
-						}
-						return;
-					}
-					
-					/* only change the content of the entry, not position */
-					$('#' + indexOfArray).text("");
-					
 					if(searchValue != "")
 					{
 						title = search.search(title,searchValue,case_sensitive);
@@ -395,57 +397,74 @@
 						isFindInEntry = search.isFindSearchValue();
 					
 						
-						if(isFindInTitle === false && isFindInEntry === false) return;
+						if(isFindInTitle === false && isFindInEntry === false) isHide = true;
 					}
 
-					$("#" + indexOfArray).append(
-						'<div class = "date">'
-							+ myDiaryEntry.year +'<br>'  
-							+ myDiaryEntry.month + '<br>'
-							+ myDiaryEntry.day + '\
-						</div>\
-						<div class="boxed" name = "' + indexOfArray + '">\
-							<span class = "title">' + title + '</span>\
-							<br>\
-  							<span>' + entry + '</span>\
-  						</div>\
-						<hr>');
+					/* change the date. So, we remove the original one and add the new one */
+					if(entryData.date == myDiaryEntry.date) 
+					{	
+						diaryEntries[entryData.indexOfArray] = myDiaryEntry;
+						$('#' + indexOfArray).text("");
+						$('#' + indexOfArray).append(entryString(indexOfArray, myDiaryEntry, title, entry, false, isHide))
+					}
+					else
+					{	
+						
+						$("#" + indexOfArray).remove();
+						
+						index = addToDiaryEntry(diaryEntries,myDiaryEntry);
+						content = entryString(myDiaryEntry.indexOfArray, myDiaryEntry, title, entry, true, isHide);
+					
+						if(index >= 0) $(content).insertAfter("#" + index);
+						else $("#diaryEntries").prepend(content);
+
+					}
 					
 				}
 				if(type == "DELETE")
 				{
-					/* should change to use remover later on. Should make a big change on photo moudule too */
-					
 					$("#" + indexOfArray).remove();
-					diaryEntries[indexOfArray].isdeleted = true;
+					//diaryEntries[indexOfArray].isdeleted = true;
 					
 					diaryThread.send("refreshCalendar","DELETE",diaryEntries[indexOfArray]);
 					
 				}
+
 				if(type == "ADD")
 				{	
-					let index = addToDiaryEntry(diaryEntries,entryData);
-			
-					if(searchValue == "")
+					
+					index = addToDiaryEntry(diaryEntries,entryData);
+					content = "";
+					title = entryData.title;
+					entry = entryData.entry.replace(/  +/g," ");
+					if(searchValue != "")
 					{
-						startingShowIndex = 0;
-						endingShowIndex = index + 10;
-						showDiaryEntry(startingShowIndex, endingShowIndex);
+						title = search.search(title,searchValue,case_sensitive);
+						isFindInTitle = search.isFindSearchValue();	
+					
+						entry = search.search(entry,searchValue,case_sensitive);
+						isFindInEntry = search.isFindSearchValue();
+					
+						
+						if(isFindInTitle === false && isFindInEntry === false) isHide = true;
 					}
-					else
-					{
-						numFind = 0;
-						startingSearchIndex = 0;
-						endingSearchIndex = searchInterval;
-						searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
-					}
+
+
+					content = entryString(entryData.indexOfArray, entryData, title, entry, true, isHide);
+					
+					if(index >= 0) $(content).insertAfter("#" + index);
+					else $("#diaryEntries").prepend(content);
+						
 					diaryThread.send("refreshCalendar","ADD",entryData);
 				}
 				
 			})
 			
+			/* entryFilePaths is key on path, val on entryData 
+			   If write a binary search, it can be faster.
+			*/
 			diaryThread.on("updateDiaryEntries",(event,entryFilePaths)=>{
-				/* may be faster if I turn diaryPaths into dictionary */
+				
 				let diaryPaths = diaryEntries.map(function(d){ 
 					if(d.isdeleted == false) return d.filePath;
 					else return "NULL";
@@ -460,7 +479,7 @@
 
 			$('body').on('click','.boxed',function(){
 				let indexOfArray = parseInt($(this).attr("name"));
-				diaryEntries[indexOfArray].indexOfArray = indexOfArray;
+				//diaryEntries[indexOfArray].indexOfArray = indexOfArray;
 				diaryThread.send("openEntry",diaryEntries[indexOfArray].indexOfWindow,diaryEntries[indexOfArray]);
 			})
 
@@ -533,7 +552,6 @@
             		showDiaryEntry(startingShowIndex, endingShowIndex);
             		return;
             	}
-            	
             	searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
             })
 
@@ -543,9 +561,9 @@
             	if(searchValue != "" && isOnSearchProcess == false)
             	{
             		numFind = 0;
-            		if(startingSearchIndex < diaryEntries.length) searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
+            		if(startingSearchIndex < diaryEntriesElements.length) searchDiaryEntry(searchValue,startingSearchIndex,endingSearchIndex);
             	}
-            	if(searchValue == "" && startingShowIndex < diaryEntries.length) showDiaryEntry(startingShowIndex,endingShowIndex);
+            	if(searchValue == "" && startingShowIndex < diaryEntriesElements.length) showDiaryEntry(startingShowIndex,endingShowIndex);
             })
 
             /* mode swapping */

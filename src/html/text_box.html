@@ -472,7 +472,7 @@ img
             let entryEventKey;
             
             if(entryData == null) entryEventKey = 0xffffff;
-            else entryEventKey = entryData.indexOfArray;
+            else entryEventKey = entryData.indexOfWindow;
             entryThread.send("TEXTBOX_REGISTER",entryEventKey);
            
             load();
