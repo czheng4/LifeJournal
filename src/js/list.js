@@ -51,11 +51,13 @@ class List
 	}
 	pop_back()
 	{
+		let rv = this.tail;
 		if(this.size == 0) return;
 		this.tail = this.tail.previous;
 		this.tail.next = this.head;
 		this.head.previous = this.tail;
 		this.size--;
+		return rv;
 	}
 	push_front(val)
 	{
@@ -77,12 +79,14 @@ class List
 		
 	}
 	pop_front()
-	{
+	{	
+		let rv = this.head;
 		if(this.size == 0) return;
 		this.head = this.head.next;
 		this.head.previous = this.tail;
-		this.tail.previous = this.head;
+		this.tail.next = this.head;
 		this.size--;
+		return rv;
 	}
 	insert_after(node, newVal)
 	{	
@@ -101,6 +105,7 @@ class List
 		//{
 			var newNode;
 			var next;
+
 			newNode = new ListNode(newVal);
 			next = node.next;
 			node.next = newNode;
@@ -108,6 +113,9 @@ class List
 			newNode.next = next;
 			next.previous = newNode;
 			this.size++;
+
+			if(node == this.tail) this.tail = newNode;
+			
 			return newNode;
 		//}
 	}
@@ -122,7 +130,8 @@ class List
 			node = node.next;
 		}
 		*/
-		//if(node == this.head) return;
+		if(node == this.head) this.head = this.head.next;
+		if(node == this.tail) this.tail = this.tail.previous;
 		node.next.previous = node.previous;
 		node.previous.next = node.next;
 	}

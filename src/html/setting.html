@@ -10,12 +10,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
-	
-	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <title></title>
+    <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
 
-	<link href="../../fontawesome/css/all.css" rel="stylesheet">
-	<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+    <link href="../../fontawesome/css/all.css" rel="stylesheet">
+    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
 
     <style type="text/css">
         /* the style for toggle button is from https://www.w3schools.com/howto/howto_css_switch.asp */
@@ -77,10 +76,7 @@
         .slider.round:before {
           border-radius: 50%;
         }
-    </style>
 
-
-	<style type="text/css">
         body
         {
             background-color: var(--background-color);
@@ -106,7 +102,7 @@
 </head>
 
 <body>
-	<div class = "container" style="margin-top:30px">
+    <div class = "container" style="margin-top:30px">
         <div style="color: red; font-size: 20px;"> Theme </div>
 
         <div style="position: relative; left :10px; top: 5px;">
@@ -129,17 +125,16 @@
         </div>
         
 </div>
-	
-	<script type="text/javascript">
+    <script type="text/javascript">
 
         
-       
-		const $ = require("jQuery");
-		const fs = require("fs");
-		const settingThread = require('electron').ipcRenderer;
-		const remote = require('electron').remote;
-		const {File} = require("../js/file.js");
-		const user = remote.getGlobal('share').user;  
+        
+        const $ = require("jQuery");
+        const fs = require("fs");
+        const settingThread = require('electron').ipcRenderer;
+        const remote = require('electron').remote;
+        const {File} = require("../js/file.js");
+        const user = remote.getGlobal('share').user;  
         const f  = new File("./data/" + user + "/setting.txt");
         const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
         const mode = loadThemeMode();
@@ -149,29 +144,29 @@
         $("#caseSensitive").prop("checked",dict["caseSensitive"] == "on");
         
 
-		$(document).ready(function(){
-            settingThread.send("MAIN_SETTING_REGISTER");
-			$("[name~=\"theme\"]").click(function(){
-                let newMode = $(this).attr("id");
-                dict["mode"] = newMode;
-				
-                $('link[rel=stylesheet][href~="' + mode + '.css"]').remove();
-                $("head").append('<link rel="stylesheet" type="text/css" href="../css/' + newMode + '.css">');
-               
-                f.writeDict(dict);
-                settingThread.send("changeThemeMode",mode,newMode);
-			})
+    $(document).ready(function(){
+      
+        settingThread.send("MAIN_SETTING_REGISTER");
+        $("[name~=\"theme\"]").click(function(){
+            let newMode = $(this).attr("id");
+            dict["mode"] = newMode;	
+            $('link[rel=stylesheet][href~="' + mode + '.css"]').remove();
+            $("head").append('<link rel="stylesheet" type="text/css" href="../css/' + newMode + '.css">');
+        
+            f.writeDict(dict);
+            settingThread.send("changeThemeMode",mode,newMode);
+        })
 
-            $("#caseSensitive").click(function(){
-                dict["caseSensitive"] = ($(this).is(':checked') == true)? "on" : "off";
-                f.writeDict(dict);
-                settingThread.send("changeCaseSensitive",dict["caseSensitive"]);
-            })
-            $("#password").click(function(){
-                window.location.href = "change_password.html";
-            })
+        $("#caseSensitive").click(function(){
+            dict["caseSensitive"] = ($(this).is(':checked') == true)? "on" : "off";
+            f.writeDict(dict);
+            settingThread.send("changeCaseSensitive",dict["caseSensitive"]);
+        })
+        $("#password").click(function(){
+            window.location.href = "change_password.html";
+        })
 
-		})
+    })
 </script>
 </body>
 </html>

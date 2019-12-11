@@ -426,13 +426,14 @@
     <script type="text/javascript">
         const $ = require("jQuery");
         const remote = require('electron').remote;
+        const {File} = require("../js/file.js");
         const musicThread = require('electron').ipcRenderer;
         const {Confirmation} = require("../js/confirmation.js");
         const fs = require("fs");
         const user = remote.getGlobal('share').user;  
         const path = "./data/" + user + "/music/";
-        const {Music,secondsToTimeString,generatePlayList,findMusicOfList,replaceMusicOfList} = require("../js/music.js")
-
+        const {Music,secondsToTimeString,generatePlayList,findMusicOfList,updateMusicFromList} = require("../js/music.js")
+        const setting = new File("./data/" + user + "/setting.txt");
        
         var playingMusic = new Audio();
         playingMusic.volume = 0.5;
@@ -448,6 +449,7 @@
         var playOrder;
         var playingMusicNode = null;
         var musicNodePointers = [];
+        var case_sensitive = (setting.readDict()["caseSensitive"] == "on");
 
         var orderType = 'i'; // i is in order, s is single, r is random
         var playListTitle = {0:'<h5 id = "0_playListTitle" style="margin-left:15px; margin-top:5px;cursor:pointer">\
@@ -471,7 +473,19 @@
 
 $(document).ready(function(){
         playOrder = $("#inOrder"); 
-        /* it shows all the music we have */
+
+        musicThread.send("MUSIC_REGISTER");
+        
+        /* a helper function to generate the html string of each song */
+        function musicPlayListStr(node)
+        {
+            return '<div id = "playList_' + node.val.index + '">\
+                                <a href="#" name = "' + node.val.index + '">' + node.val.name + '</a>\
+                                <button style = "position:absolute; right: 15px; font-size:1rem; margin-top:-2px;" name = "' + node.val.index + '"><i class="fas fa-trash"></i></button>\
+                    <hr></div>'
+        }
+
+        /* it shows all the music we have in the main page */
         function showMusic()
         {
             var dirs = fs.readdirSync(path);
@@ -479,8 +493,12 @@ $(document).ready(function(){
             var content = "";
 
             /* sor the dirs by birthtime */
-            //dirs = dirs.sort(function(t1, t2) { return fs.statSync(path + t1).birthtime - fs.statSync(path + t2).birthtime; })
+            dirs = dirs.sort(function(t1, t2) { return fs.statSync(path + t1).birthtime - fs.statSync(path + t2).birthtime; })
 
+            /* set the myMusicCategory */
+            if(dirs.length > 0) myMusicCategory = dirs[0];
+
+            /* show the music list. initialize the musicListDict. Generate the musicDict */
             for(var i = 0; i < dirs.length; i++)
             {
                 musicListDict[dirs[i]] = {'i':null, 'r':null, 's':null};
@@ -509,28 +527,12 @@ $(document).ready(function(){
                 }
                 content += "</div>"
             }
-            for(var key in musicDict)
-            {
 
-                for(var i = 0; i < musicDict[key].length; i++)
-                {
-
-                    playingMusic.src = musicDict[key][i].src;
-                    myMusicCategory = key;
-                    break;
-                }
-                if(musicDict[key].length != 0) break;
-
-        
-            }
-            //console.log(musicDict["1234"].length);
-            //generatePlayList(musicDict["1234"],musicNodePointers);
-            console.log(musicDict);
             $("#musicContent").text("");
             $("#musicContent").append(content);
 
         }
-        showMusic();
+        
 
         /* it shows the playing list */
         function showMusicList()
@@ -539,18 +541,17 @@ $(document).ready(function(){
             let content = "";
             let node;
             let list;
-           
-            //let orderType = playOrder.text().replace(/\s+/g,"")[0];
+            let musicIndex;
+            let category;
+            let pointer_index;
             
-            console.log(playingMusicNode);
-            console.log(myMusicCategory);
-            console.log(musicListDict[myMusicCategory][orderType]);
-
+            /* we haven't generate the playList for this specific category and orderType*/
             if(musicListDict[myMusicCategory][orderType] == null) 
             {   
+
                 if(orderType == 's')
                 {
-                    if(playingMusicNode != null)  musicListDict[myMusicCategory][orderType] = generatePlayList([playingMusicNode.val], musicNodePointers, orderType);
+                    if(playingMusicNode != null)  musicListDict[myMusicCategory][orderType] = generatePlayList([musicDict[myMusicCategory][playingMusicNode.val.musicIndex]], musicNodePointers, orderType);
                     else  musicListDict[myMusicCategory][orderType] = generatePlayList(musicDict[myMusicCategory], musicNodePointers, orderType);
                 }
                 else
@@ -560,44 +561,59 @@ $(document).ready(function(){
             }
             
 
-            if(playingMusicNode != null) playingMusicNode =  findMusicOfList(playingMusicNode.val, musicListDict[myMusicCategory][orderType]);
-            if(playingMusicNode == null) playingMusicNode = musicListDict[myMusicCategory][orderType].head;
+            /* we switch the the playList */
+            if(playingMusicNode != null) 
+            {
+                musicIndex = playingMusicNode.val.musicIndex;
+                category = playingMusicNode.val.category;
+                pointer_index = playingMusicNode.val.index;
+
+                playingMusicNode =  findMusicOfList(musicDict[category][musicIndex], myMusicCategory, orderType, musicNodePointers);
+                console.log(playingMusicNode);
+                /* if we can't find it, it indicates we delete it from the playList before. We add in the beginning of the playList */
+                if(playingMusicNode == null)
+                {                
+                    playingMusicNode = musicListDict[myMusicCategory][orderType].push_front(musicDict[category][musicIndex].deepCopy(myMusicCategory));
+
+                    playingMusicNode.val.index = musicNodePointers.length;
+                    playingMusicNode.val.orderType = orderType;
+                    musicDict[category][musicIndex].listIndices.push(musicNodePointers.length);
+
+                    musicNodePointers.push(playingMusicNode);     
+                }
+
+            }
+            /* first time to load, we set it to the beginning of the playList */
+            if(playingMusicNode == null) 
+            {
+                playingMusicNode = musicListDict[myMusicCategory][orderType].head;
+                playingMusic.src = playingMusicNode.val.src;
+            }
+ 
+            /* show the playList */
+            content += '<div id = "playListTitle">'
+            if(orderType == 'i') content += playListTitle[0];
+            else if(orderType == 'r') content += playListTitle[1];
+            else if(orderType == 's') content += playListTitle[2];
+            content += '</div>'
 
             list = musicListDict[myMusicCategory][orderType];
-            console.log(list);
             node = list.head;
-
-            //console.log(playOrder.text().replace(" ",""));
-            /* play in order */
-            content += '<div id = "playListTitle">'
-            if(orderType == 'i')
-            {
-                 content += playListTitle[0];
-            }
-            else if(orderType == 'r')
-            {
-                 content += playListTitle[1];
-            }
-            else if(orderType == 's')
-            {
-                 content += playListTitle[2];
-            }
-            content += '</div>'
             for(var i = 0; i < list.size; i++)
             {
-                content += '<div id = "playList_' + node.val.index + '">\
-                                <a href="#" name = "' + node.val.index + '">' + node.val.name + '</a>\
-                                <button style = "position:absolute; right: 15px; font-size:1rem; margin-top:-2px;" name = "' + node.val.index + '"><i class="fas fa-trash"></i></button>\
-                            <hr></div>';
+                if(node.val.isdelete == false) content += musicPlayListStr(node);
                 node = node.next;
             }
             
-            //console.log(content);
             $(".playList").text("");
             $(".playList").append(content);
             
         }
+
+        showMusic();
         showMusicList();
+
+
         $("#playList").click(function(){
             let visibility = $('.playList').css("visibility");
             if(visibility == "hidden") $('.playList').css("visibility","visible");
@@ -612,7 +628,7 @@ $(document).ready(function(){
             else orderType = 's';
 
             showMusicList();
-            if(playingMusicNode!=null) 
+            if(playingMusicNode != null) 
             {
                 $("#playList_" + playingMusicNode.val.index).css("color","blue");
                 $(".playList").scrollTop($("#playList_" + playingMusicNode.val.index).offset().top - $('.playList').offset().top);
@@ -645,9 +661,9 @@ $(document).ready(function(){
             let index = $(this).attr("name");
             
             if(playingMusicNode == musicNodePointers[index]) next();
+            musicNodePointers[index].val.isdelete = true;
             musicListDict[myMusicCategory][orderType].erase(musicNodePointers[index]);
             $(this).parent().remove();
-            // console.log(index);
         })
         /* play order */
         $(".playOrder span").click(function(){
@@ -857,15 +873,20 @@ $(document).ready(function(){
         var renameMusic = null;
         /* play the music we click */
         $("body").on("click",".musicCategorySong div a",function(){
+            
+            /* we are in the edit mode */
             if(isSelect == true)
             {
                 renameMusic = $(this);
                 return;
             }
+
             let music = $(this).attr("name");
             let category = $(this).parents()[1].id;
             let index = parseInt(music);
-           
+            let oldIndex = playingMusicNode.val.index;
+
+            /* change the icon of play/pause button */
             if($("#playPause").attr("name") == "pause")
             {   
                 $("#playPause").text("");
@@ -873,27 +894,41 @@ $(document).ready(function(){
                 $("#playPauseText").text("pause");
                 $("#playPause").append('<i class="fas fa-play"></i><span class = "shortcut"> space </span>');
             }   
-            console.log(playingMusicNode);
             $("#playList_" + playingMusicNode.val.index).css("color","");
             $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
             
             category = category.substr(category.indexOf('_') + 1);
-            myMusicCategory = category;
-            if(playingMusicNode.val.category != category) 
-            {
-                console.log(playingMusicNode.val.category);
-                showMusicList();
-            }
-            
+  
+            /* find the associated node in the playList */
+            playingMusicNode = findMusicOfList(musicDict[category][index], myMusicCategory, orderType, musicNodePointers);
 
-            playingMusicNode = findMusicOfList(musicDict[category][index], musicListDict[category][orderType]);
-            //console.log(playingMusicNode);
+            /* we didn't find associated node and we click the song belons to another category */
+            if(myMusicCategory != category && playingMusicNode == null) 
+            {
+                myMusicCategory = category;
+                showMusicList();
+                //playingMusicNode = findMusicOfList(musicDict[category][index], myMusicCategory, orderType, musicNodePointers);
+            }
+            /* 
+                we just didn't find the associated node which belongs to current category(it indicares we delete this music from our playList before). We add this music back to playList.
+            */
+            else if(playingMusicNode == null)
+            {
+                playingMusicNode = musicListDict[category][orderType].insert_after(musicNodePointers[oldIndex],musicDict[category][index].deepCopy(myMusicCategory));
+
+                musicDict[category][index].listIndices.push(musicNodePointers.length);
+                playingMusicNode.val.index = musicNodePointers.length;
+                playingMusicNode.val.orderType = orderType;
+                musicNodePointers.push(playingMusicNode);
+               
+                
+                $(musicPlayListStr(playingMusicNode)).insertAfter("#playList_" + oldIndex);
+            }
+
+
             playingMusic.pause();
             playingMusic.src = playingMusicNode.val.src;
             playingMusic.play();
-           
-            
-           
         })
 
         $("body").on('click',".musicCategorySong div i", function(){
@@ -905,19 +940,16 @@ $(document).ready(function(){
             category = category.substr(category.indexOf('_') + 1);
             
             /* insert the new node to the play list */
-            newNode = musicListDict[myMusicCategory][orderType].insert_after(playingMusicNode, musicDict[category][index].deepCopy());
-            //console.log(newNode);
+            newNode = musicListDict[myMusicCategory][orderType].insert_after(playingMusicNode, musicDict[category][index].deepCopy(myMusicCategory));
+            
+            musicDict[category][index].listIndices.push(musicNodePointers.length);
             newNode.val.index = musicNodePointers.length;
+            newNode.val.orderType = orderType;
             musicNodePointers.push(newNode);
 
-            content = '<div id = "playList_' + newNode.val.index + '">\
-                                <a href="#" name = "' + newNode.val.index + '">' + newNode.val.name + '</a>\
-                                <button style = "position:absolute; right: 15px; font-size:1rem; margin-top:-2px;" name = "' + newNode.val.index + '"><i class="fas fa-trash"></i></button>\
-                            <hr></div>';
-            //console.log(playingMusicNode.val.index);
-            //console.log($("#playList_" + playingMusicNode.val.index).text());
+            content = musicPlayListStr(newNode);
             $(content).insertAfter("#playList_" + playingMusicNode.val.index);
-            //console.log(category);
+       
         })
 
         /* update the musicCurrentTime */
@@ -938,19 +970,19 @@ $(document).ready(function(){
 
         /* when loading a new music, I reset the min, max, val of range, musicCurrentTime,playingSongName and musicDuration */
         playingMusic.addEventListener("loadedmetadata",function(){
-            //console.log(playingMusic.duration);
+            
 
-            $("#playList_" + playingMusicNode.val.index).css("color","blue");
-            //console.log("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category);
-            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","blue");
             let timeStr = secondsToTimeString(playingMusic.duration);
             myMusicCurrentTime = -1;
             myMusicDuration = parseInt(playingMusic.duration);
+
+            $("#playList_" + playingMusicNode.val.index).css("color","blue");
+            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","blue");
+
             $(".musicSlider").val(0);
             $(".musicSlider").attr("min", 0);
             $(".musicSlider").attr("max",myMusicDuration);
             $(".playingSongName").text(playingMusicNode.val.name);
-            //console.log($(".musicSlider").attr("value"));
             
             $(".musicCurrentTime").text("0:00");
             $(".musicDuration").text(timeStr);
@@ -958,16 +990,12 @@ $(document).ready(function(){
 
         /* the music ends and play the next song */
         playingMusic.addEventListener("ended",function(){
-            //let orderType = playOrder.text().replace(/\s+/g,"")[0];
+           
             console.log("ended");
             $("#playList_" + playingMusicNode.val.index).css("color","");
             $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
-
-            playingMusicNode = playingMusicNode.next;
-           
+            if(orderType != 's') playingMusicNode = playingMusicNode.next;
             playingMusic.src = playingMusicNode.val.src;
-            //console.log($("#playList_" + playingMusicNode.val.index).css("color","blue"))
-            //console.log(playingMusic.src);
             playingMusic.play();
         })
 
@@ -1090,47 +1118,43 @@ $(document).ready(function(){
 
         /* rename */
         $('body').on('blur',".musicCategorySong div a",function(){
-            //console.log(renameMusic[0]);
+            
             if(isSelect == false || renameMusic == null) return;
+
             let music = renameMusic.attr("name");
             let category = renameMusic.parents()[1].id;
             let index = parseInt(music);
             let newMusic;
-            let nodes;
+            let node;
+            let newName;
+
             category = category.substr(category.indexOf('_') + 1);
 
-
-            console.log(category, index);
-            console.log(musicDict[category]);
-            console.log(musicDict[category][index].filePath);
-            console.log(musicDict[category][index].fileName);
-            let newName = parseInt(musicDict[category][index].fileName) + "-" + $(this).text();
-
-            console.log(newName);
-            fs.renameSync(musicDict[category][index].filePath, path + category + "/" + newName);
-
+            /* when we want to name it with empty string, we restore it to original name */
+            if($(this).text() == "") 
+            {
+                $(this).text(musicDict[category][index].name);
+                return;
+            }
+            
+            /* rename it and update the associated node in the list */
+            newName = parseInt(musicDict[category][index].fileName) + "-" + $(this).text();
             newMusic = new Music(path + category + '/' + newName, newName, category);
-            for(var key in musicListDict)
-            {   
-                for(var type of ['i','r','s'])
+
+            fs.renameSync(musicDict[category][index].filePath, path + category + "/" + newName);
+            updateMusicFromList(musicDict[category][index], newMusic, musicNodePointers);
+            
+            /* uodate the playList interface  */ 
+            for(var i = 0; i < musicDict[category][index].listIndices.length; i++)
+            {
+
+                node = musicNodePointers[musicDict[category][index].listIndices[i]];
+                if(node.val.isdelete == false)
                 {
-                    //console.log(key, type);
-                    //console.log(musicListDict[key][type]);
-                    nodes = replaceMusicOfList(musicDict[category][index], newMusic, musicListDict[key][type]);
-                    console.log(nodes);
-                    /* update the name in the play list */
-                    if(nodes != null)
-                    {
-                        for(var i = 0; i < nodes.length; i++)
-                        {                    
-                           $("#playList_" + nodes[i].val.index).children()[0].innerHTML = nodes[i].val.name;
-                        }
-                    }
-                    
+                    /* we don't update the name of music which doesn't show so far.(it may be in the other type of music list) */
+                    if(node.val.playListCategory == myMusicCategory && node.val.orderType == orderType) $("#playList_" + node.val.index).children()[0].innerHTML = node.val.name;
                 }
             }
-            musicDict[category][index] = newMusic;
-            //$(this).text();
         })
 
         function next()
@@ -1164,7 +1188,36 @@ $(document).ready(function(){
         })
         
 
-        
+        /* search */
+        $("#search").keyup(function(){
+            let searchVal = $(this).val();
+            let music;
+            let name;
+            for(var key in musicDict)
+            {
+                for(var i = 0; i < musicDict[key].length; i++)
+                {
+                    music = musicDict[key][i];
+                    if(music.isdelete == false)
+                    {   
+                        name = music.name;
+                        if(case_sensitive == false) name = name.toLowerCase();
+                        if(name.indexOf(searchVal) == -1) 
+                        {
+                            $("#" + music.musicIndex + "_" + music.category).css("display","none");
+                        }
+                        else
+                        {
+                            $("#" + music.musicIndex + "_" + music.category).css("display","block");
+                             console.log(music.name);
+                        }
+                            
+                    }
+                }
+            }
+                
+        })
+
         /* disable 'enter' key when typing title */
         $("body").keydown(function(event){
             if (event.which == '13') 
@@ -1174,6 +1227,10 @@ $(document).ready(function(){
                 if(isSelect == true && renameMusic != null)renameMusic.blur();
             }
         })
+
+        musicThread.on("changeCaseSensitive",function(event,newCaseSensitive){
+                case_sensitive = (newCaseSensitive == "on");
+        });
 
 
 })      

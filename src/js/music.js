@@ -8,7 +8,12 @@
 const {List} = require("../js/list.js");
 const {Random} = require("../js/cryptography.js");
 class Music
-{
+{	
+
+	/* 
+		The fileName is in the format of NUM-FILENAME.SUFFIX.(e.g., 10-My Love.mp3)
+		The reason I put number front is we can have duplicate musics.
+	*/
 	constructor(filePath = null, fileName = null, category = null)
 	{
 		if(filePath == null || fileName == null || category == null) return;
@@ -21,11 +26,38 @@ class Music
 		if(suffix != -1) this.name = fileName.substring(fileName.indexOf('-') + 1, suffix);
 		else this.name = fileName.substr(fileName.indexOf('-') + 1);
 
+
+
+		/* 
+			1. I have a musicDict[category][orderType] to store all the music in your music list.
+			   orderType can be 'r'(random) or 's'(single) or 'o'(order).
+			2. I have a musicNodePointers to store all the Node through all lists. I use the this.index to rememer
+			   where the is node is in the musicNodePointers.(it will only be set for the node of list, see list.js) 
+			3. All the music in the playList are extension of musics in musicDict[][]. 
+			   The musicIndex and category keeps track where this musci belongs in the musciDict.
+			4. listIndices keeps track all the musics in the playList. It stores where they are in the musicNodePointers.
+			   We can use it to do quick deletion, insertion. For example, if we delete one music in the music list. we 
+			   traverse the listIndices to grab the node and delete it from the list.
+			5. The index stores where it is in the musicNodePointers.(it's used for node in the list)
+			
+			6. The playListCategory stores which playList it is.
+			   (For example, if we are at playList '1', we may add the song from playList '2' to '1').
+			7. The musicIndex is set for both music in the musicDict and list.
+			   The index is set for music in the list.
+			   the listIndices is set for music in the musicDict.
+			   The isdelete is set for music in the node when it's deleted.
+
+		*/
+		this.playListCategory = "";
 		this.isdelete = false;
-		this.musicIndex = -1; // this is the index of musicDict[][]. It's for comuunication between play list and the music list.
-		this.index = -1;	// this is the index of musicNodePointers  array. it's for qucik deletion and insetion.
+		this.musicIndex = -1;
+		this.index = -1;
+		this.listIndices = [];
 	}
-	deepCopy()
+	/* As in Javascript, it is shallow copy, I create a deepcopy function. 
+	   Therefore, they won't interfere with each other.
+	*/
+	deepCopy(playListCategory = null)
 	{
 		var newMusic = new Music();
 		
@@ -36,7 +68,11 @@ class Music
 		newMusic.category = this.category;
 		newMusic.musicIndex = this.musicIndex;
 		newMusic.fileName = this.fileName;
+		newMusic.isdelete = false;
+		newMusic.orderType = "";
 		
+		if(playListCategory == null) newMusic.playListCategory = this.category;
+		else newMusic.playListCategory = playListCategory;
 		return newMusic;
 	}
 }
@@ -50,45 +86,53 @@ function secondsToTimeString(seconds)
 	else return min + ":" + sec; 
 }
 
-/* find the node which has the same src as music.src */
-function findMusicOfList(music, list, findAll = false)
+/* find the node in the current playList. They must have same category and orderType */
+function findMusicOfList(music, category, orderType, musicNodePointers)
 {
-	if(music == null || list == null) return null;
-	var node = list.head;
-	var rv = [];
-
-	for(var i = 0; i < list.size; i++)
+	if(music == null || orderType == null || category == null || musicNodePointers == null) return null;
+	let node;
+	for(var i = 0; i < music.listIndices.length; i++)
 	{
-		if(music.src == node.val.src) 
-		{
-			if(findAll == true) rv.push(node);
-			else return node;
-		}
-		node = node.next;
+		node = musicNodePointers[music.listIndices[i]];
+		if(node.val.isdelete == true) continue;
+		if(node.val.orderType == orderType && node.val.playListCategory == category) return node;
 	}
-	if(rv.length > 0) return rv;
 	return null;
 }
 
-/* replace */
-function replaceMusicOfList(music, newMusic, list)
+/* update the src, filePath, fileName, name when we rename the file */
+function updateMusicFromList(music, newMusic, musicNodePointers)
 {
-	if(music == null || list == null || newMusic == null) return null;
+	if(music == null || musicNodePointers == null || newMusic == null) return null;
 	
-	var nodes = findMusicOfList(music, list, findAll = true);
-	
-	if(nodes == null) return null;
-	for(var i = 0; i < nodes.length; i++)
+	for(var i = 0; i < music.listIndices.length; i++)
 	{
-		nodes[i].val.src = newMusic.src;
-		nodes[i].val.filePath = newMusic.filePath;
-		nodes[i].val.fileName = newMusic.fileName;
-		nodes[i].val.name = newMusic.name;
+		if(musicNodePointers[music.listIndices[i]].val.isdelete == true) continue;
+		musicNodePointers[music.listIndices[i]].val.src = newMusic.src;
+		musicNodePointers[music.listIndices[i]].val.filePath = newMusic.filePath;
+		musicNodePointers[music.listIndices[i]].val.fileName = newMusic.fileName;
+		musicNodePointers[music.listIndices[i]].val.name = newMusic.name;
 	}
-	return nodes;
+	music.src =  newMusic.src;
+	music.filePath = newMusic.filePath;
+	music.fileName = newMusic.fileName;
+	music.name = newMusic.name;
+	
 }
 
+function deleteFromList(music, musicNodePointers)
+{
+	if(music == null || musicNodePointers == null) return null;
+	let node;
+	for(var i = 0; i < music.listIndices.length; i++)
+	{
+		node = musicNodePointers[music.listIndices[i]];
+		node.val.isdelete == true;
+	}
+	return null;
+	
 
+}
 /* i stands for in order, r stands for random order */
 function generatePlayList(music, musicNodePointers, type = 'i')
 {
@@ -109,6 +153,9 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 		{
 			newNode = list.push_back(music[i].deepCopy());
 			newNode.val.index = pointers_length;
+			newNode.val.orderType = "i";
+			music[i].listIndices.push(pointers_length);
+
 			//newNode.val.musicIndex = music[i].musicIndex;
 			musicNodePointers.push(newNode);
 			pointers_length++;
@@ -120,7 +167,11 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 		if(length > 0)
 		{
 			newNode = list.push_back(music[0].deepCopy());
+			console.log(music[0]);
+
+			music[0].listIndices.push(pointers_length);
 			newNode.val.index = pointers_length;
+			newNode.val.orderType = "s";
 			//newNode.val.musicIndex = music[0].musicIndex;
 			musicNodePointers.push(newNode);
 		}
@@ -143,6 +194,8 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 		newNode = list.push_back(music[musicIndexArray[i]].deepCopy());
 
 		newNode.val.index = pointers_length;
+		newNode.val.orderType = "r";
+		music[musicIndexArray[i]].listIndices.push(pointers_length);
 		//newNode.val.musicIndex = music[musicIndexArray[i]].musicIndex;
 		musicNodePointers.push(newNode);
 		pointers_length++;
@@ -158,5 +211,5 @@ module.exports = {
 	secondsToTimeString:secondsToTimeString,
 	generatePlayList:generatePlayList,
 	findMusicOfList:findMusicOfList,
-	replaceMusicOfList:replaceMusicOfList
+	updateMusicFromList:updateMusicFromList
 }
