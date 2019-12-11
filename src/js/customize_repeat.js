@@ -51,8 +51,8 @@ $("#repeatType a").click(function(){
 })
 
 /* choose the week */
-$(":checkbox").on("click", function(){
-	$(this)[0].checked = !$(this)[0].checked;
+$(":checkbox").on("click", function(event){
+	event.stopPropagation();
 });
 $("#days div").click(function(){
 	console.log($(this).text());

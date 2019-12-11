@@ -451,6 +451,7 @@
         var musicNodePointers = [];
         var case_sensitive = (setting.readDict()["caseSensitive"] == "on");
 
+        var renameMusic = null;
         var orderType = 'i'; // i is in order, s is single, r is random
         var playListTitle = {0:'<h5 id = "0_playListTitle" style="margin-left:15px; margin-top:5px;cursor:pointer">\
                                     <i class="fas fa-arrow-right"></i>\
@@ -870,7 +871,7 @@ $(document).ready(function(){
             }
         })
 
-        var renameMusic = null;
+       
         /* play the music we click */
         $("body").on("click",".musicCategorySong div a",function(){
             

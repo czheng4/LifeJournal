@@ -10,6 +10,70 @@
     <title>Calendar</title>
 
     <style type="text/css">
+
+           /* the style for toggle button is from https://www.w3schools.com/howto/howto_css_switch.asp */
+        /* The switch - the box around the slider */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 27px;
+        }
+        
+        /* Hide default HTML checkbox */
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        
+        /* The slider */
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: .4s;
+        }
+        
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 24px;
+          width: 24px;
+          left: 4px;
+          bottom: 2px;
+          background-color: white;
+          transition: .4s;
+        }
+        
+        input:checked + .slider {
+          background-color: #2196F3;
+        }
+        
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+        }
+        
+        input:checked + .slider:before {
+          transform: translateX(19px);
+        }
+        
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 34px;
+        }
+        
+        .slider.round:before {
+          border-radius: 50%;
+        }
+
+
+
+
         body
         {
             background-color: var(--background-color);
@@ -25,7 +89,7 @@
             border: 2px solid black;
 
             padding-left: 4px;
-            width: 500px;
+            width: 5000px;
             height: 50px;
             font-size: 15px;
             overflow-x: hidden;
@@ -132,6 +196,32 @@
         {
             position: relative; margin-bottom: 15px;
         }
+        .MONTH
+        {
+            display: none;
+        }
+        .SCHEDULE
+        {
+           
+        }
+        hr
+        {
+            background-color: var(--hr-line);
+            margin: 5px 5px 5px 5px;
+        }
+        #alarmSchedule div:hover
+        {
+            background-color: silver;
+        }
+        #alarmSchedule div
+        {
+           padding-top: 10px;
+           padding-bottom: 10px;
+           margin-right: 5px;
+           margin-left: 5px;
+           cursor: pointer;
+        }
+       
     </style>
 </head>
 <body>
@@ -142,92 +232,132 @@
     <a href = "#" id = "reminder" style="top: 80%; position: fixed; right: 10%;font-size: 40px;z-index: 2"><i class="fas fa-plus-circle"></i></a>
 
 <div class="box" style = "margin-top:50px;">
-    <div>
-        
-        <div style="overflow:scroll;">
-        <table>
-            <tr>
-                <th colspan="7" style="background-color: var(--theme-l1);font-size: 25px">
-                <a href = "#" id = "previous" style="position: relative; left: 2%"><i class="fas fa-arrow-left"></i></a>
-                <a href = "#" id = "currentTime" style="position: relative; left: 3%">today</a>
-                <a href = "#" id = "next" style="position: relative; left: 4%"><i class="fas fa-arrow-right"></i></a>
     
-                <span id = "title" style="position: absolute; left:42%"> Oct</span>
-                <a href = "#" style="position: absolute; left: 80%"><i class="fas fa-search"></i></a>
-                <br>
-             
-                <a id = "week" href = "#" style="position: relative; left: 20%">Week</a>
-                <a id = "month" href = "#" style="position: relative; left: 65%">Month</a>
+    <table>
+        <tr>
+            <th colspan="7" style="background-color: var(--theme-l1);font-size: 25px">
+            <a href = "#" id = "previous" style="position: relative; left: 2%"><i class="fas fa-arrow-left"></i></a>
+            <a href = "#" id = "currentTime" style="position: relative; left: 3%">today</a>
+            <a href = "#" id = "next" style="position: relative; left: 4%"><i class="fas fa-arrow-right"></i></a>
+    
+            <span id = "title" style="position: absolute; left:42%"> Oct</span>
+            <a href = "#" style="position: absolute; left: 80%"><i class="fas fa-search"></i></a>
+            <br>
+         
+            <a id = "week" href = "#" style="position: relative; left: 20%">Week</a>
+            <a id = "month" href = "#" style="position: relative; left: 65%">Month</a>
+            
+         </th>
+        <tr>
+
+        <tbody class = "SCHEDULE">
+        <tr>
+            
+
+                <th colspan="7" style="">
                 
-             </th>
-            <tr>
-            <tr>
-                <th>Sun</th>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-            </tr>
-            <tbody id = "calendar"> 
-            </tbody>
-            <tr>
-                <th colspan="7">
-                    <form class="form-inline">
-                    <span style = "font-size: 20px; margin-right: 10px">Jump To:</span>
-                    <select class="form-control col-sm-2"  id="month">
-                        <option value=1>Jan</option>
-                        <option value=2>Feb</option>
-                        <option value=3>Mar</option>
-                        <option value=4>Apr</option>
-                        <option value=5>May</option>
-                        <option value=6>Jun</option>
-                        <option value=7>Jul</option>
-                        <option value=8>Aug</option>
-                        <option value=9>Sep</option>
-                        <option value=10>Oct</option>
-                        <option value=11>Nov</option>
-                        <option value=12>Dec</option>
-                    </select>
-
-
-                    <label for="year"></label><select class="form-control col-sm-2" id="year">
-                        <option value=2010>2010</option>
-                        <option value=2011>2011</option>
-                        <option value=2012>2012</option>
-                        <option value=2013>2013</option>
-                        <option value=2014>2014</option>
-                        <option value=2015>2015</option>
-                        <option value=2016>2016</option>
-                        <option value=2017>2017</option>
-                        <option value=2018>2018</option>
-                        <option value=2019>2019</option>
-                        <option value=2020>2020</option>
-                        <option value=2021>2021</option>
-                        <option value=2022>2022</option>
-                        <option value=2023>2023</option>
-                        <option value=2024>2024</option>
-                        <option value=2025>2025</option>
-                        <option value=2026>2026</option>
-                        <option value=2027>2027</option>
-                        <option value=2028>2028</option>
-                        <option value=2029>2029</option>
-                        <option value=2030>2030</option>
-                    </select></form>
-                </th>
-            </tr>
-            <tr>
-                <th colspan="7">
+                    <h3 style="text-align:center;  padding-top: 10px">alarm schedule in 7 days </h3>
+                    <div id = "alarmSchedule">
+                        <hr>
+                        <span style="margin-left: 10px;">First time (ring in 21 minute 5hour)</span>
+                        <label class="switch" style="position: absolute; right:40px;">
+                            <input id = "caseSensitive" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        
+                        <hr>
+                        <span style="margin-left: 10px;">1234</span>
+                        <label class="switch" style="position: absolute; right:40px;">
+                            <input id = "caseSensitive" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <hr style="visibility: hidden">
                     
-                <div id = "diaryAndReminder" class = "diaryAndReminder">
-                   
-                </div>                  
+                
+                    
                 </th>
-            </tr>
-        </table> 
-    </div>
-    </div>
+               
+           
+        </tr>
+        </tbody>
+
+        <tbody class = "MONTH">
+        <tr>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+        </tr>
+        </tbody>
+        
+        <tbody id = "calendar" class= "MONTH"> 
+        </tbody>
+        
+        <tbody class="MONTH">
+        <tr>
+            <th colspan="7">
+                <form class="form-inline">
+                <span style = "font-size: 20px; margin-right: 10px">Jump To:</span>
+                <select class="form-control col-sm-2"  id="month">
+                    <option value=1>Jan</option>
+                    <option value=2>Feb</option>
+                    <option value=3>Mar</option>
+                    <option value=4>Apr</option>
+                    <option value=5>May</option>
+                    <option value=6>Jun</option>
+                    <option value=7>Jul</option>
+                    <option value=8>Aug</option>
+                    <option value=9>Sep</option>
+                    <option value=10>Oct</option>
+                    <option value=11>Nov</option>
+                    <option value=12>Dec</option>
+                </select>
+
+
+                <label for="year"></label><select class="form-control col-sm-2" id="year">
+                    <option value=2010>2010</option>
+                    <option value=2011>2011</option>
+                    <option value=2012>2012</option>
+                    <option value=2013>2013</option>
+                    <option value=2014>2014</option>
+                    <option value=2015>2015</option>
+                    <option value=2016>2016</option>
+                    <option value=2017>2017</option>
+                    <option value=2018>2018</option>
+                    <option value=2019>2019</option>
+                    <option value=2020>2020</option>
+                    <option value=2021>2021</option>
+                    <option value=2022>2022</option>
+                    <option value=2023>2023</option>
+                    <option value=2024>2024</option>
+                    <option value=2025>2025</option>
+                    <option value=2026>2026</option>
+                    <option value=2027>2027</option>
+                    <option value=2028>2028</option>
+                    <option value=2029>2029</option>
+                    <option value=2030>2030</option>
+                </select></form>
+            </th>
+        </tr>
+        </tbody>
+        
+        <tbody class = "MONTH">
+        <tr>
+            <th colspan="7">
+                
+            <div id = "diaryAndReminder" class = "diaryAndReminder">
+               
+            </div>                  
+            </th>
+        </tr>
+        </tbody>
+
+        
+    </table> 
 </div>
 
 <script src = "../js/calendar.js"></script>

@@ -46,6 +46,31 @@ var markDay = remote.getGlobal('share').markDay;
 const dot = "&#8226";
 
 console.log(reminderArray);
+
+/* milliseconds to the format of string n1 days n2 hours and n3 minutes */
+function millisecondsToString(time)
+{
+    const millisecondsHour = 1000 * 60;
+    
+    let minute = parseInt(time / (1000 * 60));
+    let hour = parseInt(minute / 60);
+    let day = parseInt(hour / 24);
+    let rv = "";
+    minute = minute - hour * 60;
+    hour = hour - day * 24;
+
+    if(day <= 1) rv += day + " day ";
+    else rv += day + " days ";
+
+    if(hour <= 1) rv += hour + " hour ";
+    else rv += hour + " hours ";
+
+    if(minute <= 1) rv += minute + " minute";
+    else rv += minute + " minutes";
+
+    return rv;
+
+}
 function showCalendar(year, month, markDay = null)
 {
     currentMonth = month;
@@ -176,6 +201,80 @@ function showReminderDiary(date)
 
     $("#diaryAndReminder").append(content);
 }
+
+
+function showAlarmSchedule()
+{
+    let alarmTime;
+    let today ;
+    const oneDay = 86400000;
+    let todayMilliseconds = new Date().getTime();
+    //let beginningReminderDate = new Date(getDateString(today).replace(/-/g,"/"));
+    let reminderDate = new Date();
+    let oneWeek = [];
+    let hour;
+    let minute;
+    let timeInterval;
+    let content = "";
+    for(i = 0; i < 7; i++)
+    {
+        today = new Date(new Date().getTime() + oneDay * i);
+        oneWeek.push(new Date(getDateString(today).replace(/-/g,"/")));
+        
+    }
+   
+
+    for(var i = 0; i < reminderArray.length; i++)
+    {
+        console.log(reminderArray[i])
+        if(reminderArray[i].alarmTime == "" || reminderArray[i].isSchedule == true || reminderArray[i].isdeleted == true) continue;
+        alarmTime = reminderArray[i].alarmTime.split(",");
+        alarmTime = alarmTime.map(function(time){ return parseInt(time);});
+        //console.log(alarmTime.length);
+        for(var j = 0; j < alarmTime.length; j++)
+        {
+            console.log(alarmTime[j]);
+            hour = parseInt(reminderArray[i].startTimeHourMinute);
+            minute = parseInt(reminderArray[i].startTimeHourMinute.substr(3))
+            reminderDate.setTime(todayMilliseconds + alarmTime[j]);
+            reminderDate.setHours(hour);
+            reminderDate.setMinutes(minute);
+
+            for(var day = 0; day < 7; day++)
+            {
+                if(day != 0)reminderDate.setDate(reminderDate.getDate() + 1);
+                timeInterval = reminderDate.getTime() - todayMilliseconds - alarmTime[j];
+                if(timeInterval < 0) continue;
+                beginningReminderDate = new Date(getDateString(reminderDate).replace(/-/g,"/"));
+                if(Reminder.isMarkOnCalendar(beginningReminderDate, reminderArray[i]))
+                {
+                    console.log(millisecondsToString(timeInterval));
+                    console.log("call reminder " + reminderArray[i].title + " in " + timeInterval);
+
+                    content += '<hr><div name =' + i + '>\
+                                    <span style="margin-left: 10px;">' + reminderArray[i].title + '&emsp;(Ring in ' + millisecondsToString(timeInterval) + ')</span>\
+                                    <label class="switch" style="position: absolute; right:40px; margin-top:-3px">\
+                                        <input type="checkbox" checked>\
+                                        <span class="slider round"></span>\
+                                    </label>\
+                                </div>';
+
+                //playAlarm(timeInterval, reminderArray[i]);
+                }
+            }
+            $("#alarmSchedule").text("");
+            $("#alarmSchedule").append(content);
+            
+        }
+        
+    }
+    console.log(oneWeek);
+}
+
+
+
+
+
 $(document).ready(function(){
 
 calendarThread.send("CALENDAR_REGISTER");
@@ -184,7 +283,25 @@ calendarThread.send("getReminderArray");
 calendarThread.on("getReminderArray",function(event,reminderArray1){
     reminderArray = reminderArray1;
     markToday();
+    showAlarmSchedule();
+  
+    setInterval(showAlarmSchedule,1000 * 60);
 })
+
+
+$("body").on("click","#alarmSchedule div",function(){
+    let index = parseInt($(this).attr("name"));
+    window.location.href = "reminder.html";
+    calendarThread.send("setGlobalVal","markDay",markDay);
+    calendarThread.send("setGlobalVal","reminder",reminderArray[index]);
+})
+
+$("body").on("click","#alarmSchedule label",function(event){
+    console.log(123);
+    event.stopPropagation();
+})
+
+$("b")
 
 
 $("#previous").click(function(){
