@@ -167,7 +167,7 @@ class Reminder
 			else reminder.startTimeHourMinute += minute;
 		}
 		else reminder.endTimeMilliseconds = date.getTime();
-	
+		console.log(reminder);
 		//console.log(date);
 		//console.log(this.startTimeMilliseconds);
 			
@@ -465,8 +465,14 @@ class Reminder
 		var middle;
 		var index;
 		var filePath = reminder.filePath;
-	
+		
+		for(var i = 0; i < reminderArray.length; i++)
+		{
+			if(reminderArray[i].filePath == filePath) return i;
+		}
+		return -1;
 		/* binary search to find where the reminder is in the reminderArray */
+		/* the date may change when we modify the reminder
 		while(start <= end)
 		{
 			middle = Math.floor((start + end) / 2);
@@ -491,6 +497,7 @@ class Reminder
 			else if(tempDate < myDate) start = middle + 1;
 			else end = middle - 1;
 		}
+		*/
 
 		return -1;
 	}

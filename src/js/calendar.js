@@ -43,10 +43,26 @@ var reminderDict = {}
 var reminderArray;
 var slot_width;
 var markDay = remote.getGlobal('share').markDay;
+
 const dot = "&#8226";
 
 console.log(reminderArray);
 
+
+function load()
+{
+    var type = remote.getGlobal('share').calendarType;
+    if(type == "MONTH")
+    {
+        $(".MONTH").css("display","table-row-group");
+        $(".SCHEDULE").css("display","none");
+    }
+    else if(type == "SCHEDULE")
+    {
+        $(".MONTH").css("display","none");
+        $(".SCHEDULE").css("display","table-row-group");
+    }
+}
 /* milliseconds to the format of string n1 days n2 hours and n3 minutes */
 function millisecondsToString(time)
 {
@@ -275,12 +291,13 @@ function showAlarmSchedule()
 
 
 $(document).ready(function(){
-
+load();
 calendarThread.send("CALENDAR_REGISTER");
 
 calendarThread.send("getReminderArray");
 calendarThread.on("getReminderArray",function(event,reminderArray1){
     reminderArray = reminderArray1;
+    console.log(reminderArray);
     markToday();
     showAlarmSchedule();
   
@@ -293,6 +310,7 @@ $("body").on("click","#alarmSchedule div",function(){
     window.location.href = "reminder.html";
     calendarThread.send("setGlobalVal","markDay",markDay);
     calendarThread.send("setGlobalVal","reminder",reminderArray[index]);
+    calendarThread.send("setGlobalVal","calendarType","SCHEDULE");
 })
 
 $("body").on("click",".switch", function(event){
@@ -305,6 +323,7 @@ $("body").on("click",".switch span",function(event){
     let index2 = parseInt(name[1]);
     reminderArray[index1].isSchedule[index2] =  !reminderArray[index1].isSchedule[index2];
     calendarThread.send("updateReminders", "ALARM", index1, index2);
+
     event.stopPropagation();
     
 })
@@ -376,6 +395,7 @@ $("body").on('click', "#diaryAndReminder div",function(){
         window.location.href = "reminder.html";
         calendarThread.send("setGlobalVal","markDay",markDay);
         calendarThread.send("setGlobalVal","reminder",reminder);
+        calendarThread.send("setGlobalVal","calendarType","MONTH");
     }
 })
 

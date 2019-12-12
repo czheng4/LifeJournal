@@ -27,6 +27,8 @@ var entryWindows = {};
    image holds the image name when we manipulate a single image(signle_image.html)
    status holds two strings "loading" and "saving" where we decode info when the status is
    loading and encode when the status is saving.
+
+   calendarType is "MONTH", "WEEK" or "SCHEDULE".
 */
 global.share = {
     user: null, 
@@ -40,7 +42,8 @@ global.share = {
     diaryEntryDict: null,
     diaryEntries: null,
     reminderArray: null,
-    markDay: null
+    markDay: null,
+    calendarType: "MONTH"
 };
 
 var confirmation;
