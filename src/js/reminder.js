@@ -71,7 +71,10 @@ class Reminder
 {
 	constructor()
 	{
-
+		/*
+			If it's an array.
+			when I write it to the file, I convert it to a string with each element seperated by ','.
+		*/
 
 		/*
 			date is yyyy-mm-dd
@@ -79,7 +82,7 @@ class Reminder
 			title is the title of reminder
 			repeatText is the text of repeat.
 			alarmText is all the texts of alarm and each alram is seperated by ','.
-			alarmTime is the time in millsencond before the event happens and each time is seperated by ','
+			alarmTime is an array of storing the millsencond before the event happens.
 			startTimeMilliseconds is when the event start to happens.
 			endTimeMilliseconds is when the event ends.
 			startTimeHourMinute store the hour and minute of starting time with the format of "hour:minute"
@@ -94,7 +97,7 @@ class Reminder
 		this.alarmText = "";
 		this.startTimeHourMinute = "";
 
-		this.alarmTime = "";
+		this.alarmTime = [];
 		this.startTimeMilliseconds = 0;
 		this.endTimeMilliseconds = 0;
 
@@ -120,7 +123,7 @@ class Reminder
 
 		/* vitually delete this reminder */
 		this.isdeleted = false;
-		this.isSchedule = false;
+		this.isSchedule = [];
 		
 	}
 
@@ -177,33 +180,45 @@ class Reminder
 	{
 
 		/*  We have to trigger the alarm further away from the starting time. so I sorted the keys in reverse order */
-		
-		let alarmTime = "";
 		let keys = Object.keys(alarmDict).reverse();
 		let firstAlarm = true;
+		let isScheduleDict = {};
+		let alarmTime = [];
+		let isSchedule = [];
+		
+		
+		for(var i = 0; i < reminder.alarmTime.length; i++)
+		{
+			if(reminder.isSchedule[i] == true) isScheduleDict[reminder.alarmTime[i]] = true;
+		}
 
 		reminder.alarmText = "";
-		reminder.alarmTime = "";
+		
 		for(var i = 0; i < keys.length; i++)
 		{
 			if(alarmDict[keys[i]] == 1) 
 			{
+				alarmTime.push(alarmDictMilliseconds[keys[i]]);
+				isSchedule.push(false);
 				if(firstAlarm == true) 
 				{
 					reminder.alarmText += keys[i];
-					alarmTime += alarmDictMilliseconds[keys[i]];
 					firstAlarm = false;
 				}
-				else 
-				{
-					alarmTime += "," + alarmDictMilliseconds[keys[i]];
-					reminder.alarmText += "," + keys[i];
-				}
+				else reminder.alarmText += "," + keys[i];
+				
 			}
 		}
-		console.log(reminder.alarmText);
+
+		
+		for(var i = 0; i < alarmTime.length; i++)
+		{
+			if(alarmTime[i] in isScheduleDict) isSchedule[i] = true;
+		}
 		
 		reminder.alarmTime = alarmTime;
+		reminder.isSchedule = isSchedule;
+		console.log(reminder.alarmText);
 		console.log(reminder.alarmTime);
 		
 	}
@@ -330,7 +345,19 @@ class Reminder
 		content += reminder.startTimeHourMinute;
 
 		content += "REMINER_ZCH";
-		content += reminder.alarmTime;
+		for(var i = 0; i < reminder.alarmTime.length; i++)
+		{
+			if(i == 0) content += reminder.alarmTime[i];
+			else content += "," + reminder.alarmTime[i];
+		}
+
+		content += "REMINER_ZCH";
+		for(var i = 0; i < reminder.isSchedule.length; i++)
+		{
+			if(i == 0) content += (reminder.isSchedule == true)? '1':'0';
+			else content += (reminder.isSchedule == true)? ',1':',0';
+		}
+		
 
 		f.write(content);
 	}
@@ -359,7 +386,14 @@ class Reminder
 		reminder.date = arr[13];
 		reminder.filePath = arr[14];
 		reminder.startTimeHourMinute = arr[15];
+
 		reminder.alarmTime = arr[16];
+		reminder.alarmTime = reminder.alarmTime.split(',');
+		reminder.alarmTime = reminder.alarmTime.map(function(v){ return parseInt(v); });
+
+		reminder.isSchedule = arr[17];
+		reminder.isSchedule = reminder.isSchedule.split(',');
+		reminder.isSchedule = reminder.isSchedule.map(function(v){ return (v == "1"); });
 	}
 
 	/* get reminder array */
@@ -472,7 +506,7 @@ class Reminder
 		if(index != -1) 
 		{
 			reminderArray[index] = reminder;
-			reminderArray[index].isSchedule = false;
+			//reminderArray[index].isSchedule = false;
 		}
 		
 	}

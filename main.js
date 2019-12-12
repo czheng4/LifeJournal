@@ -12,7 +12,7 @@ const mainThread = require('electron').ipcMain;
 const {Confirmation} = require("./src/js/confirmation.js");
 const {Reminder} = require("./src/js/reminder.js");
 const {Cryptography,decodeAll,encodeAll} = require("./src/js/cryptography.js");
-const {addToDiaryEntryDict,deleteFromDiaryEntryDict,changeFromDiaryEntryDict} = require("./src/js/diaryEntry.js");
+const {addToDiaryEntryDict,deleteFromDiaryEntryDict,FromDiaryEntryDict,changeFromDiaryEntryDict} = require("./src/js/diaryEntry.js");
 var login, diary, photo, musicWindow, calendarWindow, upload, download, taskConfirm, createAlbum,entryWindow,editAlbum,transferPhoto,singlePhoto,settingWindow;
 
 var entryWindows = {};
@@ -180,6 +180,7 @@ mainThread.on("changeThemeMode",function(event,oldMode,newMode){
 })
 mainThread.on("changeCaseSensitive",function(event,newCaseSensitive){
     eventList["MAIN_DIARY"].sender.send("changeCaseSensitive",newCaseSensitive);
+    if(eventList["MUSIC"] != null) eventList["MUSIC"].sender.send("changeCaseSensitive",newCaseSensitive);
     for(var key in eventList["TEXTBOX"]) eventList["TEXTBOX"][key].sender.send("changeCaseSensitive",newCaseSensitive);
 })
 
@@ -378,11 +379,12 @@ mainThread.on("refreshCalendar",function(event,type, entryData, oldEntryData = n
 
 
 
-mainThread.on("updateReminders", function(event, type, reminder){
+mainThread.on("updateReminders", function(event, type, reminder, index2 = -1){
     if(type == "DELETE") Reminder.deleteFromReminderArray(global.share.reminderArray,reminder);
     if(type == "ADD") Reminder.addToReminders(global.share.reminderArray,reminder);
     if(type == "CHANGE") Reminder.changeFromReminders(global.share.reminderArray,reminder);
-    eventList["MAIN_DIARY"].sender.send("updateReminders",type, reminder);
+    if(type == "ALARM") global.share.reminderArray[reminder].isSchedule[index2] =  !global.share.reminderArray[reminder].isSchedule[index2];
+    eventList["MAIN_DIARY"].sender.send("updateReminders",type, reminder,index2);
     
 })
 

@@ -581,7 +581,7 @@
 
 
             diaryThread.on("ALARM_SOUND_RENEW",function(event,reminder){
-            	reminder.isSchedule = false;
+            	//reminder.isSchedule = false;
             	playAlarm(1000 * 60 * 1, reminder);
             	audio.pause();
             })
@@ -590,13 +590,13 @@
             })
 
             /* play the alram */
-            function playAlarm(time,reminder)
+            function playAlarm(time,reminder, j )
             {
             	
             	console.log("call me");
 
             	let id = setTimeout(function(){
-            		if(reminder.isdeleted == true || reminder.isSchedule == true) return;
+            		if(reminder.isdeleted == true || reminder.isSchedule[j] == true) return;
             		audio = document.getElementById("alarm");
 					audio.play();
 					var confirmation = new Confirmation(
@@ -608,7 +608,7 @@
 						reminder
 					);
 					diaryThread.send("openConfirmation",confirmation);
-            		reminder.isSchedule = true;
+            		reminder.isSchedule[j] = true;
             	},time);
             	console.log(id);
             	alarmId.push(id);
@@ -634,21 +634,19 @@
 				for(var i = 0; i < reminderArray.length; i++)
 				{
 					console.log(reminderArray[i])
-					if(reminderArray[i].alarmTime == "" || reminderArray[i].isSchedule == true || reminderArray[i].isdeleted == true) continue;
-					alarmTime = reminderArray[i].alarmTime.split(",");
-					alarmTime = alarmTime.map(function(time){ return parseInt(time);});
+					if(reminderArray[i].alarmTime == "" || reminderArray[i].isdeleted == true) continue;
+					alarmTime = reminderArray[i].alarmTime;
+					
 					//console.log(alarmTime.length);
 					for(var j = 0; j < alarmTime.length; j++)
 					{
 						console.log(alarmTime[j]);
+						if(reminderArray[i].isSchedule[j] == true) continue;
 						hour = parseInt(reminderArray[i].startTimeHourMinute);
 						minute = parseInt(reminderArray[i].startTimeHourMinute.substr(3))
 						reminderDate.setTime(todayMilliseconds + alarmTime[j]);
 						reminderDate.setHours(hour);
 						reminderDate.setMinutes(minute);
-						//console.log(reminderDate)
-						//console.log(reminderDate.getTime())
-						//console.log(todayMilliseconds);
 						timeInterval = reminderDate.getTime() - todayMilliseconds - alarmTime[j];
 						if(timeInterval < 0 || timeInterval > 1000 * 600) continue;
 						beginningReminderDate = new Date(getDateString(reminderDate).replace(/-/g,"/"));
@@ -656,7 +654,7 @@
 						if(Reminder.isMarkOnCalendar(beginningReminderDate, reminderArray[i]))
 						{
 							console.log("call reminder " + reminderArray[i].title + " in " + timeInterval);
-							playAlarm(timeInterval, reminderArray[i]);
+							playAlarm(timeInterval, reminderArray[i], j);
 						}
 					}
 					
@@ -674,6 +672,11 @@
 				if(type == "DELETE") Reminder.deleteFromReminderArray(reminderArray,reminder);
     			if(type == "ADD") Reminder.addToReminders(reminderArray,reminder);
     			if(type == "CHANGE") Reminder.changeFromReminders(reminderArray,reminder);
+    			if(type == "ALARM") 
+    			{
+    				reminderArray[reminder].isSchedule[index2] =  !reminderArray[reminder].isSchedule[index2];
+    				return;
+    			}
     			for(var i = 0; i < alarmId.length; i++) clearTimeout(alarmId[i]);
     			console.log("rechedule");
     			alarmId = [];

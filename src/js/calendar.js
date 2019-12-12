@@ -216,35 +216,35 @@ function showAlarmSchedule()
     let minute;
     let timeInterval;
     let content = "";
+    let isChecked = "";
     for(i = 0; i < 7; i++)
     {
         today = new Date(new Date().getTime() + oneDay * i);
         oneWeek.push(new Date(getDateString(today).replace(/-/g,"/")));
-        
     }
    
 
     for(var i = 0; i < reminderArray.length; i++)
     {
-        console.log(reminderArray[i])
-        if(reminderArray[i].alarmTime == "" || reminderArray[i].isSchedule == true || reminderArray[i].isdeleted == true) continue;
-        alarmTime = reminderArray[i].alarmTime.split(",");
-        alarmTime = alarmTime.map(function(time){ return parseInt(time);});
-        //console.log(alarmTime.length);
+        
+        if(reminderArray[i].alarmTime == "" || reminderArray[i].isdeleted == true) continue;
+        alarmTime = reminderArray[i].alarmTime;
+       
         for(var j = 0; j < alarmTime.length; j++)
         {
-            console.log(alarmTime[j]);
+            
             hour = parseInt(reminderArray[i].startTimeHourMinute);
             minute = parseInt(reminderArray[i].startTimeHourMinute.substr(3))
             reminderDate.setTime(todayMilliseconds + alarmTime[j]);
             reminderDate.setHours(hour);
             reminderDate.setMinutes(minute);
-
+            isChecked = (reminderArray[i].isSchedule[j] == true)? "unchecked": "checked";
             for(var day = 0; day < 7; day++)
             {
+
                 if(day != 0)reminderDate.setDate(reminderDate.getDate() + 1);
                 timeInterval = reminderDate.getTime() - todayMilliseconds - alarmTime[j];
-                if(timeInterval < 0) continue;
+                if(timeInterval <= 0) continue;
                 beginningReminderDate = new Date(getDateString(reminderDate).replace(/-/g,"/"));
                 if(Reminder.isMarkOnCalendar(beginningReminderDate, reminderArray[i]))
                 {
@@ -254,12 +254,11 @@ function showAlarmSchedule()
                     content += '<hr><div name =' + i + '>\
                                     <span style="margin-left: 10px;">' + reminderArray[i].title + '&emsp;(Ring in ' + millisecondsToString(timeInterval) + ')</span>\
                                     <label class="switch" style="position: absolute; right:40px; margin-top:-3px">\
-                                        <input type="checkbox" checked>\
-                                        <span class="slider round"></span>\
+                                        <input type="checkbox"' + isChecked + '>\
+                                        <span class="slider round" name = ' + i + '&' + j + '></span>\
                                     </label>\
                                 </div>';
 
-                //playAlarm(timeInterval, reminderArray[i]);
                 }
             }
             $("#alarmSchedule").text("");
@@ -296,12 +295,20 @@ $("body").on("click","#alarmSchedule div",function(){
     calendarThread.send("setGlobalVal","reminder",reminderArray[index]);
 })
 
-$("body").on("click","#alarmSchedule label",function(event){
-    console.log(123);
+$("body").on("click",".switch", function(event){
     event.stopPropagation();
 })
+$("body").on("click",".switch span",function(event){
+    
+    let name = $(this).attr("name").split("&");
+    let index1 = parseInt(name[0]);
+    let index2 = parseInt(name[1]);
+    reminderArray[index1].isSchedule[index2] =  !reminderArray[index1].isSchedule[index2];
+    calendarThread.send("updateReminders", "ALARM", index1, index2);
+    event.stopPropagation();
+    
+})
 
-$("b")
 
 
 $("#previous").click(function(){
@@ -387,6 +394,18 @@ $("#reminder").click(function(){
    
     calendarThread.send("setGlobalVal","markDay",markDay);
     window.location.href = "reminder.html";
+})
+
+
+$("#month").click(function(){
+
+    $(".MONTH").css("display","table-row-group");
+    $(".SCHEDULE").css("display","none");
+})
+
+$("#schedule").click(function(){
+    $(".MONTH").css("display","none");
+    $(".SCHEDULE").css("display","table-row-group");
 })
 calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData){
     console.log(type, entryData);
