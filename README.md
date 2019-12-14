@@ -12,7 +12,7 @@ npm install bootstrap
 ## Login System
 * Allow different users to have their on database.
 * Data encryption.
-![login image](./image/login.png)
+<img src="./image/login"  width="200" height="300">
 
 ## Journal Entry
 * Orginize your journal by date.
@@ -27,8 +27,8 @@ npm install bootstrap
 ![reminder](./image/reminder.png)
 
 ## Album
-![album](./image/album.png)
 * Manage your photos.
+![album](./image/album.png)
 
 ## Music
 * play your local music.
