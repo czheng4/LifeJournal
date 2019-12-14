@@ -1,8 +1,8 @@
-# Diary
-Have you ever tired of switching among your album, note, music, and calendar apps in your desktop? This app combine them all to give you more convinience to keep track of your daily basis. 
+# LifeJournal
+Have you ever tired of switching among your album, note, music, and calendar apps in your desktop? The LifeJournal combine them all to give you more convinience to keep track of your daily basis. 
 
 ## Installation
-This project is built on the top of electron. If you havn't installed electron on your computer. Here is the link: https://electronjs.org/docs/tutorial/installation. Run theses command lines below to install the external libraries.
+The LifeJournal is built on the top of [electron](https://electronjs.org/docs/tutorial/installation) and [node.js](https://nodejs.org/en/download/). Run theses command lines below to install the external libraries after you install node.js and electron.
 
 ```bash
 npm install jquery
@@ -10,17 +10,17 @@ npm install bootstrap
 ```
 
 ## Login System
+![login image](./image/login.png)
 * Allow different users to have their on database.
 * I Encrpty your data.
 
-## Diary Entry
-* I orginize your diary by date.
-* You can seach for your diary by keyword.
-* You can upload your photos assciated your diary.
+## Journal Entry
+* I orginize your journal by date.
+* You can seach for your journal by keyword.
+* You can upload your photos assciated your journal.
 
-## Calendar
-* Add reminder
-* Show your diary entry in associated date slot.
+## Calendar and Reminder
+* 
 
 ## Album
 * Manage your photos.
