@@ -10,26 +10,36 @@ npm install bootstrap
 ```
 
 ## Login System
-![login image](./image/login.png)
 * Allow different users to have their on database.
-* I Encrpty your data.
+* Data encryption.
+![login image](./image/login.png)
 
 ## Journal Entry
-* I orginize your journal by date.
-* You can seach for your journal by keyword.
-* You can upload your photos assciated your journal.
+* Orginize your journal by date.
+* Search for your journal by keyword.
+* Upload your photos assciated your journal.
+![journal entry](./image/journalEntry.png)
 
 ## Calendar and Reminder
-* 
+* Reminder you of upcoming events.
+* Access to your journal.
+![calendar](./image/calendar.png)
+![reminder](./image/reminder.png)
 
 ## Album
+![album](./image/album.png)
 * Manage your photos.
-* Import, export, transfer, delete, zoom in and zoom out.
-* Show your diary entry in associated photos.
+
+## Music
+* play your local music.
 
 ## Theme
 * Blue theme
 * Dark theme
-* light theme
+* Light theme
+![blue](./image/blueTheme.png)
+![dark](./image/darkTheme.png)
+![light](./image/lightTheme.png)
+
 
 
