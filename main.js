@@ -202,7 +202,7 @@ mainThread.on("openDiary",function(event,data){
         closable: false,
         webPreferences: { nodeIntegration: true }
     });
-    diary.webContents.openDevTools();
+    //diary.webContents.openDevTools();
     global.share.status = "loading";
     global.share.user = data;
     diary.loadFile("./src/html/progress_bar.html");
@@ -268,7 +268,7 @@ mainThread.on("openMusic", function(event){
         title: "Music",
         webPreferences: { nodeIntegration: true }
     });
-    musicWindow.webContents.openDevTools();
+    //musicWindow.webContents.openDevTools();
     musicWindow.on('closed',() => { musicWindow = null;});
     musicWindow.loadFile("./src/html/music.html");
 })
@@ -368,7 +368,7 @@ mainThread.on("openCalendar", function(event){
         title: "Calendar",
         webPreferences: { nodeIntegration: true }
     });
-    calendarWindow.webContents.openDevTools();
+    //calendarWindow.webContents.openDevTools();
     calendarWindow.on('closed',() => { eventList["CALENDAR"] = null;calendarWindow = null;});
     calendarWindow.loadFile("./src/html/calendar.html");
 
