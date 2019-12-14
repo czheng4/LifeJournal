@@ -10,11 +10,17 @@
         <title>Music Player</title>
         <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
         <link href="../../fontawesome/css/all.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="../css/light.css">
         <style type="text/css">
+        body
+        {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
         .topFeature
         {
             position: fixed;
-            background-color: lightblue;
+            background-color: var(--nav-color);
             height: 60px;
             width: 100%;
             z-index: 2;
@@ -23,7 +29,7 @@
         .bottomFeature
         {
             position: fixed;
-            background-color: lightblue;
+            background-color: var(--nav-color);
             bottom: 0px;
             height: 60px;
             width: 100%;
@@ -31,11 +37,9 @@
         }
         button
         {
-            border: none;
-            
+            border: none;   
             color:var(--text-color);
             background-color: var(--nav-color);
-            
             margin-top: 5px;
             font-size: 20px;
 
@@ -69,29 +73,29 @@
         .playOrder
         {
             position: absolute;
-            top:30px;
-            left:53%;
+            top:40px;
+            left:45%;
             width:170px;
             height: 105px;
-            border: 1px solid black;
-           
             padding: 0px 0px 0px 0px;
             display: none;
             z-index: 2;
-            background-color: red;
+            background-color: var(--theme-l2);
+            border-radius: 5px;
         }
         .create
         {
             position: fixed;
-            top:40%;
-            text-align: center;
+            top:38%;
             width: 80%;
-            height: 20%;
+            height: 24%;
             left:10%;
-            border: 1px solid black;
             z-index: 2;
-            background-color: red;
+            background-color: var(--theme-l1);
+            color: var(--text-color);
+            border-radius: 5px;
             display: none;
+            
         }
 
         .importCategory
@@ -102,9 +106,9 @@
             width: 80%;
             height: 50%;
             left:10%;
-            border: 1px solid black;
+            border-radius: 10px;
             z-index: 2;
-            background-color: red;  
+            background-color: var(--theme-l1);  
             display: none;
         }
         .categoryDropdown
@@ -113,8 +117,7 @@
             border: none;
             outline: none;
             padding: 7px 16px;
-            background-color: blue;
-            color: black;
+            background-color: var(--theme-l2);
             position: relative;
             text-align: left;
             margin-left: 5%;
@@ -135,9 +138,9 @@
             position: absolute;
             margin-left: 5%;
             width: 90%;
-            background-color: blue;
+            background-color: var(--theme-l3);
             box-shadow: 0px 4px 8px 0px;
-            height: 100
+            max-height: 100px;
             z-index: 2;
             max-height: 0%;
             overflow: scroll;
@@ -146,8 +149,7 @@
         }
         .categoryContent a 
         {
-
-            color:black;
+            color: var(--text-color);
             padding: 7px 16px;
             text-decoration: none;
             display: block;
@@ -170,7 +172,6 @@
             top: 70px;
             bottom: 70px;
             width: 100%;
-            border: 1px solid red;
         }
 
       
@@ -178,11 +179,10 @@
         {
            position: absolute;
            width: 100%;
-           padding-left: 20px;
-          
-                  
+           padding-left: 20px;   
            cursor: pointer;
-           background-color: lightblue;
+           background-color: var(--theme-l3);
+           color: var(--text-color);
            z-index: 2;
         }
         .musicCategorySong
@@ -195,11 +195,6 @@
             margin-left: 17px;
             margin-right: 30px;
             color: inherit;
-            /*
-            position: absolute;
-            left: 70px;
-            overflow: hidden;
-            */
            
         }
         .volumeController
@@ -214,8 +209,6 @@
         {
             text-decoration: none;
         }
-
-
         .volumeSlider
         {
             -webkit-appearance: none;
@@ -276,11 +269,30 @@
             width: 50%;
             height: 50%;
             bottom: 60px;
-            border: 1px solid red;
             overflow: scroll;
-            background-color: lightblue;
-            color:black;
+            background-color: var(--theme-l2);
             visibility: hidden;
+            border-radius: 10px;
+        }
+        .playList button
+        {
+            background-color: var(--theme-l2);
+            position:absolute; 
+            right: 15px; 
+            font-size:1rem; 
+            margin-top:-2px;
+            border:none;
+            outline: none;
+        }
+        hr
+        {
+            color: var(--hr-line);
+            background-color: var(--hr-line);
+        }
+        .playList div hr
+        {
+            margin: 2px 0px 2px 0px;
+            background-color: var(--hr-line);
         }
       
         .playList a
@@ -290,12 +302,6 @@
             margin-right: 30px;
             text-decoration: none;
             color:inherit;
-            /*
-            position: absolute;
-            left: 70px;
-            overflow: hidden;
-            */
-           
         }
         
     </style>
@@ -309,18 +315,20 @@
                 <input type="text" id = "search" style = "font-size: 18px;width: 40%;position: absolute;left: 15px;top:15px; border-radius: 5px"placeholder="Search ...">
 
 
-                <button id = "delete" style = "position:absolute; left: 48%"> <i class="fas fa-trash"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "order" style = "position:absolute; left: 48%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 <button id = "transfer" style = "position:absolute; left: 57%"> <i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                <button id = "order" style = "position:absolute; left: 66%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "delete" style = "position:absolute; left: 66%"> <i class="fas fa-trash"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
                 <button id = "upload" style = "position:absolute; left: 75%"><i class="fas fa-file-import"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
                 <button id = "createCategoryWindow" style = "position:absolute; left: 84%"> <i class="fas fa-plus"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
                 <button id = "select" style = "position:absolute; left: 93%"><i class="fas fa-mouse-pointer"></i><span class = "shortcut"> ctr-x/alt-x </span></button>
-                 <span style="position: absolute; left: 47.3%; margin-top: 35px;">delete</span>
-                  <span style="position: absolute; left: 55.8%; margin-top: 35px;">transfer</span>
-                <span style="position: absolute; left: 65.9%; margin-top: 35px;">order</span>
+
+              
+                <span style="position: absolute; left: 47.8%; margin-top: 35px;">order</span>
+                <span style="position: absolute; left: 55.9%; margin-top: 35px;">transfer</span>
+                <span style="position: absolute; left: 65.4%; margin-top: 35px;">delete</span>
                 <span style="position: absolute; left: 74.4%; margin-top: 35px;">import</span>
                 <span style="position: absolute; left: 83.4%; margin-top: 35px;">create</span>
                 <span style="position: absolute; left: 92.2%; margin-top: 35px;">select</span>
@@ -361,24 +369,30 @@
         </div>
 
         <div class="playList">
+            <div id="playListTitle">
+                <h5 id="0_playListTitle" style="margin-left:15px; margin-top:5px;cursor:pointer">
+                <i class="fas fa-arrow-right"></i>
+                <span style="margin-left:15px">play in order</span> 
+                </h5>
+            <hr></div>
         </div>
 
         <!-- play order chooser -->
         <div class = "playOrder">
-            <span id = "inOrder" style=" position: relative; left: 20px; top: 5px; cursor: pointer;"><i class="fas fa-long-arrow-alt-right"></i>&emsp;in order&emsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
+            <span id = "inOrder" style=" position: relative; left: 20px; top: 5px; cursor: pointer;"><i class="fas fa-long-arrow-alt-right" name = "0"></i>&emsp;in order&emsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
             <hr style="margin: 10px 0px 5px 0px;">
-             <span id = "random" style=" position: relative; left: 20px; cursor: pointer; "><i class="fas fa-random"></i>&emsp;random&emsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
+             <span id = "random" style=" position: relative; left: 20px; cursor: pointer; "><i class="fas fa-random" name = "1"></i>&emsp;random&emsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
             <hr style="margin: 5px 0px 5px 0px;">
-            <span id = "single" style=" width: 100%; position: relative; left: 20px; cursor: pointer;"> <i class="fas fa-recycle"></i></i>&emsp;single&emsp;&ensp;&nbsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
+            <span id = "single" style=" width: 100%; position: relative; left: 20px; cursor: pointer;"> <i class="fas fa-recycle" name = "2"></i></i>&emsp;single&emsp;&ensp;&nbsp;<i class="fas fa-check" style="visibility: hidden;"></i></span>
 
         </div>
 
         <!-- create a new album -->
         <div class="create">
            
-            <input type="text" id = "categoryName" class="form-control" placeholder="Enter category name" style="width: 90%; margin-left: 5%; margin-top: 1%;">
+            <input type="text" id = "categoryName" class="form-control" placeholder="Enter category name" style="width: 90%; margin-left: 5%; margin-top: 10px;">
 
-            <div style="text-align: right; margin-right: 5%; margin-top: 3%;">
+            <div style="text-align: right; position: absolute; right: 5%; bottom: 10px;">
                 <button id = "cancelCategory" type="button" class="btn btn-primary">Cancel</button>
                 &nbsp;&nbsp;
                 <button id = "createCategory" type="button" class="btn btn-danger">Create</button>
@@ -391,7 +405,7 @@
             <div class = "categoryContent"> 
             </div>
             
-            <div style="text-align: right; position: relative; right: 5%; top: 55%;">
+            <div style="text-align: right; position: absolute; right: 5%; bottom: 10px;">
                 <button id = "cancelImportTransfer" type="button" class="btn btn-primary" style="width: 100px">Cancel</button>
                 &nbsp;&nbsp;
                 <button id = "yesImportTransfer" type="button" class="btn btn-danger" style="width: 100px">yes</button>
@@ -399,26 +413,6 @@
         </div>
 
         <div id = "musicContent" class="musicContent">
-            <div><span class = "musicCategoryTitle" name = "1"> 1 </span><span style="right: 30px; position: absolute;">▲</span>
-               
-                <div class = "musicCategorySong" id = "myMusic_1">
-                    <br>
-                    <i class="fas fa-plus-square"></i><a href="#" contenteditable="true">1232rfrienierfieofjewiohfiewnviowhfioewhioewfhfioewhfiowehfiowehfiowe hwoifheio hfiwoehfi owh fiow1</a><input type="checkbox" style="position: absolute; right: 20px">
-                    <hr>
-                    <i class="fas fa-plus-square"></i><a href="#" style="position: absolute;">2435</a><input type="checkbox" style="position: absolute; right: 20px">
-
-                </div>
-            </div>
-            <div><span class = "musicCategoryTitle">Category▲</span>
-                <div class = "musicCategorySong">
-                    <br>
-                    <i class="fas fa-plus-square"></i><a href="#" contenteditable="true">1</a>
-                    <hr>
-
-                    <i class="fas fa-plus-square"></i><a href="#">2</a>
-
-                </div>
-            </div>
         </div>
 
     </body>
@@ -434,7 +428,7 @@
         const path = "./data/" + user + "/music/";
         const {Music,secondsToTimeString,generatePlayList,findMusicOfList,updateMusicFromList} = require("../js/music.js")
         const setting = new File("./data/" + user + "/setting.txt");
-       
+        const playOrderTypes = ['i','r','s'];
         var playingMusic = new Audio();
         playingMusic.volume = 0.5;
         var musicDict = {};
@@ -469,8 +463,8 @@
 
         }
 
-        //const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
-        //loadThemeMode();
+        const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
+        loadThemeMode();
 
 $(document).ready(function(){
         playOrder = $("#inOrder"); 
@@ -482,7 +476,7 @@ $(document).ready(function(){
         {
             return '<div id = "playList_' + node.val.index + '">\
                                 <a href="#" name = "' + node.val.index + '">' + node.val.name + '</a>\
-                                <button style = "position:absolute; right: 15px; font-size:1rem; margin-top:-2px;" name = "' + node.val.index + '"><i class="fas fa-trash"></i></button>\
+                                <button name = "' + node.val.index + '"><i class="fas fa-trash"></i></button>\
                     <hr></div>'
         }
 
@@ -547,7 +541,7 @@ $(document).ready(function(){
             let pointer_index;
             
             /* we haven't generate the playList for this specific category and orderType*/
-            if(musicListDict[myMusicCategory][orderType] == null) 
+            if(musicListDict[myMusicCategory][orderType] == null || musicListDict[myMusicCategory][orderType].head == null) 
             {   
 
                 if(orderType == 's')
@@ -570,12 +564,13 @@ $(document).ready(function(){
                 pointer_index = playingMusicNode.val.index;
 
                 playingMusicNode =  findMusicOfList(musicDict[category][musicIndex], myMusicCategory, orderType, musicNodePointers);
-                console.log(playingMusicNode);
+                
+
                 /* if we can't find it, it indicates we delete it from the playList before. We add in the beginning of the playList */
                 if(playingMusicNode == null)
                 {                
                     playingMusicNode = musicListDict[myMusicCategory][orderType].push_front(musicDict[category][musicIndex].deepCopy(myMusicCategory));
-
+                   
                     playingMusicNode.val.index = musicNodePointers.length;
                     playingMusicNode.val.orderType = orderType;
                     musicDict[category][musicIndex].listIndices.push(musicNodePointers.length);
@@ -588,7 +583,7 @@ $(document).ready(function(){
             if(playingMusicNode == null) 
             {
                 playingMusicNode = musicListDict[myMusicCategory][orderType].head;
-                playingMusic.src = playingMusicNode.val.src;
+                if(playingMusicNode != null) playingMusic.src = playingMusicNode.val.src;
             }
  
             /* show the playList */
@@ -622,22 +617,35 @@ $(document).ready(function(){
 
         })
         
-        $("body").on("click",".playList #playListTitle",function(){
-            let indexOfTitle = (parseInt($(this).children()[0].id) + 1) % 3;
+
+        function updatePlayListOrder(indexOfTitle)
+        {
             if(indexOfTitle == 0) orderType = 'i';
             else if(indexOfTitle == 1) orderType = 'r';
             else orderType = 's';
 
             showMusicList();
-            if(playingMusicNode != null) 
+            if(playingMusicNode != null && $("#playList_" + playingMusicNode.val.index) != undefined) 
             {
                 $("#playList_" + playingMusicNode.val.index).css("color","blue");
                 $(".playList").scrollTop($("#playList_" + playingMusicNode.val.index).offset().top - $('.playList').offset().top);
             }
             
-            $(this).text("");
-            $(this).append(playListTitle[indexOfTitle % 3]);
-        })
+            $("#playListTitle").text("");
+            $("#playListTitle").append(playListTitle[indexOfTitle % 3]);
+        }
+        $("body").on("click",".playList #playListTitle",function(){
+            let indexOfTitle = (parseInt( $("#playListTitle").children()[0].id) + 1) % 3;
+            updatePlayListOrder(indexOfTitle);
+
+
+            /* update the play order in the main page */
+            $("#order").text("");
+            if(indexOfTitle  == 0) $("#order").append('<i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-i/alt-i </span>');
+            else if(indexOfTitle == 1) $("#order").append('<i class="fas fa-random"></i><span class = "shortcut"> ctr-i/alt-i </span>');
+            else $("#order").append('<i class="fas fa-recycle"></i><span class = "shortcut"> ctr-i/alt-i </span>');
+            
+        });
 
         $("body").on("click",".playList div a",function(){
             let index = $(this).attr("name");
@@ -648,9 +656,12 @@ $(document).ready(function(){
                 $("#playPause").attr("name","play");
                 $("#playPauseText").text("pause");
                 $("#playPause").append('<i class="fas fa-play"></i><span class = "shortcut"> space </span>');
-            }   
-            $("#playList_" + playingMusicNode.val.index).css("color","");
-            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+            } 
+            if(playingMusicNode != null)
+            {
+                $("#playList_" + playingMusicNode.val.index).css("color","");
+                $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+            }
             playingMusicNode = musicNodePointers[index];
             
             playingMusic.pause();
@@ -678,8 +689,10 @@ $(document).ready(function(){
             playOrder = $(this);
             playOrder.css("color","blue");
 
+            updatePlayListOrder(parseInt(playOrder.children()[0].attributes.name.value));
             $("#order").text("");
             $("#order").append(playOrder.children()[0].outerHTML + '<span class = "shortcut"> ctr-i/alt-i </span>');
+
             $(".playOrder").css("display","none");
         })
         $("#order").click(function(){
@@ -703,6 +716,13 @@ $(document).ready(function(){
             {
                 fs.mkdirSync(dir);
 
+                if(myMusicCategory == null)
+                {
+                    showMusic();
+                    showMusicList();
+                    $(".create").css("display","none");
+                    return;
+                }
                 content += '<div style = "margin-top:5px">\
                                 <div class = "musicCategoryTitle" name = "' + name + '">' + name + '\
                                     <span style="right: 60px; position: absolute; cursor:pointer">▼</span>\
@@ -712,6 +732,8 @@ $(document).ready(function(){
                             </div>\
                             <div class = "musicCategorySong" id = "myMusic_' + name + '"></div>';
                 musicDict[name] = [];
+                musicListDict[name] = {'i':null, 'r':null, 's':null};
+                if(myMusicCategory == null) myMusicCategory = name;
                 $(".create").css("display","none");
                 $("#musicContent").append(content);
             }
@@ -732,7 +754,7 @@ $(document).ready(function(){
             let max_height = $(".categoryContent").css("max-height");
             let dirs;
             let content = "";
-            console.log(max_height);
+            
             if(max_height == "0%")
             {
                 dirs = fs.readdirSync(path);
@@ -761,6 +783,8 @@ $(document).ready(function(){
             let content = "";
             let category_index;
             let newFileName;
+            let newNode;
+            let playListContent = "";
             if(typeTransferImport == "import")
             {
                 if(category == "Import to ...") musicThread.send("errorMessage","ERROR","Select one category");
@@ -800,6 +824,9 @@ $(document).ready(function(){
                             value = checkboxes[i].value;
                             value = value.split('-');
                             index = parseInt(value[0]);
+
+                            if(value[1] == category) continue;  // at the category we transfer to 
+                           
                             musicDict[value[1]][index].isdelete = true;
                             from = musicDict[value[1]][index].filePath;
                             newFileName = num + "-" + musicDict[value[1]][index].name;
@@ -807,13 +834,29 @@ $(document).ready(function(){
 
                             fs.renameSync(from, to + newFileName);
                             newMusic = new Music(to + newFileName, newFileName, category);
+                            newMusic.musicIndex = category_index;
                             musicDict[category].push(newMusic);
                             
+                            /* update the music in the playList */
+                            for(var j = 0; j < playOrderTypes.length; j++)
+                            {
+                                if(playOrderTypes[j] != "s" && musicListDict[category][playOrderTypes[j]] != null)
+                                {
+                                    newNode = musicListDict[category][playOrderTypes[j]].push_back(newMusic.deepCopy());
+                                    musicDict[category][category_index].listIndices.push(musicNodePointers.length);
+                                    newNode.val.index = musicNodePointers.length;
+                                    newNode.val.orderType = playOrderTypes[j];
+                                    musicNodePointers.push(newNode);
+                       
+                                    if(myMusicCategory == category && playOrderTypes[j] == orderType) playListContent += musicPlayListStr(newNode);       
+                                }
+                            }    
 
-                            content += '<div><hr>\
-                                    <i class="fas fa-plus-square"></i>\
-                                    <a href="#" contenteditable="' + isSelect + '" name = "'+ category_index  + '_' + category +'">' + newMusic.name + '</a>\
-                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:' + visible[isSelect] + '" value = "' + category_index + "-" + category + '"></div>';
+                            content += '<div id = "' + category_index + '_' + category + '"><hr>\
+                                            <i class="fas fa-plus-square" style = "cursor:pointer" name = "' + category_index + '_' + category + '"></i>\
+                                            <a href="#" contenteditable="' + isSelect + '" name = "'+ category_index  + '_' + category +'">' + newMusic.name + '</a>\
+                                            <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:' + visible[isSelect] + '" value = "' + category_index + "-" + category + '">\
+                                        </div>';
                            
                             checkboxes[i].parentElement.remove();
                             num++;
@@ -822,7 +865,7 @@ $(document).ready(function(){
                         }
 
                     }
-
+                    if(playListContent != "") $(".playList").append(playListContent);
                     if(content != "") $("#myMusic_" + category).append(content);
                     
                 }
@@ -850,7 +893,7 @@ $(document).ready(function(){
         /* play and pause the music */
         $("#playPause").click(function(){
 
-            if(playingMusic.src == "") return;
+            if(playingMusic.src == "" || playingMusicNode == null) return;
             type = $(this).attr("name");
             $(this).text("");
             if(type == "pause")
@@ -885,7 +928,9 @@ $(document).ready(function(){
             let music = $(this).attr("name");
             let category = $(this).parents()[1].id;
             let index = parseInt(music);
-            let oldIndex = playingMusicNode.val.index;
+            let oldIndex;
+            let temp = playingMusicNode;
+
 
             /* change the icon of play/pause button */
             if($("#playPause").attr("name") == "pause")
@@ -895,20 +940,39 @@ $(document).ready(function(){
                 $("#playPauseText").text("pause");
                 $("#playPause").append('<i class="fas fa-play"></i><span class = "shortcut"> space </span>');
             }   
-            $("#playList_" + playingMusicNode.val.index).css("color","");
-            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+            if(playingMusicNode != null)
+            {
+                $("#playList_" + playingMusicNode.val.index).css("color","");
+                $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
+                oldIndex = playingMusicNode.val.index;
+            }
+
             
             category = category.substr(category.indexOf('_') + 1);
-  
+            
             /* find the associated node in the playList */
             playingMusicNode = findMusicOfList(musicDict[category][index], myMusicCategory, orderType, musicNodePointers);
-
+            
             /* we didn't find associated node and we click the song belons to another category */
             if(myMusicCategory != category && playingMusicNode == null) 
-            {
+            {   
+               
                 myMusicCategory = category;
                 showMusicList();
-                //playingMusicNode = findMusicOfList(musicDict[category][index], myMusicCategory, orderType, musicNodePointers);
+                playingMusicNode = findMusicOfList(musicDict[category][index], myMusicCategory, orderType, musicNodePointers);
+
+                /* it gets deleted before */
+                if(playingMusicNode == null)
+                {
+                    playingMusicNode = musicListDict[myMusicCategory][orderType].push_front(musicDict[category][index].deepCopy(myMusicCategory));
+                   
+                    playingMusicNode.val.index = musicNodePointers.length;
+                    playingMusicNode.val.orderType = orderType;
+                    musicDict[category][index].listIndices.push(musicNodePointers.length);
+                    musicNodePointers.push(playingMusicNode);
+                    $(musicPlayListStr(playingMusicNode)).insertAfter("#playListTitle");
+                }
+                
             }
             /* 
                 we just didn't find the associated node which belongs to current category(it indicares we delete this music from our playList before). We add this music back to playList.
@@ -964,7 +1028,7 @@ $(document).ready(function(){
                 $(".musicCurrentTime").text(secondsToTimeString(time));
                 percent = time / myMusicDuration * 100;
                 $(".musicSlider").val(time);
-                //console.log(percent);
+            
                 $(".musicSlider").css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
             }
         })
@@ -978,6 +1042,7 @@ $(document).ready(function(){
             myMusicDuration = parseInt(playingMusic.duration);
 
             $("#playList_" + playingMusicNode.val.index).css("color","blue");
+           
             $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","blue");
 
             $(".musicSlider").val(0);
@@ -1004,6 +1069,7 @@ $(document).ready(function(){
 
         /* sldie the music controler. So I update the currentTime and range track color */
         $(".musicSlider").on('input',function(){
+            if(playingMusicNode == null) return;
             playingMusic.currentTime = this.value;
             let percent = (this.value / this.max) * 100;
             $(this).css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
@@ -1055,7 +1121,8 @@ $(document).ready(function(){
             let files;
             let index;
             let category;
-            console.log(checkboxes[0]);
+            let node;
+            let isReload = false;
             for(var i = 0; i < checkboxes.length; i++)
             {
                
@@ -1077,35 +1144,93 @@ $(document).ready(function(){
                     }
                     else
                     {   
+
                         value = checkboxes[i].value;
+
                         value = value.split('-');
                         category = value[1];
                         index = parseInt(value[0]);
                         checkboxes[i].parentElement.remove();
                         musicDict[category][index].isdelete = true;
+                        /* delete the associated musics in the playlist*/
+                        for(var j = 0; j < musicDict[category][index].listIndices.length; j++)
+                        {
+                            node = musicNodePointers[musicDict[category][index].listIndices[j]];
+                            if(playingMusicNode == node) 
+                            {
+                                if(playingMusicNode.next == playingMusicNode) playingMusicNode = null;
+                                else playingMusicNode = playingMusicNode.next;
+
+                                isReload = true;
+                            }
+                            musicListDict[node.val.playListCategory][node.val.orderType].erase(node);
+                           
+                            if(node.val.playListCategory == myMusicCategory)
+                            {
+                                $("#playList_" + node.val.index).remove();
+                            }
+                        }
                         fs.unlinkSync(musicDict[category][index].filePath);
                     }
+                }
+            }
+            if(isReload == true)
+            {
+                playingMusic.pause();
+                if(playingMusicNode != null) 
+                {
+                    playingMusic.src = playingMusicNode.val.src;
+                    playingMusic.play();
+                }
+                else
+                {
+                    $(".musicSlider").val(0);
+                    $(".musicSlider").attr("min", 0);
+                    $(".musicSlider").attr("max",0);
+                    $(".playingSongName").text("");
+                    $(".musicCurrentTime").text("0:00");
+                    $(".musicDuration").text("0:00");
                 }
             }
         })
 
 
-        /* add the musics we uploaded to the category */
+        /* add the musics we uploaded to the category and playList */
         musicThread.on("doneUpload",function(event,files){
             let category = $("#chosenCategory").text();
             let category_index = musicDict[category].length;
             let content = "";
+            let playListContent = "";
+            let type;
+            let newNode;
+
             for(var i = category_index; i < files.length + category_index; i++)
             {
                 newMusic = new Music(path + category + '/' + files[i - category_index],files[i - category_index], category);
+                newMusic.musicIndex = i;
                 musicDict[category].push(newMusic);
-                   
-                content += '<div><hr>\
-                                <i class="fas fa-plus-square"></i>\
+
+                for(var j = 0; j < playOrderTypes.length; j++)
+                {
+                    if(playOrderTypes[j] != "s" && musicListDict[category][playOrderTypes[j]] != null)
+                    {
+                        newNode = musicListDict[category][playOrderTypes[j]].push_back(newMusic.deepCopy());
+                        musicDict[category][i].listIndices.push(musicNodePointers.length);
+                        newNode.val.index = musicNodePointers.length;
+                        newNode.val.orderType = playOrderTypes[j];
+                        musicNodePointers.push(newNode);
+                       
+                        if(myMusicCategory == category && playOrderTypes[j] == orderType) playListContent += musicPlayListStr(newNode);       
+                    }
+                }           
+
+                content += '<div id = "' + i + '_' + category + '"><hr>\
+                                <i class="fas fa-plus-square" style = "cursor:pointer" name = "' + i + '_' + category + '"></i>\
                                 <a href="#" contenteditable="' + isSelect + '" name = "'+ i + '_' + category +'">' + newMusic.name + '</a>\
-                                <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:"' + visible[isSelect] + '" value = "' + i + "-" + category + '">\
+                                <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:' + visible[isSelect] + '" value = "' + i + "-" + category + '">\
                             </div>';
             }
+            if(playListContent != "") $(".playList").append(playListContent);
             if(content != "") $("#myMusic_" + category).append(content);
             
         })
@@ -1210,7 +1335,7 @@ $(document).ready(function(){
                         else
                         {
                             $("#" + music.musicIndex + "_" + music.category).css("display","block");
-                             console.log(music.name);
+                            
                         }
                             
                     }
@@ -1224,7 +1349,7 @@ $(document).ready(function(){
             if (event.which == '13') 
             {
                 event.preventDefault();
-                console.log(renameMusic);
+                
                 if(isSelect == true && renameMusic != null)renameMusic.blur();
             }
         })
@@ -1232,7 +1357,7 @@ $(document).ready(function(){
         musicThread.on("changeCaseSensitive",function(event,newCaseSensitive){
                 case_sensitive = (newCaseSensitive == "on");
         });
-
+        musicThread.on("changeThemeMode",changeThemeMode);
 
 })      
     </script>

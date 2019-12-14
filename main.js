@@ -198,7 +198,7 @@ mainThread.on("openDiary",function(event,data){
         width: 1000, 
         minHeight:550,
         minWidth:850,
-        title: "Doyoument",
+        title: "LifeJournal",
         closable: false,
         webPreferences: { nodeIntegration: true }
     });
@@ -238,8 +238,9 @@ mainThread.on("openMusic", function(event){
     musicWindow = new BrowserWindow(
     {
         height:500,
-        width: 500,
-        //resizable: false,
+        width: 743,
+        minHeight:500,
+        minWidth: 743,
         title: "Music",
         webPreferences: { nodeIntegration: true }
     });

@@ -144,13 +144,13 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 	var random = new Random("123");
 	var newNode;
 	var pointers_length = musicNodePointers.length;
-	console.log(pointers_length);
+	
 	/* in order */
-	console.log(type)
 	if(type == 'i')
 	{
 		for(var i = 0; i < length; i++)
 		{
+			if(music[i].isdelete == true) continue;
 			newNode = list.push_back(music[i].deepCopy());
 			newNode.val.index = pointers_length;
 			newNode.val.orderType = "i";
@@ -164,16 +164,17 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 	}
 	if(type == 's')
 	{
-		if(length > 0)
+		for(var i = 0; i < length; i++)
 		{
-			newNode = list.push_back(music[0].deepCopy());
-			console.log(music[0]);
+			if(music[i].isdelete == true) continue;
+			newNode = list.push_back(music[i].deepCopy());
 
-			music[0].listIndices.push(pointers_length);
+			music[i].listIndices.push(pointers_length);
 			newNode.val.index = pointers_length;
 			newNode.val.orderType = "s";
 			//newNode.val.musicIndex = music[0].musicIndex;
 			musicNodePointers.push(newNode);
+			return list;
 		}
 		return list;
 	}
@@ -182,7 +183,6 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 	for(var i = 0; i < length; i++) musicIndexArray.push(i);
 	for(var i = length - 1; i >= 0; i--)
 	{
-		//rn = parseInt(Math.random() * (i + 1));
 		rn = random.getNumber() % (i + 1);
 		tmp = musicIndexArray[rn];
 		musicIndexArray[rn] = musicIndexArray[i]
@@ -191,18 +191,16 @@ function generatePlayList(music, musicNodePointers, type = 'i')
 
 	for(var i = 0; i < length; i++)
 	{
+		if(music[musicIndexArray[i]].isdelete == true) continue;
 		newNode = list.push_back(music[musicIndexArray[i]].deepCopy());
 
 		newNode.val.index = pointers_length;
 		newNode.val.orderType = "r";
 		music[musicIndexArray[i]].listIndices.push(pointers_length);
-		//newNode.val.musicIndex = music[musicIndexArray[i]].musicIndex;
 		musicNodePointers.push(newNode);
 		pointers_length++;
 	}
-	console.log(list);
 	return list;
-	
 }
 
 

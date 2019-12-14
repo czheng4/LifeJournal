@@ -105,8 +105,13 @@ class List
 		//{
 			var newNode;
 			var next;
-
+			if(this.size == 0)
+			{
+				this.push_back(newVal);
+				return;
+			}
 			newNode = new ListNode(newVal);
+
 			next = node.next;
 			node.next = newNode;
 			newNode.previous = node;
@@ -130,10 +135,21 @@ class List
 			node = node.next;
 		}
 		*/
+		if(node == this.head && node == this.tail)
+		{
+			console.log("delete all");
+			this.head = null;
+			this.tail = null;
+			this.size = 0;
+			return;
+		}
+
 		if(node == this.head) this.head = this.head.next;
 		if(node == this.tail) this.tail = this.tail.previous;
 		node.next.previous = node.previous;
 		node.previous.next = node.next;
+		this.size--;
+
 	}
 	print()
 	{

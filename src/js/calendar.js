@@ -46,9 +46,6 @@ var markDay = remote.getGlobal('share').markDay;
 
 const dot = "&#8226";
 
-console.log(reminderArray);
-
-
 function load()
 {
     var type = remote.getGlobal('share').calendarType;
