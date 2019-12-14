@@ -12,26 +12,26 @@ npm install bootstrap
 ## Login System
 * Allow different users to have their on database.
 * Data encryption.
-<img src="./image/login.png"  width="200" height="300">
+<img src="./image/login.png"  width="300" height="300">
 
 ## Journal Entry
 * Orginize your journal by date.
 * Search for your journal by keyword.
 * Upload your photos assciated your journal.
-<img src="./image/journalEntry.png"  width="250" height="300">
+<img src="./image/journalEntry.png"  width="300" height="300">
 
 
 ## Calendar and Reminder
 * Reminder you of upcoming events.
 * Access to your journal.
 <div>
-<img src="./image/calendar.png"  width="250" height="300">
-<img src="./image/reminder.png"  width="250" height="300">
+<img src="./image/calendar.png"  width="300" height="300">
+<img src="./image/reminder.png"  width="300" height="300">
 </div>
 
 ## Album
 * Manage your photos.
-<img src="./image/album.png"  width="250" height="300">
+<img src="./image/album.png"  width="300" height="300">
 
 ## Music
 * play your local music.
@@ -41,9 +41,9 @@ npm install bootstrap
 * Dark theme
 * Light theme
 <div>
-<img src="./image/blueTheme.png"  width="250" height="300">
-<img src="./image/darkTheme.png"  width="250" height="300">
-<img src="./image/lightTheme.png"  width="250" height="300">
+<img src="./image/blueTheme.png"  width="300" height="300">
+<img src="./image/darkTheme.png"  width="300" height="300">
+<img src="./image/lightTheme.png"  width="300" height="300">
 </div>
 
 
