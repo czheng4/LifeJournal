@@ -41,9 +41,9 @@ npm install bootstrap
 * Dark theme
 * Light theme
 <div>
-<img src="./image/blueTheme.png"  width="300" height="300">
-<img src="./image/darkTheme.png"  width="300" height="300">
-<img src="./image/lightTheme.png"  width="300" height="300">
+<img src="./image/blueTheme.png"  width="280" height="300">
+<img src="./image/darkTheme.png"  width="280" height="300">
+<img src="./image/lightTheme.png"  width="280" height="300">
 </div>
 
 
