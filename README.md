@@ -24,8 +24,10 @@ npm install bootstrap
 ## Calendar and Reminder
 * Reminder you of upcoming events.
 * Access to your journal.
+<div>
 <img src="./image/calendar.png"  width="250" height="300">
 <img src="./image/reminder.png"  width="250" height="300">
+</div>
 
 ## Album
 * Manage your photos.
@@ -38,9 +40,11 @@ npm install bootstrap
 * Blue theme
 * Dark theme
 * Light theme
+<div>
 <img src="./image/blueTheme.png"  width="250" height="300">
 <img src="./image/darkTheme.png"  width="250" height="300">
 <img src="./image/lightTheme.png"  width="250" height="300">
+</div>
 
 
 
