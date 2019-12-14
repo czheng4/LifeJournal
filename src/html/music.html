@@ -1,7 +1,7 @@
 <!--
     music.html
     ChaoHui Zheng
-    11/28/2019
+    12/14/2019
 -->
 
 <!DOCTYPE html>
@@ -315,15 +315,15 @@
                 <input type="text" id = "search" style = "font-size: 18px;width: 40%;position: absolute;left: 15px;top:15px; border-radius: 5px"placeholder="Search ...">
 
 
-                <button id = "order" style = "position:absolute; left: 48%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                <button id = "transfer" style = "position:absolute; left: 57%"> <i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
-                <button id = "delete" style = "position:absolute; left: 66%"> <i class="fas fa-trash"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "order" style = "position:absolute; left: 48%"><i class="fas fa-long-arrow-alt-right"></i><span class = "shortcut"> ctr-o/alt-o </span></button>
+                <button id = "transfer" style = "position:absolute; left: 57%"> <i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-t/alt-t </span></button>
+                <button id = "delete" style = "position:absolute; left: 66%"> <i class="fas fa-trash"></i><span class = "shortcut"> ctr-d/alt-d </span></button>
                 
                 <button id = "upload" style = "position:absolute; left: 75%"><i class="fas fa-file-import"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
                 
-                <button id = "createCategoryWindow" style = "position:absolute; left: 84%"> <i class="fas fa-plus"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "createCategoryWindow" style = "position:absolute; left: 84%"> <i class="fas fa-plus"></i><span class = "shortcut"> ctr-c/alt-c </span></button>
                 
-                <button id = "select" style = "position:absolute; left: 93%"><i class="fas fa-mouse-pointer"></i><span class = "shortcut"> ctr-x/alt-x </span></button>
+                <button id = "select" style = "position:absolute; left: 93%"><i class="fas fa-mouse-pointer"></i><span class = "shortcut"> ctr/alt-x </span></button>
 
               
                 <span style="position: absolute; left: 47.8%; margin-top: 35px;">order</span>
@@ -347,18 +347,18 @@
                 <input type="range" min="0" max="11" value="0" step="1" class = "musicSlider" id = "musicSlider">
                 <span class="musicDuration">0:00</span>
                 
-                <button id = "volume" class = "volume" style = "position:absolute; left: 41%"> <i class="fas fa-volume-up"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "volume" class = "volume" style = "position:absolute; left: 41%"><i class="fas fa-volume-up"></i><span class = "shortcut"> ctr-m/alt-m </span></button>
                 
 
                 <input type="range" class = "volumeSlider"  id="start" name="volume" min="0.0" max="1.0" value = '0.5' step = 0.01>
                 
-                <button id = "previous" style = "position:absolute; left: 53%"><i class="fas fa-step-backward"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "previous" style = "position:absolute; left: 53%"><i class="fas fa-step-backward"></i><span class = "shortcut"> leftArrow </span></button>
                 
-                <button id = "playPause" style = "position:absolute; left: 65%" name = "pause"> <i class="fas fa-pause"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "playPause" style = "position:absolute; left: 65%" name = "pause"> <i class="fas fa-pause"></i><span class = "shortcut"> space </span></button>
                 
-                <button id = "next" style = "position:absolute; left: 77%"> <i class="fas fa-step-forward"></i><span class = "shortcut"> ctr-i/alt-i </span></button>
+                <button id = "next" style = "position:absolute; left: 77%"> <i class="fas fa-step-forward"></i><span class = "shortcut"> rightArrow </span></button>
                 
-                <button id = "playList" style = "position:absolute; left: 89%" name = "pause"> <i class="fas fa-list"></i><span class = "shortcut"> space </span></button>
+                <button id = "playList" style = "position:absolute; left: 89%" name = "pause"> <i class="fas fa-list"></i><span class = "shortcut"> ctr-l/alt-l </span></button>
                 
 
                 <span style="position: absolute; left: 51.7%; margin-top: 35px;">previous</span>
@@ -428,6 +428,7 @@
         const path = "./data/" + user + "/music/";
         const {Music,secondsToTimeString,generatePlayList,findMusicOfList,updateMusicFromList} = require("../js/music.js")
         const setting = new File("./data/" + user + "/setting.txt");
+        const {changeThemeMode, loadThemeMode} = require("../js/theme.js"); loadThemeMode();
         const playOrderTypes = ['i','r','s'];
         var playingMusic = new Audio();
         playingMusic.volume = 0.5;
@@ -437,6 +438,7 @@
         var myMusicCategory = null;
         var myMusicCurrentTime = -1;
         var myMusicDuration = 0;
+        var myVolume = 0;
         var visible = {false:"hidden",true:"visible"};
         var isSelect = false;
         var typeTransferImport = "";
@@ -463,177 +465,17 @@
 
         }
 
-        const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
-        loadThemeMode();
+        
 
 $(document).ready(function(){
         playOrder = $("#inOrder"); 
 
         musicThread.send("MUSIC_REGISTER");
         
-        /* a helper function to generate the html string of each song */
-        function musicPlayListStr(node)
-        {
-            return '<div id = "playList_' + node.val.index + '">\
-                                <a href="#" name = "' + node.val.index + '">' + node.val.name + '</a>\
-                                <button name = "' + node.val.index + '"><i class="fas fa-trash"></i></button>\
-                    <hr></div>'
-        }
-
-        /* it shows all the music we have in the main page */
-        function showMusic()
-        {
-            var dirs = fs.readdirSync(path);
-            var files;
-            var content = "";
-
-            /* sor the dirs by birthtime */
-            dirs = dirs.sort(function(t1, t2) { return fs.statSync(path + t1).birthtime - fs.statSync(path + t2).birthtime; })
-
-            /* set the myMusicCategory */
-            if(dirs.length > 0) myMusicCategory = dirs[0];
-
-            /* show the music list. initialize the musicListDict. Generate the musicDict */
-            for(var i = 0; i < dirs.length; i++)
-            {
-                musicListDict[dirs[i]] = {'i':null, 'r':null, 's':null};
-                files = fs.readdirSync(path + dirs[i]);
-                files = files.sort(function(m1,m2){return parseInt(m1) - parseInt(m2);});
-                musicDict[dirs[i]] = [];
-                content += '<div style = "margin-top:5px">\
-                                <div class = "musicCategoryTitle" name = "' + dirs[i] + '">' + dirs[i] + '\
-                                    <span style="right: 60px; position: absolute; cursor:pointer">▼</span>\
-                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "" name = "myMusic_' + dirs[i] + '">\
-                                </div>\
-                                <br>\
-                            </div>\
-                            <div class = "musicCategorySong" id = "myMusic_' + dirs[i] + '">';
-                for(var j = 0; j < files.length; j++)
-                {
-                    newMusic = new Music(path + dirs[i] + '/' + files[j],files[j], dirs[i]);
-                    newMusic.musicIndex = j;
-                    musicDict[dirs[i]].push(newMusic);
-                    content += '<div id = "' + j + '_' + dirs[i] + '"><hr>\
-                                    <i class="fas fa-plus-square" style = "cursor:pointer" name = "' + j + '_' + dirs[i] +'"></i>\
-                                    <a href="#" contenteditable="false" name = "'+ j  + '_' + dirs[i] +'">' + newMusic.name + '</a>\
-                                    <input type="checkbox" style="position: absolute; right: 20px; margin-top:5px; visibility:hidden" value = "' + j + "-" + dirs[i] + '">\
-                                </div>';
-                    
-                }
-                content += "</div>"
-            }
-
-            $("#musicContent").text("");
-            $("#musicContent").append(content);
-
-        }
-        
-
-        /* it shows the playing list */
-        function showMusicList()
-        {
-            if(myMusicCategory == null) return;
-            let content = "";
-            let node;
-            let list;
-            let musicIndex;
-            let category;
-            let pointer_index;
-            
-            /* we haven't generate the playList for this specific category and orderType*/
-            if(musicListDict[myMusicCategory][orderType] == null || musicListDict[myMusicCategory][orderType].head == null) 
-            {   
-
-                if(orderType == 's')
-                {
-                    if(playingMusicNode != null)  musicListDict[myMusicCategory][orderType] = generatePlayList([musicDict[myMusicCategory][playingMusicNode.val.musicIndex]], musicNodePointers, orderType);
-                    else  musicListDict[myMusicCategory][orderType] = generatePlayList(musicDict[myMusicCategory], musicNodePointers, orderType);
-                }
-                else
-                {
-                    musicListDict[myMusicCategory][orderType] = generatePlayList(musicDict[myMusicCategory],musicNodePointers, orderType);
-                }
-            }
-            
-
-            /* we switch the the playList */
-            if(playingMusicNode != null) 
-            {
-                musicIndex = playingMusicNode.val.musicIndex;
-                category = playingMusicNode.val.category;
-                pointer_index = playingMusicNode.val.index;
-
-                playingMusicNode =  findMusicOfList(musicDict[category][musicIndex], myMusicCategory, orderType, musicNodePointers);
-                
-
-                /* if we can't find it, it indicates we delete it from the playList before. We add in the beginning of the playList */
-                if(playingMusicNode == null)
-                {                
-                    playingMusicNode = musicListDict[myMusicCategory][orderType].push_front(musicDict[category][musicIndex].deepCopy(myMusicCategory));
-                   
-                    playingMusicNode.val.index = musicNodePointers.length;
-                    playingMusicNode.val.orderType = orderType;
-                    musicDict[category][musicIndex].listIndices.push(musicNodePointers.length);
-
-                    musicNodePointers.push(playingMusicNode);     
-                }
-
-            }
-            /* first time to load, we set it to the beginning of the playList */
-            if(playingMusicNode == null) 
-            {
-                playingMusicNode = musicListDict[myMusicCategory][orderType].head;
-                if(playingMusicNode != null) playingMusic.src = playingMusicNode.val.src;
-            }
- 
-            /* show the playList */
-            content += '<div id = "playListTitle">'
-            if(orderType == 'i') content += playListTitle[0];
-            else if(orderType == 'r') content += playListTitle[1];
-            else if(orderType == 's') content += playListTitle[2];
-            content += '</div>'
-
-            list = musicListDict[myMusicCategory][orderType];
-            node = list.head;
-            for(var i = 0; i < list.size; i++)
-            {
-                if(node.val.isdelete == false) content += musicPlayListStr(node);
-                node = node.next;
-            }
-            
-            $(".playList").text("");
-            $(".playList").append(content);
-            
-        }
-
         showMusic();
         showMusicList();
 
-
-        $("#playList").click(function(){
-            let visibility = $('.playList').css("visibility");
-            if(visibility == "hidden") $('.playList').css("visibility","visible");
-            else $('.playList').css("visibility","hidden");
-
-        })
-        
-
-        function updatePlayListOrder(indexOfTitle)
-        {
-            if(indexOfTitle == 0) orderType = 'i';
-            else if(indexOfTitle == 1) orderType = 'r';
-            else orderType = 's';
-
-            showMusicList();
-            if(playingMusicNode != null && $("#playList_" + playingMusicNode.val.index) != undefined) 
-            {
-                $("#playList_" + playingMusicNode.val.index).css("color","blue");
-                $(".playList").scrollTop($("#playList_" + playingMusicNode.val.index).offset().top - $('.playList').offset().top);
-            }
-            
-            $("#playListTitle").text("");
-            $("#playListTitle").append(playListTitle[indexOfTitle % 3]);
-        }
+       
         $("body").on("click",".playList #playListTitle",function(){
             let indexOfTitle = (parseInt( $("#playListTitle").children()[0].id) + 1) % 3;
             updatePlayListOrder(indexOfTitle);
@@ -641,9 +483,9 @@ $(document).ready(function(){
 
             /* update the play order in the main page */
             $("#order").text("");
-            if(indexOfTitle  == 0) $("#order").append('<i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-i/alt-i </span>');
-            else if(indexOfTitle == 1) $("#order").append('<i class="fas fa-random"></i><span class = "shortcut"> ctr-i/alt-i </span>');
-            else $("#order").append('<i class="fas fa-recycle"></i><span class = "shortcut"> ctr-i/alt-i </span>');
+            if(indexOfTitle  == 0) $("#order").append('<i class="fas fa-arrow-right"></i><span class = "shortcut"> ctr-o/alt-o </span>');
+            else if(indexOfTitle == 1) $("#order").append('<i class="fas fa-random"></i><span class = "shortcut"> ctr-o/alt-o </span>');
+            else $("#order").append('<i class="fas fa-recycle"></i><span class = "shortcut"> ctr-o/alt-o </span>');
             
         });
 
@@ -691,19 +533,11 @@ $(document).ready(function(){
 
             updatePlayListOrder(parseInt(playOrder.children()[0].attributes.name.value));
             $("#order").text("");
-            $("#order").append(playOrder.children()[0].outerHTML + '<span class = "shortcut"> ctr-i/alt-i </span>');
+            $("#order").append(playOrder.children()[0].outerHTML + '<span class = "shortcut"> ctr-o/alt-o </span>');
 
             $(".playOrder").css("display","none");
         })
-        $("#order").click(function(){
-            $(".playOrder").css("display","block");
-        })
 
-
-        /* create the new category */
-        $("#createCategoryWindow").click(function(){
-            $(".create").css("display","block");
-        })
         $("#createCategory").click(function(){
             /* remove the trailing space */
             let name = $("#categoryName").val().replace(/\s+$/,"");
@@ -743,13 +577,7 @@ $(document).ready(function(){
              $(".create").css("display","none");
         })
 
-        /* import the music */
-        $("#upload").click(function(){
-            typeTransferImport = "import";
-            $("#chosenCategory").text("Import to ...");
-            $(".importCategory").css("display","block");
-        })
-
+        
         $(".categoryDropdown").click(function(){
             let max_height = $(".categoryContent").css("max-height");
             let dirs;
@@ -890,31 +718,6 @@ $(document).ready(function(){
             }      
         })
 
-        /* play and pause the music */
-        $("#playPause").click(function(){
-
-            if(playingMusic.src == "" || playingMusicNode == null) return;
-            type = $(this).attr("name");
-            $(this).text("");
-            if(type == "pause")
-            {
-               
-                $(this).attr("name","play");
-                $(this).append('<i class="fas fa-play"></i><span class = "shortcut"> space </span>');
-                $("#playPauseText").text("pause");
-                playingMusic.play();
-            }
-            else
-            {
-                $(this).attr("name","pause");
-                $(this).append('<i class="fas fa-pause"></i><span class = "shortcut"> space </span>');
-               
-                $("#playPauseText").text("play");
-                playingMusic.pause();
-            }
-        })
-
-       
         /* play the music we click */
         $("body").on("click",".musicCategorySong div a",function(){
             
@@ -1077,19 +880,16 @@ $(document).ready(function(){
 
         $(".volumeSlider").on('input',function(){
             let percent = (this.value / this.max) * 100;
+            let type = $(this)[0].name;
             playingMusic.volume = this.value;
 
+            if(type == "mute")
+            {
+                $(this)[0].name = "on";
+                $("#volume").text("");
+                $("#volume").append('<i class="fas fa-volume-up"></i><span class = "shortcut"> ctr-m/alt-m </span>');
+            }
             $(this).css( 'background', 'linear-gradient(to right, green 0%, green '+ percent +'%, #fff ' + percent + '%100%)' )
-        })
-
-
-
-        /* hide/display checkbox */
-        $("#select").click(function(event){
-            isSelect = !isSelect;
-            $("[type='checkbox']").css("visibility",visible[isSelect]);
-            $(".musicCategorySong div a").prop("contenteditable",isSelect);
-            
         })
 
         /* check all checkboxes under a certain category */
@@ -1104,16 +904,7 @@ $(document).ready(function(){
             }
         })
 
-        /* delete the music */
-        $("#delete").click(function(){
-            var confirmation = new Confirmation(
-                "MUSIC_DELETION",     //type
-                "Delete",             //title
-                "Are you sure you want to delete the musics you selected?", // text
-                ["Cancel","Delete"]   //buttonlabels 
-            );
-            musicThread.send("openConfirmation",confirmation);
-        })
+        
 
         musicThread.on("MUSIC_DELETION",function(){
             let checkboxes = $("[type='checkbox']");
@@ -1235,12 +1026,7 @@ $(document).ready(function(){
             
         })
 
-        /* transfer the music */
-        $("#transfer").click(function(){
-            typeTransferImport = "transfer";
-            $("#chosenCategory").text("Transfer to ...");
-            $(".importCategory").css("display","block");
-        })
+        
 
         /* rename */
         $('body').on('blur',".musicCategorySong div a",function(){
@@ -1283,37 +1069,6 @@ $(document).ready(function(){
             }
         })
 
-        function next()
-        {
-            if(playingMusicNode == null) return;
-            $("#playList_" + playingMusicNode.val.index).css("color","");
-            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
-            playingMusic.pause();
-            playingMusicNode = playingMusicNode.next;
-            playingMusic.src = playingMusicNode.val.src;
-            playingMusic.play();
-
-            if(playingMusicNode == musicListDict[playingMusicNode.val.category][orderType].head)
-            {
-
-                $(".playList").scrollTop(0);
-            }
-        }
-        $("#next").click(next);
-
-        $("#previous").click(function(){
-            if(playingMusicNode == null) return;
-            $("#playList_" + playingMusicNode.val.index).css("color","");
-            $("#" + playingMusicNode.val.musicIndex  + "_" + playingMusicNode.val.category).css("color","");
-            playingMusic.pause();
-            playingMusicNode = playingMusicNode.previous;
-            playingMusic.src = playingMusicNode.val.src;
-            playingMusic.play();
-
-            if(playingMusicNode == musicListDict[playingMusicNode.val.category][orderType].tail) $(".playList").scrollTop(0xfffffff);
-        })
-        
-
         /* search */
         $("#search").keyup(function(){
             let searchVal = $(this).val();
@@ -1343,14 +1098,71 @@ $(document).ready(function(){
             }
                 
         })
+        
 
-        /* disable 'enter' key when typing title */
+        /* control button click events */
+        $("#select").click(select);
+        $("#upload").click(upload);
+        $("#delete").click(deletion);
+        $("#transfer").click(transfer);
+        $("#order").click(order);
+        $("#createCategoryWindow").click(createCategoryWindow);
+
+        $("#next").click(next);
+        $("#previous").click(previous);
+        $("#playPause").click(playPause);
+        $("#playList").click(playList);
+        $("#volume").click(volume);
+
+        /* control button shortcuts */
         $("body").keydown(function(event){
-            if (event.which == '13') 
+            if(event.ctrlKey || event.altKey)
             {
-                event.preventDefault();
-                
-                if(isSelect == true && renameMusic != null)renameMusic.blur();
+                switch(event.keyCode)
+                {
+                    case 88:            // 'x' key
+                        select(); break;
+                        
+                    case 68:            // 'd' key
+                        deletion(); break;
+                    
+                    case 67:            // 'c' key
+                        createCategoryWindow(); break;
+
+                    case 73:            // 'i' key
+                        upload(); break;
+
+                    case 84:            // 't' key
+                        transfer(); break;
+
+                    case 79:            // 'o' key
+                        order(); break;
+
+                    case 76:            // 'l' key
+                        playList(); break;
+                    
+                    case 77:            // 'm' key
+                        event.preventDefault();
+                        volume(); break;
+
+                }
+            }
+            else
+            {
+                switch(event.keyCode)
+                {   
+                    case 32:           // space key
+                        event.preventDefault();
+                        playPause(); break;
+                    case 37:           // left arrow key
+                        previous(); break;
+                    case 39:           // right arrow key 
+                        next(); break;
+                    case 13:           // 'enter' key. I disable it.
+                        event.preventDefault();
+                        if(isSelect == true && renameMusic != null)renameMusic.blur();
+                        break;
+                }
             }
         })
 
@@ -1361,4 +1173,5 @@ $(document).ready(function(){
 
 })      
     </script>
+    <script src = "../js/musicHTML.js"></script>
 </html>

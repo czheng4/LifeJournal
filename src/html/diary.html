@@ -582,7 +582,7 @@
 
             diaryThread.on("ALARM_SOUND_RENEW",function(event,reminder){
             	//reminder.isSchedule = false;
-            	playAlarm(1000 * 60 * 1, reminder);
+            	playAlarm(1000 * 60 * 5, reminder);
             	audio.pause();
             })
             diaryThread.on("ALARM_SOUND_CANCEL",function(event){
@@ -610,7 +610,7 @@
 					diaryThread.send("openConfirmation",confirmation);
             		reminder.isSchedule[j] = true;
             	},time);
-            	console.log(id);
+            	
             	alarmId.push(id);
             	return id;
             	
@@ -633,14 +633,14 @@
 
 				for(var i = 0; i < reminderArray.length; i++)
 				{
-					console.log(reminderArray[i])
+					
 					if(reminderArray[i].alarmTime == "" || reminderArray[i].isdeleted == true) continue;
 					alarmTime = reminderArray[i].alarmTime;
 					
 					//console.log(alarmTime.length);
 					for(var j = 0; j < alarmTime.length; j++)
 					{
-						console.log(alarmTime[j]);
+						
 						if(reminderArray[i].isSchedule[j] == true) continue;
 						hour = parseInt(reminderArray[i].startTimeHourMinute);
 						minute = parseInt(reminderArray[i].startTimeHourMinute.substr(3))

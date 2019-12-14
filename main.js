@@ -212,6 +212,30 @@ mainThread.on("openDiary",function(event,data){
 mainThread.on("closeDiary",function(event){
     diary.destroy();
     diary = null;
+    
+    /* reset the global.share and evenlist */
+    /*
+    global.share = {
+        user: null, 
+        album : null, 
+        image:null, 
+        status: null, 
+        entryData: null, 
+        albumFrom: null,
+        moveFrom: null,
+        reminder: null,
+        diaryEntryDict: null,
+        diaryEntries: null,
+        reminderArray: null,
+        markDay: null,
+        calendarType: "MONTH"
+    };
+    for(var key in eventList)
+    {
+        if(key == "TEXTBOX") eventList[key] = {};
+        else eventList[key] = null;
+    }*/
+
     createWindow();
 })
 
@@ -332,6 +356,7 @@ mainThread.on("closeCreateAlbum",function(event,dir){
 mainThread.on("openCalendar", function(event){
     if(calendarWindow != null) 
     {
+        if(calendarWindown.isMinimized() == true) calendarWindow.restore();
         calendarWindow.focus();
         return;
     } 
@@ -490,6 +515,24 @@ mainThread.on("closeConfirmation",function(event,confirmation){
                 break;
             case "SIGN_OUT":
                 global.share.status = "saving";
+                if(photo != null) { photo.destroy();photo = null; } 
+                if(musicWindow != null) { musicWindow.destroy(); musicWindow = null; } 
+                if(calendarWindow != null){ calendarWindow.destroy(); calendarWindow = null; } 
+                if(createAlbum != null){ createAlbum.destroy(); createAlbum = null; }
+                if(editAlbum != null){ editAlbum.destroy(); editAlbum = null; }
+                if(transferPhoto != null) {transferPhoto.destroy(); transferPhoto = null; }
+                if(singlePhoto != null) {singlePhoto.destroy(); singlePhoto = null; }
+                if(settingWindow != null) {settingWindow.destroy(); settingWindow = null; }
+                
+                for(var index in entryWindows)
+                {
+                    entryWindows[index].destroy();
+                    delete entryWindows[index];
+                    delete eventList["TEXTBOX"][index];
+                }
+
+                
+                
                 diary.loadFile("./src/html/progress_bar.html");
                 break;
         }
@@ -645,6 +688,7 @@ mainThread.on("openEntry", function(event,index, data = null){
    
     if(index in entryWindows)
     {
+        if(entryWindows[index].isMinimized() == true) entryWindows[index].restore();
         entryWindows[index].focus();
         return;
     }
@@ -671,7 +715,11 @@ mainThread.on("openEntry", function(event,index, data = null){
 mainThread.on("closeEntry",function(event, type, entryData){
     
     let indexOfWindow;
-    if(entryData == null || type == "ADD") indexOfWindow = 0xffffff;
+    if(entryData == null || type == "ADD") 
+    {
+        indexOfWindow = 0xffffff;
+        entryData.indexOfWindow = 0xffffff;
+    }
     else indexOfWindow = entryData.indexOfWindow;
 
     if(entryData != null) eventList["MAIN_DIARY"].sender.send("reload",type, entryData);
@@ -696,6 +744,10 @@ mainThread.on("sendDiaryEntry",(event,oldDiaryEntry,newDiaryEntry)=>{
 })
 
 
+const filters = {  
+                    Images:  { name: 'Images', extensions: ['jpg', 'png', 'gif','jpeg'] },
+                    Musics :  { name: 'Music', extensions: ['mp3'] }
+                }
 // file dialog
 mainThread.on("upload", function(event,data, specifier = ""){
     if(upload != null) return; 
@@ -708,14 +760,15 @@ mainThread.on("upload", function(event,data, specifier = ""){
         alwaysOnTop: true,
         webPreferences: { nodeIntegration: true }
     });
+
+    var filter;
+    if(data.indexOf("music") != -1) filter = [filters["Musics"]];
+    else if(data.indexOf("photo") != -1) filter = [filters["Images"]]
+
     upload = dialog.showOpenDialog(win,{
         buttonLabel: 'upload',
         properties: ['openFile', 'multiSelections'],
-        filters: [
-            { name: 'Images', extensions: ['jpg', 'png', 'gif','jpeg'] },
-            { name: 'Music', extensions: ['mp3'] },
-            { name: 'Video', extensions: ['avi'] },
-            { name: 'All Files', extensions: ['*'] }]
+        filters: filter,
     }, (filenames) => {
 
 
@@ -833,11 +886,11 @@ app.on('window-all-closed', () => {
     }
 })
 
+
 app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-    if (login === null) {
-    createWindow();
+    if (diary != null) {
+        if(diary.isMinimized() == true) diary.restore();
+        diary.focus();
     }
 })
 
