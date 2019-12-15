@@ -1,29 +1,29 @@
 # LifeJournal
-Have you ever tired of switching among your album, note, music, and calendar apps in your desktop? The LifeJournal combine them all to give you more convinience to keep track of your daily basis. 
+Are you ever tired of constantly switching between your apps on your desktop? Wouldn't it be more convenient if you can have your photo album, music, note calendar and more all in one place? The LifeJournal helps to gather all of your essential apps in one place!
 
 ## Installation
-The LifeJournal is built on the top of [electron](https://electronjs.org/docs/tutorial/installation) and [node.js](https://nodejs.org/en/download/). Run theses command lines below to install the external libraries after you install node.js and electron.
+The LifeJournal is built on the top of [electron](https://electronjs.org/docs/tutorial/installation) and [node.js](https://nodejs.org/en/download/). Run theses command lines below to install the external libraries and launch the app after you install node.js and electron.
 
 ```bash
 npm install jquery
 npm install bootstrap
+npm start
 ```
 
 ## Login System
-* Allow different users to have their on database.
-* Data encryption.
+* Allow different users to have their own database.
 <img src="./image/login.png"  width="300" height="300">
 
-## Journal Entry
-* Orginize your journal by date.
-* Search for your journal by keyword.
-* Upload your photos assciated your journal.
+## Note Entry
+* Organize your note by date.
+* Search for your note by keyword.
+* Upload your photos assciated with your note.
 <img src="./image/journalEntry.png"  width="300" height="300">
 
 
 ## Calendar and Reminder
-* Reminder you of upcoming events.
-* Access to your journal.
+* Remind you of upcoming events.
+* Access to your notes.
 <div>
 <img src="./image/calendar.png"  width="300" height="300">
 <img src="./image/reminder.png"  width="300" height="300">
@@ -34,16 +34,16 @@ npm install bootstrap
 <img src="./image/album.png"  width="300" height="300">
 
 ## Music
-* play your local music.
+* Play your local music.
 
 ## Theme
 * Blue theme
 * Dark theme
 * Light theme
 <div>
-<img src="./image/blueTheme.png"  width="280" height="300">
-<img src="./image/darkTheme.png"  width="280" height="300">
-<img src="./image/lightTheme.png"  width="280" height="300">
+<img src="./image/blueTheme.png"  width="300" height="300">
+<img src="./image/darkTheme.png"  width="300" height="300">
+<img src="./image/lightTheme.png"  width="300" height="300">
 </div>
 
 
