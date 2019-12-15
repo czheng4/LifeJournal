@@ -127,7 +127,6 @@ mainThread.on("MUSIC_REGISTER",(event)=>{
 
 mainThread.on("TEXTBOX_REGISTER",(event,index)=>{
     eventList["TEXTBOX"][index] = event;
-    console.log(eventList["TEXTBOX"]);
 })
 
 // set globalVal 
@@ -356,7 +355,7 @@ mainThread.on("closeCreateAlbum",function(event,dir){
 mainThread.on("openCalendar", function(event){
     if(calendarWindow != null) 
     {
-        if(calendarWindown.isMinimized() == true) calendarWindow.restore();
+        if(calendarWindow.isMinimized() == true) calendarWindow.restore();
         calendarWindow.focus();
         return;
     } 
@@ -373,7 +372,6 @@ mainThread.on("openCalendar", function(event){
     calendarWindow.loadFile("./src/html/calendar.html");
 
     calendarWindow.on('resize',function(){
-        console.log(calendarWindow.getSize()[0]);
         eventList["CALENDAR"].sender.send("resizeCalendar",calendarWindow.getSize()[0]);
     })
 })
@@ -431,7 +429,7 @@ mainThread.on("openConfirmation",function(event,data){
         return;
     } 
     confirmation = data;
-    console.log(confirmation.type);
+    
     eventList["TASK_CONFIRM"] = event;
     
     taskConfirm = new BrowserWindow( 
@@ -783,8 +781,8 @@ mainThread.on("upload", function(event,data, specifier = ""){
 
         /* grab the biggest number */
         else size =  1 + parseInt(files[files.length - 1]);
-        console.log(files);
-        console.log("size" + size);
+        //console.log(files);
+        //console.log("size" + size);
         for(var i = 0; i < filenames.length; i++)
         {
             var path = filenames[i];
