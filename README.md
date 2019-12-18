@@ -1,9 +1,9 @@
 # LifeJournal
 Are you ever tired of constantly switching between your apps on your desktop? Wouldn't it be more convenient if you can have your photo album, music, note calendar and more all in one place? The LifeJournal helps to gather all of your essential apps in one place!
 
-## Installation
-The LifeJournal is built on the top of [electron](https://electronjs.org/docs/tutorial/installation) and [node.js](https://nodejs.org/en/download/). Run theses command lines below to install the external libraries and launch the app after you install node.js and electron.
 
+## Installation
+The LifeJournal is built on the top of [electron](https://electronjs.org/docs/tutorial/installation) and [node.js](https://nodejs.org/en/download/). Run theses command lines below to install the external libraries and launch the app after you install node.js and electron.Unfortunately, it only works on linux system so far.
 ```bash
 npm install jquery
 npm install bootstrap
