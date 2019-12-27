@@ -288,7 +288,7 @@ function showAlarmSchedule()
 
 
 $(document).ready(function(){
-load();
+//load();
 calendarThread.send("CALENDAR_REGISTER");
 
 calendarThread.send("getReminderArray");

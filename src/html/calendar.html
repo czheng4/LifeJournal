@@ -198,12 +198,16 @@
         }
         .MONTH
         {
-           
+           display: none;
         }
         .SCHEDULE
         {
            display: none;
-        }   
+        }
+        .WEEK
+        {
+
+        }  
         hr
         {
             background-color: var(--hr-line);
@@ -235,7 +239,7 @@
     
     <table>
         <tr>
-            <th colspan="7" style="background-color: var(--theme-l1);font-size: 25px">
+            <th colspan="8" style="background-color: var(--theme-l1);font-size: 25px">
             <a href = "#" id = "previous" style="position: relative; left: 2%"><i class="fas fa-arrow-left"></i></a>
             <a href = "#" id = "currentTime" style="position: relative; left: 3%">today</a>
             <a href = "#" id = "next" style="position: relative; left: 4%"><i class="fas fa-arrow-right"></i></a>
@@ -251,22 +255,39 @@
          </th>
         <tr>
 
+        <tbody class = "WEEK">
+            <tr >
+                <th style="width:10%"><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr >
+                <th style="width:10%"><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </tbody>
+
+
+
+
         <tbody class = "SCHEDULE">
         <tr>
+            <th colspan="7">
             
-
-                <th colspan="7" style="">
-                
-                    <h3 style="text-align:center;  padding-top: 10px">alarm schedule in 7 days </h3>
-                    <div id = "alarmSchedule">
-                    </div>
-                    <hr style="visibility: hidden">
-                    
-                
-                    
-                </th>
-               
-           
+                <h3 style="text-align:center;  padding-top: 10px">alarm schedule in 7 days </h3>
+                <div id = "alarmSchedule">
+                </div>
+                <hr style="visibility: hidden">  
+            </th>
         </tr>
         </tbody>
 
