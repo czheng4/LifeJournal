@@ -367,7 +367,7 @@ mainThread.on("openCalendar", function(event){
         title: "Calendar",
         webPreferences: { nodeIntegration: true }
     });
-    //calendarWindow.webContents.openDevTools();
+    calendarWindow.webContents.openDevTools();
     calendarWindow.on('closed',() => { eventList["CALENDAR"] = null;calendarWindow = null;});
     calendarWindow.loadFile("./src/html/calendar.html");
 

@@ -137,6 +137,7 @@
             margin-top: 2px;
             overflow: hidden;
         }
+        
         .diaryBox
         {
             background: red;
@@ -154,6 +155,7 @@
             font-size: 30px;
             margin-left: 10px;
         }
+
         .diaryDot
         {
             color:red;
@@ -206,7 +208,7 @@
         }
         .WEEK
         {
-
+           
         }  
         hr
         {
@@ -225,7 +227,12 @@
            margin-left: 5px;
            cursor: pointer;
         }
-       
+        
+        .WEEK th
+        {
+            border-width: 1px;
+            border-color: rgba(0, 0, 0, .2);
+        }
     </style>
 </head>
 <body>
@@ -249,15 +256,28 @@
             <br>
             
             <a id = "week" href = "#" style="position: relative; left: 7%">Week</a>
-            <a id = "month" href = "#" style="position: absolute; left: 42%">Month</a>
+            <a id = "monthNav" href = "#" style="position: absolute; left: 42%">Month</a>
             <a id = "schedule" href = "#" style="position: absolute; right: 7%">Schedule</a>
             
          </th>
         <tr>
 
         <tbody class = "WEEK">
-            <tr >
-                <th style="width:10%"><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
+            <div class = "reminderBox" style="position: absolute; top:128px; left: 90px; width: 50px">123</div>
+            <div class = "reminderBox" style="position: absolute; top:128px; left: 90px; width: 50px">456</div>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
+                <th style="text-align: center; font-family: courier;">Sun</th>
+                <th style="text-align: center; font-family: courier;">Mon</th>
+                <th style="text-align: center; font-family: courier;">Tue</th>
+                <th style="text-align: center; font-family: courier;">Wed</th>
+                <th style="text-align: center; font-family: courier;">Thu</th>
+                <th style="text-align: center; font-family: courier;">Fri</th>
+                <th style="text-align: center; font-family: courier;">Sat</th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">1AM</span></th>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -265,8 +285,9 @@
                 <th></th>
                 <th></th>
             </tr>
-            <tr >
-                <th style="width:10%"><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">2AM</span></th>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -274,6 +295,238 @@
                 <th></th>
                 <th></th>
             </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">3AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">4AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">5AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">6AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">7AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">8AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">9AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">10AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">11AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">12PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">1PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">2PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">3PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">4PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">5PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">6PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">7PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">8PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">9PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">10PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">11PM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr style="visibility: hidden;">
+                <th><span style="position: absolute; padding: 12px 0px 0px 12px"></span></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                
+            </tr>
+
         </tbody>
 
 

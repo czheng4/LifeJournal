@@ -414,15 +414,23 @@ $("#reminder").click(function(){
 })
 
 
-$("#month").click(function(){
+$("#monthNav").click(function(){
 
     $(".MONTH").css("display","table-row-group");
     $(".SCHEDULE").css("display","none");
+    $(".WEEK").css("display","none");
 })
 
 $("#schedule").click(function(){
     $(".MONTH").css("display","none");
     $(".SCHEDULE").css("display","table-row-group");
+    $(".WEEK").css("display","none");
+})
+
+$("#week").click(function(){
+    $(".MONTH").css("display","none");
+    $(".SCHEDULE").css("display","none");
+    $(".WEEK").css("display","table-row-group");
 })
 calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData){
     console.log(type, entryData);
