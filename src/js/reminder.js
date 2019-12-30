@@ -96,6 +96,7 @@ class Reminder
 		this.repeatText = "";
 		this.alarmText = "";
 		this.startTimeHourMinute = "";
+		this.endTimeHourMinute = "";
 
 		this.alarmTime = [];
 		this.startTimeMilliseconds = 0;
@@ -124,6 +125,9 @@ class Reminder
 		/* vitually delete this reminder */
 		this.isdeleted = false;
 		this.isSchedule = [];
+
+		/* this is for layout of week */
+		this.maxOverlap = 0;
 		
 	}
 
@@ -166,7 +170,15 @@ class Reminder
 			if(minute < 10) reminder.startTimeHourMinute += '0' + minute;
 			else reminder.startTimeHourMinute += minute;
 		}
-		else reminder.endTimeMilliseconds = date.getTime();
+		else 
+		{
+			reminder.endTimeMilliseconds = date.getTime();
+			if(hour < 10) reminder.endTimeHourMinute = '0' + hour + ':';
+			else reminder.endTimeHourMinute = hour + ':';
+
+			if(minute < 10) reminder.endTimeHourMinute += '0' + minute;
+			else reminder.endTimeHourMinute += minute;
+		}
 		console.log(reminder);
 		//console.log(date);
 		//console.log(this.startTimeMilliseconds);
@@ -345,6 +357,9 @@ class Reminder
 		content += reminder.startTimeHourMinute;
 
 		content += "REMINER_ZCH";
+		content += reminder.endTimeHourMinute;
+
+		content += "REMINER_ZCH";
 		for(var i = 0; i < reminder.alarmTime.length; i++)
 		{
 			if(i == 0) content += reminder.alarmTime[i];
@@ -386,12 +401,13 @@ class Reminder
 		reminder.date = arr[13];
 		reminder.filePath = arr[14];
 		reminder.startTimeHourMinute = arr[15];
+		reminder.endTimeHourMinute = arr[16];
 
-		reminder.alarmTime = arr[16];
+		reminder.alarmTime = arr[17];
 		reminder.alarmTime = reminder.alarmTime.split(',');
 		reminder.alarmTime = reminder.alarmTime.map(function(v){ return parseInt(v); });
 
-		reminder.isSchedule = arr[17];
+		reminder.isSchedule = arr[18];
 		reminder.isSchedule = reminder.isSchedule.split(',');
 		reminder.isSchedule = reminder.isSchedule.map(function(v){ return (v == "1"); });
 	}

@@ -100,7 +100,7 @@
             margin-left: 2.5%;
             width:95%;
            
-            position: absolute;;
+            position: absolute;
         }
         .dot
         {
@@ -136,6 +136,8 @@
             width: 100%;
             margin-top: 2px;
             overflow: hidden;
+            z-index: 1;
+            cursor: pointer;
         }
         
         .diaryBox
@@ -147,7 +149,7 @@
             font-size:11px;
             width: 100%;
             margin-top: 2px;
-            overflow: hidden;
+            word-wrap: break-word;
         }
         .reminderDot
         {
@@ -233,6 +235,24 @@
             border-width: 1px;
             border-color: rgba(0, 0, 0, .2);
         }
+
+
+        .WEEK .shortcut
+        {
+            font-size:15px;
+            visibility: hidden;
+            background-color: red;
+            color:var(--text-color);
+            text-align: center;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 2;
+
+        }
+        .reminderBox:hover + .shortcut
+        {
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
@@ -263,17 +283,16 @@
         <tr>
 
         <tbody class = "WEEK">
-            <div class = "reminderBox" style="position: absolute; top:128px; left: 90px; width: 50px">123</div>
-            <div class = "reminderBox" style="position: absolute; top:128px; left: 90px; width: 50px">456</div>
+            
             <tr>
-                <th><span style="position: absolute; padding: 12px 0px 0px 12px">12AM</span></th>
-                <th style="text-align: center; font-family: courier;">Sun</th>
-                <th style="text-align: center; font-family: courier;">Mon</th>
-                <th style="text-align: center; font-family: courier;">Tue</th>
-                <th style="text-align: center; font-family: courier;">Wed</th>
-                <th style="text-align: center; font-family: courier;">Thu</th>
-                <th style="text-align: center; font-family: courier;">Fri</th>
-                <th style="text-align: center; font-family: courier;">Sat</th>
+                <th id = "WEEK_TIME"><span style="position: absolute; padding: 12px 0px 0px 12px;">12AM</span></th>
+                <th id = "WEEK_0" style="text-align: center; font-family: courier;">Sun</th>
+                <th id = "WEEK_1" style="text-align: center; font-family: courier;">Mon</th>
+                <th id = "WEEK_2" style="text-align: center; font-family: courier;">Tue</th>
+                <th id = "WEEK_3" style="text-align: center; font-family: courier;">Wed</th>
+                <th id = "WEEK_4" style="text-align: center; font-family: courier;">Thu</th>
+                <th id = "WEEK_5" style="text-align: center; font-family: courier;">Fri</th>
+                <th id = "WEEK_6" style="text-align: center; font-family: courier;">Sat</th>
             </tr>
             <tr>
                 <th><span style="position: absolute; padding: 12px 0px 0px 12px">1AM</span></th>

@@ -23,6 +23,16 @@ const months = {
     11: "Nov.",
     12: "Dec."
 };
+
+const weeks = {
+    0: "Sun",
+    1: "Mon",
+    2: "Tue",
+    3: "Wed",
+    4: "Thu",
+    5: "Fri",
+    6: "Sat"
+};
 const $ = require("jQuery");
 const remote = require('electron').remote;
 const calendarThread = require('electron').ipcRenderer;
@@ -34,6 +44,8 @@ const path = "./data/" + user + "/entry";
 const {changeThemeMode, loadThemeMode} = require("../js/theme.js");
 loadThemeMode();
 
+var currentWeekDate;
+
 var currentYear;
 var currentMonth;
 var currentDate;  // yyyy-mm-dd
@@ -43,21 +55,29 @@ var reminderDict = {}
 var reminderArray;
 var slot_width;
 var markDay = remote.getGlobal('share').markDay;
-
+var loadingType;
 const dot = "&#8226";
 
 function load()
 {
-    var type = remote.getGlobal('share').calendarType;
-    if(type == "MONTH")
+    loadingType = remote.getGlobal('share').calendarType;
+    if(loadingType == "MONTH")
     {
         $(".MONTH").css("display","table-row-group");
         $(".SCHEDULE").css("display","none");
+        $(".WEEK").css("display","none");
     }
-    else if(type == "SCHEDULE")
+    else if(loadingType == "SCHEDULE")
     {
         $(".MONTH").css("display","none");
         $(".SCHEDULE").css("display","table-row-group");
+        $(".WEEK").css("display","none");
+    }
+    else if(loadingType == "WEEK")
+    {
+        $(".MONTH").css("display","none");
+        $(".SCHEDULE").css("display","none");
+        $(".WEEK").css("display","table-row-group");
     }
 }
 /* milliseconds to the format of string n1 days n2 hours and n3 minutes */
@@ -84,7 +104,7 @@ function millisecondsToString(time)
     return rv;
 
 }
-function showCalendar(year, month, markDay = null)
+function showMonthCalendar(year, month, markDay = null)
 {
     currentMonth = month;
     currentYear = year;
@@ -154,12 +174,126 @@ function showCalendar(year, month, markDay = null)
     $("#calendar").append(calendar);
     $("#title").text(months[month] + "  " + year);
 }
+
+function showWeekCalendar(date)
+{
+    var dayOfWeek = date.getDay();
+    var newDate = new Date(date);
+    var widthOfTime = parseInt($("#WEEK_TIME").css("width"));
+    var widthOfContent = parseInt($("#WEEK_0").css("width"));
+    var time_slot = {
+        0 :[],
+        1 :[],
+        2 :[],
+        3 :[],
+        4 :[],
+        5 :[],
+        6 :[],
+        7 :[],
+        8 :[],
+        9 :[],
+        10:[],
+        11:[],
+        12:[],
+        13:[],
+        14:[],
+        15:[],
+        16:[],
+        17:[],
+        18:[],
+        19:[],
+        20:[],
+        21:[],
+        22:[],
+        23:[]
+    };
+    var content = "";
+    var startingHour, endingHour;
+    var startingMinute, endingMinute;
+    var usedReminder = [];
+    var left, top, height, width;
+
+    newDate.setHours(0);
+    newDate.setMinutes(0);
+    newDate.setSeconds(0);
+    for(var i = 0; i < 7; i++)
+    {
+
+        newDate.setDate(date.getDate() + i - dayOfWeek);
+        $("#WEEK_" + i).text(weeks[i] + " " + newDate.getDate());
+        for(var j = 0; j < reminderArray.length; j++)
+        {
+            if(reminderArray[j].isdeleted == true) continue;
+            if(Reminder.isMarkOnCalendar(newDate, reminderArray[j]))
+            {
+                startingHour = parseInt(reminderArray[j].startTimeHourMinute);
+                startingMinute = parseInt(reminderArray[j].startTimeHourMinute.substr(3));
+                endingHour = parseInt(reminderArray[j].endTimeHourMinute);
+                endingMinute = parseInt(reminderArray[j].endTimeHourMinute.substr(3));
+                reminderArray[j].maxOverlap = 0;
+                for(var k = startingHour; k < endingHour; k++)
+                {
+
+                    time_slot[k].push(reminderArray[j]);
+                }
+                if(endingMinute >= 1) time_slot[endingHour].push(reminderArray[j]);
+            }
+        }
+
+        for(var key in time_slot)
+        {
+            for(var j = 0; j < time_slot[key].length; j++)
+            {
+                if(time_slot[key][j].maxOverlap < time_slot[key].length)
+                {
+                    time_slot[key][j].maxOverlap = time_slot[key].length;
+                }
+            }
+        }
+
+
+        for(var key in time_slot)
+        {
+            for(var j = 0; j < time_slot[key].length; j++)
+            {
+                if(usedReminder.indexOf(time_slot[key][j]) == -1)
+                {
+                    //console.log(time_slot[key]);
+                    usedReminder.push(time_slot[key][j]);
+                    startingHour = parseInt(time_slot[key][j].startTimeHourMinute);
+                    startingMinute = parseInt(time_slot[key][j].startTimeHourMinute.substr(3));
+                    endingHour = parseInt(time_slot[key][j].endTimeHourMinute);
+                    endingMinute = parseInt(time_slot[key][j].endTimeHourMinute.substr(3));
+                
+                    top = 128 + 50 * (startingHour + startingMinute / 60);
+                    height = 50 * (endingHour - startingHour + endingMinute / 60 - startingMinute / 60);
+                    width = widthOfContent / time_slot[key][j].maxOverlap - 1;
+                    left = i * 50 + widthOfTime + j * (width + 1);
+                    content += '<div class = "reminderBox" style = "position: absolute; top:' + top + 'px; height:' + height + 'px; left:' + left + 'px; width: ' + width + 'px;">' + time_slot[key][j].title + '</div>\
+                                <div class = "shortcut" style = "left:' + (left + width + 5) +'px; width:' + widthOfContent + 'px; top:' + top +'px">' + time_slot[key][j].title + '<br>' + time_slot[key][j].startTimeHourMinute + ' - ' + time_slot[key][j].endTimeHourMinute + '</div>'; 
+                    //console.log(width);
+                    
+                }
+            }
+            time_slot[key] = [];
+        }
+        usedReminder = []
+
+    }
+    //console.log(content);
+    $("#title").text(months[date.getMonth() + 1] + "  " + date.getFullYear());
+    
+
+    //content = '<div class = "reminderBox" style="position: absolute; top:128px; left:' + widthOfTime + 'px; width: 50px; height:100px">123fnei rubfejrkb fejkrbfekr</div>';
+    $(".WEEK").prepend(content);
+}
+
+
 function markToday()
 {
     var date = new Date();
-   
     if(markDay == null) markDay = getDateString(date);
-    showCalendar(date.getFullYear(),date.getMonth() + 1, markDay);
+    showMonthCalendar(date.getFullYear(),date.getMonth() + 1, markDay);
     showReminderDiary(markDay);
     currentDate = markDay;
     $(".slot").css("width", slot_width);
@@ -289,6 +423,8 @@ function showAlarmSchedule()
 
 $(document).ready(function(){
 //load();
+currentWeekDate = new Date();
+
 calendarThread.send("CALENDAR_REGISTER");
 
 calendarThread.send("getReminderArray");
@@ -297,7 +433,7 @@ calendarThread.on("getReminderArray",function(event,reminderArray1){
     console.log(reminderArray);
     markToday();
     showAlarmSchedule();
-  
+    showWeekCalendar(currentWeekDate);
     setInterval(showAlarmSchedule,1000 * 60);
 })
 
@@ -328,22 +464,38 @@ $("body").on("click",".switch span",function(event){
 
 
 $("#previous").click(function(){
-    if((currentMonth - 1) == 0) showCalendar(currentYear - 1, 12);
-    else showCalendar(currentYear, currentMonth - 1,markDay);
-    $(".slot").css("width", slot_width);
+    if(loadingType == "MONTH")
+    {
+        if((currentMonth - 1) == 0) showMonthCalendar(currentYear - 1, 12);
+        else showMonthCalendar(currentYear, currentMonth - 1,markDay);
+        $(".slot").css("width", slot_width);
+    }
+    else if(loadingType == "WEEK")
+    {
+        currentWeekDate.setDate(currentWeekDate.getDate() - 7);
+        showWeekCalendar(currentWeekDate);
+    }
 })
 
 $("#next").click(function(){
-    if((currentMonth + 1) == 13) showCalendar(currentYear + 1, 1);
-    else showCalendar(currentYear, currentMonth + 1,markDay);
-    $(".slot").css("width", slot_width);
+    if(loadingType == "MONTH")
+    {
+        if((currentMonth + 1) == 13) showMonthCalendar(currentYear + 1, 1);
+        else showMonthCalendar(currentYear, currentMonth + 1,markDay);
+        $(".slot").css("width", slot_width);
+    }
+    else if(loadingType == "WEEK")
+    {
+        currentWeekDate.setDate(currentWeekDate.getDate() + 7);
+        showWeekCalendar(currentWeekDate);
+    }
 })
 
 $("#year").change(function(){
 
     let newYear = $(this).children("option:selected").val();
     let newMonth = $("#month").children("option:selected").val();
-    showCalendar(parseInt(newYear),parseInt(newMonth),markDay);
+    showMonthCalendar(parseInt(newYear),parseInt(newMonth),markDay);
     $(".slot").css("width", slot_width);
 
 })
@@ -352,7 +504,7 @@ $("#month").change(function(){
     let newYear = $("#year").children("option:selected").val();
     let newMonth = $(this).children("option:selected").val();
 
-    showCalendar(parseInt(newYear),parseInt(newMonth),markDay);
+    showMonthCalendar(parseInt(newYear),parseInt(newMonth),markDay);
     $(".slot").css("width", slot_width);
 })
 
@@ -399,11 +551,19 @@ $("body").on('click', "#diaryAndReminder div",function(){
 
 /* mark today */ 
 $("#currentTime").click(function(){
-    daySelector = null;
-    var date = new Date();
-    showCalendar(date.getFullYear(),date.getMonth() + 1, getDateString(date));
-    showReminderDiary(getDateString(date));
-    $(".slot").css("width", slot_width);
+    if(loadingType == "MONTH")
+    {
+        daySelector = null;
+        var date = new Date();
+        showMonthCalendar(date.getFullYear(),date.getMonth() + 1, getDateString(date));
+        showReminderDiary(getDateString(date));
+        $(".slot").css("width", slot_width);
+    }
+    else if(loadingType == "WEEK")
+    {
+        currentWeekDate = new Date();
+        showWeekCalendar(currentWeekDate);
+    }
 })
 
 
@@ -415,23 +575,29 @@ $("#reminder").click(function(){
 
 
 $("#monthNav").click(function(){
+    loadingType = "MONTH";
 
+    $("#title").text(months[currentMonth] + "  " + currentYear);
     $(".MONTH").css("display","table-row-group");
     $(".SCHEDULE").css("display","none");
     $(".WEEK").css("display","none");
 })
 
 $("#schedule").click(function(){
+    loadingType = "SCHEDULE";
     $(".MONTH").css("display","none");
     $(".SCHEDULE").css("display","table-row-group");
     $(".WEEK").css("display","none");
 })
 
 $("#week").click(function(){
+    loadingType = "WEEK";
+    $("#title").text(months[currentWeekDate.getMonth() + 1] + "  " + currentWeekDate.getFullYear());
     $(".MONTH").css("display","none");
     $(".SCHEDULE").css("display","none");
     $(".WEEK").css("display","table-row-group");
 })
+
 calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData){
     console.log(type, entryData);
     
@@ -439,7 +605,7 @@ calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData)
     if(type == "ADD") addToDiaryEntryDict(diaryEntryDict,entryData);
     if(type  == "CHANGE") changeFromDiaryEntryDict(diaryEntryDict,entryData,oldEntryData);
 
-    showCalendar(currentYear,currentMonth,markDay);
+    showMonthCalendar(currentYear,currentMonth,markDay);
     daySelector = null;
     showReminderDiary(currentDate);
 
@@ -450,6 +616,11 @@ calendarThread.on("refreshCalendar",function(event,type,entryData, oldEntryData)
 calendarThread.on("resizeCalendar",function(event,width){
     slot_width = 0.83 * width / 7 + "px";
     $(".slot").css("width", slot_width);
+    console.log($("#WEEK_TIME").css("width"));
+    $(".WEEK .reminderBox").remove();
+    showWeekCalendar(currentWeekDate);
+    //$("#WEEK_TIME").css("width","100px");
+    
     //console.log($("table").css("height"));
 
 })
